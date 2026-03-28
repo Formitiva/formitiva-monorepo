@@ -1,7 +1,8 @@
 {
   "name": "@formitiva/core",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Formitiva shared core — types, validation, registries and utilities (framework-agnostic)",
+  "keywords": ["formitiva", "form", "form-builder", "form-validation", "schema", "dynamic-form", "typescript", "framework-agnostic"],
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -19,6 +20,10 @@
     "./themes/*": "./src/themes/*"
   },
   "files": ["dist", "src/styles/formitiva.css", "src/themes"],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",

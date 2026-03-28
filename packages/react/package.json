@@ -1,7 +1,8 @@
 {
   "name": "@formitiva/react",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Formitiva React adapter — components, hooks and registries",
+  "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "react", "react-form", "hooks", "typescript"],
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -15,6 +16,10 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",

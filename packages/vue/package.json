@@ -1,7 +1,8 @@
 {
   "name": "@formitiva/vue",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Formitiva Vue 3 adapter — components, composables and registries",
+  "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "vue", "vue3", "composables", "typescript"],
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -15,6 +16,10 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
