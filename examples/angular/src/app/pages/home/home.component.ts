@@ -9,7 +9,6 @@
 import { Component, signal } from '@angular/core';
 import { FormitivaComponent } from '@formitiva/angular';
 import type { FormSubmissionHandler } from '@formitiva/angular';
-import '@formitiva/angular/themes/material-dark.css';
 
 const definition = {
   name: 'contactForm',

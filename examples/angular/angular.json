@@ -26,7 +26,8 @@
             "styles": [
               "src/styles.css",
               "../../packages/core/src/styles/formitiva.css",
-              "../../packages/core/src/themes/material.css"
+              "../../packages/core/src/themes/material.css",
+              "../../packages/core/src/themes/material-dark.css"
             ],
             "scripts": []
           },
