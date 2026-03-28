@@ -1,8 +1,17 @@
 {
   "name": "@formitiva/vue",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "Formitiva Vue 3 adapter — components, composables and registries",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "vue", "vue3", "composables", "typescript"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/formitiva/formitiva-monorepo.git",
+    "directory": "packages/vue"
+  },
+  "bugs": {
+    "url": "https://github.com/formitiva/formitiva-monorepo/issues"
+  },
+  "homepage": "https://github.com/formitiva/formitiva-monorepo/tree/main/packages/vue#readme",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

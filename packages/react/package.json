@@ -1,8 +1,17 @@
 {
   "name": "@formitiva/react",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "Formitiva React adapter — components, hooks and registries",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "react", "react-form", "hooks", "typescript"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/formitiva/formitiva-monorepo.git",
+    "directory": "packages/react"
+  },
+  "bugs": {
+    "url": "https://github.com/formitiva/formitiva-monorepo/issues"
+  },
+  "homepage": "https://github.com/formitiva/formitiva-monorepo/tree/main/packages/react#readme",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

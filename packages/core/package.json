@@ -1,8 +1,17 @@
 {
   "name": "@formitiva/core",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "Formitiva shared core — types, validation, registries and utilities (framework-agnostic)",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "schema", "dynamic-form", "typescript", "framework-agnostic"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/formitiva/formitiva-monorepo.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/formitiva/formitiva-monorepo/issues"
+  },
+  "homepage": "https://github.com/formitiva/formitiva-monorepo/tree/main/packages/core#readme",
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",

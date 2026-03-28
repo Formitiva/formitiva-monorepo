@@ -1,8 +1,17 @@
 {
   "name": "@formitiva/angular",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "Formitiva Angular adapter — module, components and services",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "angular", "angular-module", "typescript"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/formitiva/formitiva-monorepo.git",
+    "directory": "packages/angular"
+  },
+  "bugs": {
+    "url": "https://github.com/formitiva/formitiva-monorepo/issues"
+  },
+  "homepage": "https://github.com/formitiva/formitiva-monorepo/tree/main/packages/angular#readme",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
