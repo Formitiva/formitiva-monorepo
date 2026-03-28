@@ -1,0 +1,57 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules
+
+# Build output
+dist
+dist-ssr
+out/
+*.tgz
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Turbo cache
+.turbo/
+
+# Angular CLI cache
+.angular/
+
+# Vite cache
+.vite/
+.vite-temp/
+
+# Test coverage
+coverage/
+
+# Temp / scratch work
+tmp/
+
+# Misc
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Next.js
+.next/
+
+#articles
+articles/
+package/

@@ -1,0 +1,9 @@
+[data-formitiva-size="spacious"] {
+  --formitiva-input-padding: 14px 16px;
+  --formitiva-font-size: 15px;
+  --formitiva-space: 14px;
+  --formitiva-space-lg: 18px;
+  --formitiva-field-gap: 18px;
+  --formitiva-column-gap: 14px;
+  --formitiva-border-radius: 10px;
+}

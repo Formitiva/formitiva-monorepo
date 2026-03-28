@@ -1,0 +1,46 @@
+/* Material Design 3 Inspired Light Theme */
+[data-formitiva-theme="material"] {
+
+  /* Surfaces */
+  --formitiva-primary-bg: #ffffff;
+  --formitiva-secondary-bg: #ffffff;
+  --formitiva-input-bg: #f9fafb;
+
+  /* Text */
+  --formitiva-text-color: #1f2937;
+  --formitiva-text-muted: #6b7280;
+
+  /* Material Border System */
+  --formitiva-border-color: #e5e7eb;
+  --formitiva-border-hover: #cbd5e1;
+  --formitiva-border-focus: #6750A4; /* Material Purple Primary */
+
+  /* State Colors */
+  --formitiva-error-color: #B3261E;
+  --formitiva-success-color: #1E8E3E;
+
+  /* Interaction */
+  --formitiva-option-menu-hover-bg: #000000;
+
+  /* Shape */
+  --formitiva-border-radius: 12px;
+
+  /* Elevation */
+  --formitiva-shadow:
+    0 1px 2px #000000,
+    0 2px 6px #000000;
+
+  /* Buttons */
+  --formitiva-button-bg: #6750A4;
+  --formitiva-button-text: #ffffff;
+  --formitiva-button-border-radius: 999px; /* pill */
+  --formitiva-button-shadow:
+    0 2px 6px #000000;
+
+  /* Inputs */
+  --formitiva-input-padding: 12px 14px;
+
+  /* Tooltip */
+  --formitiva-tooltip-color-bg: #3c3c3c;
+  --formitiva-tooltip-color: #ffffff;
+}

@@ -1,0 +1,23 @@
+[data-formitiva-theme="modern-light"] {
+  --formitiva-primary-bg: #ffffff;
+  --formitiva-secondary-bg: #fafafa;
+  --formitiva-input-bg: #ffffff;
+
+  --formitiva-text-color: #1f2937;
+  --formitiva-text-muted: #6b7280;
+
+  --formitiva-border-color: #e5e7eb;
+  --formitiva-border-hover: #d1d5db;
+  --formitiva-border-focus: #2563eb;
+
+  --formitiva-error-color: #dc2626;
+  --formitiva-success-color: #16a34a;
+
+  --formitiva-option-menu-hover-bg: #f3f4f6;
+  --formitiva-border-radius: 6px;
+  --formitiva-shadow: 0 8px 24px #000000;
+
+  /* Tooltip */
+  --formitiva-tooltip-color-bg: #3c3c3c;
+  --formitiva-tooltip-color: #ffffff;
+}

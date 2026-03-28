@@ -1,0 +1,25 @@
+[data-formitiva-theme="glass"] {
+  --formitiva-primary-bg: #ffffff40;
+  --formitiva-secondary-bg: #ffffff59;
+  --formitiva-input-bg: #ffffff59;
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  --formitiva-text-color: #111827;
+  --formitiva-text-muted: #4b5563;
+
+  --formitiva-border-color: #ffffff66;
+  --formitiva-border-hover: #ffffffb3;
+  --formitiva-border-focus: #38bdf8;
+
+  --formitiva-error-color: #e11d48;
+  --formitiva-success-color: #059669;
+
+  --formitiva-border-radius: 12px;
+  --formitiva-shadow: 0 12px 40px #000000;
+
+  /* Tooltip */
+  --formitiva-tooltip-color-bg: #3c3c3c;
+  --formitiva-tooltip-color: #ffffff;
+}

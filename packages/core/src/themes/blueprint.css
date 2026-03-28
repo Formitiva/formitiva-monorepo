@@ -1,0 +1,43 @@
+[data-formitiva-theme="blueprint"] {
+  /* Surfaces */
+  --formitiva-primary-bg: #f5f8fa;
+  --formitiva-secondary-bg: #ffffff;
+  --formitiva-input-bg: #ffffff;
+
+  /* Text */
+  --formitiva-text-color: #182026;
+  --formitiva-text-muted: #5c7080;
+
+  /* Borders */
+  --formitiva-border-color: #d8e1e8;
+  --formitiva-border-hover: #8a9ba8;
+  --formitiva-border-focus: #137cbd; /* Blueprint Primary Blue */
+
+  /* Status */
+  --formitiva-error-color: #c23030;
+  --formitiva-success-color: #0f9960;
+
+  /* Interaction */
+  --formitiva-option-menu-hover-bg: #ebf1f5;
+
+  /* Shape */
+  --formitiva-border-radius: 4px;
+
+  /* Elevation */
+  --formitiva-shadow:
+    0 1px 3px #10161a,
+    0 0 0 1px #10161a;
+
+  /* Buttons */
+  --formitiva-button-bg: #137cbd;
+  --formitiva-button-text: #ffffff;
+  --formitiva-button-border-radius: 4px;
+
+  /* Density */
+  --formitiva-input-padding: 8px 10px;
+  --formitiva-font-size: 13px;
+
+  /* Tooltip */
+  --formitiva-tooltip-color-bg: #3c3c3c;
+  --formitiva-tooltip-color: #ffffff;
+}

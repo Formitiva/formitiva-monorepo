@@ -1,0 +1,44 @@
+{
+  "name": "@formitiva/angular",
+  "version": "1.0.0",
+  "description": "Formitiva Angular adapter — module, components and services",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "clean": "rimraf dist",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@formitiva/core": "workspace:*",
+    "tslib": "^2.3.0"
+  },
+  "peerDependencies": {
+    "@angular/core": ">=18",
+    "@angular/common": ">=18",
+    "@angular/forms": ">=18",
+    "rxjs": ">=7"
+  },
+  "devDependencies": {
+    "@angular/core": "^19.0.0",
+    "@angular/common": "^19.0.0",
+    "@angular/forms": "^19.0.0",
+    "rxjs": "^7.0.0",
+    "typescript": "~5.6.3",
+    "rimraf": "^5.0.0",
+    "vitest": "^4.1.0",
+    "@vitest/coverage-v8": "^4.1.0"
+  }
+}

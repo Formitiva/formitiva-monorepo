@@ -1,0 +1,40 @@
+[data-formitiva-theme="shadcn"] {
+  /* Surfaces */
+  --formitiva-primary-bg: #ffffff;
+  --formitiva-secondary-bg: #ffffff;
+  --formitiva-input-bg: #f5f6f8;
+
+  /* Text */
+  --formitiva-text-color: #242424;
+  --formitiva-text-muted: #616161;
+
+  /* Borders */
+  --formitiva-border-color: #d1d1d6;
+  --formitiva-border-hover: #bdbdbd;
+  --formitiva-border-focus: #0078d4;
+
+  /* Accent */
+  --formitiva-success-color: #107c10;
+  --formitiva-error-color: #d13438;
+
+  /* Interaction */
+  --formitiva-option-menu-hover-bg: #000000;
+
+  /* Shape */
+  --formitiva-border-radius: 6px;
+
+  /* Shadow */
+  --formitiva-shadow:
+    0 4px 12px #000000;
+
+  /* Buttons */
+  --formitiva-button-bg: #0078d4;
+  --formitiva-button-text: white;
+  --formitiva-button-border-radius: 6px;
+
+  --formitiva-input-padding: 10px 12px;
+
+  /* Tooltip */
+  --formitiva-tooltip-color-bg: #3c3c3c;
+  --formitiva-tooltip-color: #ffffff;
+}

@@ -1,0 +1,37 @@
+# ─── Source TypeScript (compiled to dist/ for publishing) ────────────────────
+src/**/*.ts
+src/**/*.js
+src/**/*.js.map
+
+# ─── Test & coverage artifacts ───────────────────────────────────────────────
+**/*.test.ts
+**/*.test.js
+**/*.test.js.map
+**/*.test.d.ts
+**/*.test.d.ts.map
+**/*.spec.ts
+**/*.spec.js
+coverage/
+*.lcov
+
+# ─── TypeScript / build config ────────────────────────────────────────────────
+tsconfig.json
+tsconfig*.json
+*.tsbuildinfo
+vitest.config.ts
+vitest.config.js
+vitest.setup.ts
+
+# ─── Editor & OS ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ─── Misc dev files ───────────────────────────────────────────────────────────
+.eslintrc*
+.eslintignore
+.prettierrc*
+.editorconfig
+*.log
+node_modules/

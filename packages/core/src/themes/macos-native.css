@@ -1,0 +1,32 @@
+[data-formitiva-theme="macos"] {
+  --formitiva-primary-bg: #f5f5f7;
+  --formitiva-secondary-bg: #ffffff;
+  --formitiva-input-bg: #ffffff;
+
+  --formitiva-text-color: #111111;
+  --formitiva-text-muted: #6e6e73;
+
+  --formitiva-border-color: #d2d2d7;
+  --formitiva-border-hover: #9e9ea2;
+  --formitiva-border-focus: #0a84ff;
+
+  --formitiva-success-color: #34c759;
+  --formitiva-error-color: #ff3b30;
+
+  --formitiva-option-menu-hover-bg: #000000;
+
+  --formitiva-border-radius: 999px;
+
+  --formitiva-shadow:
+    0 8px 30px #000000;
+
+  --formitiva-button-bg: #0a84ff;
+  --formitiva-button-text: white;
+  --formitiva-button-border-radius: 999px;
+
+  --formitiva-input-padding: 10px 14px;
+
+  /* Tooltip */
+  --formitiva-tooltip-color-bg: #3c3c3c;
+  --formitiva-tooltip-color: #ffffff;
+}

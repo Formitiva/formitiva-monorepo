@@ -1,0 +1,42 @@
+[data-formitiva-theme="antd"] {
+  /* Surfaces */
+  --formitiva-primary-bg: #ffffff;
+  --formitiva-secondary-bg: #ffffff;
+  --formitiva-input-bg: #ffffff;
+
+  /* Text */
+  --formitiva-text-color: #1f1f1f;
+  --formitiva-text-muted: #8c8c8c;
+
+  /* Borders */
+  --formitiva-border-color: #d9d9d9;
+  --formitiva-border-hover: #bfbfbf;
+  --formitiva-border-focus: #1677ff; /* Ant Primary */
+
+  /* States */
+  --formitiva-error-color: #ff4d4f;
+  --formitiva-success-color: #52c41a;
+
+  /* Interaction */
+  --formitiva-option-menu-hover-bg: #fafafa;
+
+  /* Shape ??AntD slightly rounded */
+  --formitiva-border-radius: 6px;
+
+  /* Elevation */
+  --formitiva-shadow:
+    0 2px 8px #000000;
+
+  /* Buttons */
+  --formitiva-button-bg: #1677ff;
+  --formitiva-button-text: #ffffff;
+  --formitiva-button-border-radius: 6px;
+
+  /* Comfortable spacing */
+  --formitiva-input-padding: 10px 12px;
+  --formitiva-font-size: 14px;
+
+  /* Tooltip */
+  --formitiva-tooltip-color-bg: #3c3c3c;
+  --formitiva-tooltip-color: #ffffff;
+}

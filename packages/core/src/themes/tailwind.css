@@ -1,0 +1,50 @@
+[data-formitiva-theme="tailwind"] {
+  /* Backgrounds */
+  --formitiva-primary-bg: #f9fafb; /* slate-50 */
+  --formitiva-secondary-bg: #ffffff; /* white */
+  --formitiva-input-bg: #ffffff;
+
+  /* Text */
+  --formitiva-text-color: #111827; /* gray-900 */
+  --formitiva-text-muted: #6b7280; /* gray-500 */
+  --formitiva-field-text-color: #1f2937; /* gray-800 */
+
+  /* Borders */
+  --formitiva-border-color: #d1d5db; /* gray-300 */
+  --formitiva-border-hover: #9ca3af; /* gray-400 */
+  --formitiva-border-focus: #6366f1; /* indigo-500 */
+
+  /* Status colors */
+  --formitiva-error-color: #f43f5e; /* rose-500 */
+  --formitiva-success-color: #10b981; /* emerald-500 */
+
+  /* Hover */
+  --formitiva-option-menu-hover-bg: #f3f4f6; /* gray-100 */
+
+  /* Radii */
+  --formitiva-border-radius: 0.5rem; /* rounded-lg */
+
+  /* Shadows (Tailwind style) */
+  --formitiva-shadow:
+      0 1px 2px #000000,
+      0 1px 3px #000000;
+
+  /* Typography */
+  --formitiva-font-size: 14px;
+  --formitiva-font-weight: 500;
+
+  /* Spacing (Tailwind scale) */
+  --formitiva-space: 0.5rem;     /* 2 = 8px */
+  --formitiva-space-lg: 0.75rem; /* 3 = 12px */
+
+  /* Buttons */
+  --formitiva-button-bg: #4f46e5; /* indigo-600 */
+  --formitiva-button-text: #ffffff;
+  --formitiva-button-border-radius: 0.5rem;
+  --formitiva-button-shadow:
+      0 2px 4px #4f46e5;
+
+  /* Tooltip */
+  --formitiva-tooltip-color-bg: #3c3c3c;
+  --formitiva-tooltip-color: #ffffff;
+}

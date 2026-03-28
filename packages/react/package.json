@@ -1,0 +1,45 @@
+{
+  "name": "@formitiva/react",
+  "version": "1.0.0",
+  "description": "Formitiva React adapter — components, hooks and registries",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "clean": "rimraf dist",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@formitiva/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=17",
+    "react-dom": ">=17"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitest/coverage-v8": "^4.1.0",
+    "happy-dom": "^20.8.4",
+    "react": "^18",
+    "react-dom": "^18",
+    "rimraf": "^5.0.0",
+    "typescript": "~5.4.0",
+    "vitest": "^4.1.0"
+  }
+}

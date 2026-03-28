@@ -1,0 +1,42 @@
+{
+  "name": "@formitiva/vue",
+  "version": "1.0.0",
+  "description": "Formitiva Vue 3 adapter — components, composables and registries",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "clean": "rimraf dist",
+    "lint": "tsc --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@formitiva/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "vue": ">=3.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "@vitest/coverage-v8": "^4.1.0",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.8.4",
+    "rimraf": "^5.0.0",
+    "typescript": "~5.4.0",
+    "vitest": "^4.1.0",
+    "vue": "^3.4.0"
+  }
+}

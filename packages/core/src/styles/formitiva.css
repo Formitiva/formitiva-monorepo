@@ -1,0 +1,394 @@
+/*/* formitiva CSS Custom Properties (CSS Variables) */
+
+/* Default Light Theme */
+:root {
+  /* Colors */
+  --formitiva-primary-bg: #f9f9f9;
+  --formitiva-secondary-bg: #fff;
+  --formitiva-text-color: #000;
+  --formitiva-text-muted: #666;
+  --formitiva-label-text-color: #000000;
+  --formitiva-form-border-color: #000000;
+  --formitiva-border-color: #ccc;
+  --formitiva-border-hover: #999;
+  --formitiva-border-focus: #4CAF50;
+  --formitiva-error-color: #e11d48;
+  --formitiva-success-color: #4CAF50;
+  
+  /* Spacing */
+  --formitiva-space: 8px;
+  --formitiva-space-lg: 12px;
+  /* Hover background for option menus */
+  --formitiva-option-menu-hover-bg: #80FFFF;
+
+    /* Gap variables
+      - --formitiva-field-gap: vertical gap between fields (default uses --formitiva-space)
+      - --formitiva-column-gap: horizontal gap between label and control in row layout
+      - --formitiva-inline-gap: inline horizontal gap used inside control groups
+      - --formitiva-label-gap: vertical gap between label and control in column layout
+    */
+    --formitiva-field-gap: var(--formitiva-space);
+    --formitiva-column-gap: var(--formitiva-space);
+    --formitiva-inline-gap: var(--formitiva-space);
+    --formitiva-label-gap: 0px;
+  
+  /* Typography */
+  --formitiva-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --formitiva-font-size: 14px;
+  --formitiva-font-weight: 500;
+  
+  --formitiva-label-font-family: var(--formitiva-font-family);
+  --formitiva-label-font-size: 14px;
+  --formitiva-label-font-weight: 600;
+
+  /* Layout */
+  --formitiva-border-radius: 0px;
+  --formitiva-border-width: 1px;
+  --formitiva-border-style: solid;
+
+  --formitiva-form-border-radius: 0px;
+  --formitiva-form-border-style: solid;
+  --formitiva-form-border-width: 0px;
+
+  --formitiva-group-border-radius: var(--formitiva-border-radius);
+  --formitiva-group-border-style: var(--formitiva-border-style);
+  --formitiva-group-border-width: var(--formitiva-border-width);
+  
+  /* Shadows */
+  --formitiva-form-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  /* Button Variables */
+  --formitiva-button-bg: var(--formitiva-success-color);
+  --formitiva-button-text: #ffffff;
+  --formitiva-button-padding: var(--formitiva-space) 12px;
+  --formitiva-button-border-radius: 6px;
+  --formitiva-button-font-size: 14px;
+  --formitiva-button-font-weight: var(--formitiva-font-weight);
+  --formitiva-button-hover-opacity: 0.9;
+  --formitiva-button-disabled-opacity: 0.6;
+  --formitiva-button-disabled-bg: #cccccc;
+  --formitiva-button-disabled-cursor: not-allowed;
+  --formitiva-button-margin-top: 0.5em;
+  --formitiva-button-shadow: none;
+  
+  /* Form specific */
+  --formitiva-input-padding: var(--formitiva-space);
+  --formitiva-container-padding: var(--formitiva-space-lg);
+  --formitiva-field-gap: var(--formitiva-space);
+
+  /* Input background (can be overridden per theme) */
+  --formitiva-input-bg: var(--formitiva-secondary-bg);
+
+  --formitiva-field-text-color: #0000ff;
+
+  /* Tooltip defaults */
+  --formitiva-tooltip-color-bg: rgba(60,60,60,0.92);
+  --formitiva-tooltip-color: #ffffff;
+
+  --formitiva-field-grid-columns: 1fr 2fr;
+
+}
+
+/* Dark Theme */
+[data-formitiva-theme="dark"] {
+
+  /* Layered Background System */
+  --formitiva-primary-bg: #121212;      /* App background */
+  --formitiva-secondary-bg: #1A1A1A;    /* Card / container surface */
+  --formitiva-input-bg: #262626;        /* Component surface */
+
+  /* Text */
+  --formitiva-text-color: #EDEDED;      /* Primary text */
+  --formitiva-text-muted: #A5A5A5;      /* Secondary text */
+  --formitiva-field-text-color: #C8C8E5; /* Optional tint for labels */
+
+  /* Borders */
+  --formitiva-border-color: #3A3A3A;    /* Default border */
+  --formitiva-border-hover: #4A4A4A;    /* Hover */
+  --formitiva-border-focus: #4DA6FF;    /* Accent blue focus */
+
+  --formitiva-form-border-color: #333333;
+
+  /* Status colors */
+  --formitiva-error-color: #FF6B6B;
+  --formitiva-success-color: #4CAF6A;
+
+  /* Interactive / Hover */
+  --formitiva-option-menu-hover-bg: rgba(255, 255, 255, 0.06);
+
+  /* Shadows (subtle for dark mode) */
+  --formitiva-form-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+
+  /* Tooltip */
+  --formitiva-tooltip-color-bg: rgba(40, 40, 40, 0.95);
+  --formitiva-tooltip-color: #F5F5F5;
+
+  --formitiva-label-text-color: #EDEDED;
+}
+
+/* Base/* formitiva Container */
+.formitiva-container {
+  font-family: var(--formitiva-font-family, sans-serif);
+  font-size: var(--formitiva-font-size, 14px);
+  background: var(--formitiva-primary-bg, #f9f9f9);
+  color: var(--formitiva-text-color, #000000);
+  padding: var(--formitiva-container-padding, 12px);
+  border-radius: var(--formitiva-form-border-radius, 0px);
+  border-color: var(--formitiva-form-border-color, #000000);
+  border-style: var(--formitiva-form-border-style, solid);
+  border-width: var(--formitiva-form-border-width, 0px);
+  box-shadow: var(--formitiva-form-shadow, none);
+  gap: var(--formitiva-space-lg, 12px);
+  max-width: 100%;
+  margin: 0 auto;
+  /* Removed internal scrolling - let parent container handle it */
+}
+
+  /* Field Container
+     - Uses a two-column grid: label (left) and control (right)
+     - `--formitiva-column-gap` controls the horizontal gap between label and control
+     - `--formitiva-field-gap` controls the vertical spacing between fields (margin-bottom)
+  */
+  .formitiva-field {
+    display: grid;
+    grid-template-columns: var(--formitiva-field-grid-columns, 1fr 2fr);
+    align-items: start;
+    padding: 0;
+    gap: var(--formitiva-column-gap, 8px);
+    margin-bottom: var(--formitiva-field-gap, 8px);
+  }
+
+  /* Fieldset / Group */
+  .formitiva-group {
+    border: 1px solid var(--formitiva-border-color, #bbb);
+    padding: var(--formitiva-fieldset-padding, 0.5em);
+    border-radius: var(--formitiva-group-border-radius, var(--formitiva-border-radius, 4px));
+    border-style: var(--formitiva-group-border-style, var(--formitiva-border-style, solid));
+    border-width: var(--formitiva-group-border-width, var(--formitiva-border-width, 1px));
+    margin-bottom: var(--formitiva-space, 8px);
+  }
+
+  .formitiva-group_legend {
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 var(--formitiva-space, 8px);
+    color: var(--formitiva-text-color, inherit);
+    margin-left: 0.4em;
+  }
+
+  .formitiva-group_legend_arrow
+   {
+    margin-left: 0.4em;
+  }
+
+/* Labels */
+.formitiva-label {
+  justify-self: start;
+  align-self: center;
+  white-space: normal;
+  line-height: 1.4;
+  min-width: 100px;
+  color: var(--formitiva-label-text-color, var(--formitiva-text-color, #000000));
+  font-family: var(--formitiva-label-font-family, var(--formitiva-font-family, sans-serif));
+  font-weight: var(--formitiva-label-font-weight, var(--formitiva-font-weight, 600));
+  font-size: var(--formitiva-label-font-size, var(--formitiva-font-size, 14px));
+  user-select: none;
+}
+
+/* Description (UI-only display text) */
+.formitiva-description {
+  font-size: var(--formitiva-font-size, 14px);
+  font-weight: var(--formitiva-font-weight, 500);
+  margin: var(--formitiva-space, 8px) 0;
+  color: var(--formitiva-text-color, #000000);
+  user-select: none;
+}
+
+/* Ensure row layout labels are left-aligned */
+
+
+/* Input Base */
+.formitiva-input {
+  width: 100%;
+  color: var(--formitiva-text-color, #000000);
+  border: 1px solid var(--formitiva-border-color, #ccc);
+  border-radius: var(--formitiva-border-radius, 0px);
+  border-style: var(--formitiva-border-style, solid);
+  border-width: var(--formitiva-border-width, 1px);
+  padding: var(--formitiva-input-padding, 8px);
+  box-sizing: border-box;
+  background-color: var(--formitiva-input-bg, #ffffff);
+  font-size: var(--formitiva-font-size, 14px);
+  font-weight: var(--formitiva-font-weight, 400);
+  transition: border-color 0.2s ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+.formitiva-input:hover {
+  border-color: var(--formitiva-border-hover, #4A4A4A);
+}
+
+.formitiva-input:focus {
+  outline: none;
+  border-color: var(--formitiva-border-focus, #4DA6FF);
+  /* Bright, prominent focus ring with cyan glow for maximum visibility on dark backgrounds */
+  box-shadow: 0 0 0 3px rgba(34,211,238,0.4),
+              0 0 16px rgba(34,211,238,0.25),
+              inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* Input Variants */
+.formitiva-input--text {
+  text-align: left;
+}
+
+.formitiva-input--number {
+  text-align: right;
+}
+
+.formitiva-input--select {
+  text-align: left;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='8' viewBox='0 0 24 24' width='8' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right var(--formitiva-space) center;
+  background-size: 20px;
+  padding-right: 32px;
+}
+
+/* Select component (multiselection, dropdown) */
+.formitiva-select {
+  text-align: left;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23666' height='8' viewBox='0 0 24 24' width='8' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right var(--formitiva-space) center;
+  background-size: 2.5em;
+  padding-right: 32px;
+  background-color: var(--formitiva-input-bg);
+}
+
+.formitiva-textarea {
+  width: 100%;
+  background-color: var(--formitiva-input-bg);
+  color: var(--formitiva-text-color);
+  border: 1px solid var(--formitiva-border-color);
+  border-radius: var(--formitiva-border-radius);
+  padding: var(--formitiva-input-padding);
+  box-sizing: border-box;
+}
+
+.formitiva-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background-color: var(--formitiva-input-bg);
+  border: 1px solid var(--formitiva-border-color);
+  border-radius: var(--formitiva-border-radius);
+  color: var(--formitiva-text-color);
+  font-size: 0.875rem;
+  gap: 8px;
+}
+
+/* Button */
+.formitiva-button {
+  background-color: var(--formitiva-button-bg, var(--formitiva-success-color, #4CAF50));
+  color: var(--formitiva-button-text, var(--formitiva-text-color, #000000));
+  padding: var(--formitiva-button-padding);
+  border-radius: var(--formitiva-button-border-radius, 6px);
+  font-size: var(--formitiva-button-font-size);
+  font-weight: var(--formitiva-button-font-weight);
+  box-shadow: var(--formitiva-button-shadow);
+  margin-top: var(--formitiva-button-margin-top);
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.formitiva-button:hover:not(:disabled) {
+  opacity: var(--formitiva-button-hover-opacity);
+  background-color: var(--formitiva-button-bg-hover, #0056b3);
+}
+
+.formitiva-button:disabled {
+  opacity: var(--formitiva-button-disabled-opacity);
+  background-color: var(--formitiva-button-disabled-bg);
+  cursor: var(--formitiva-button-disabled-cursor);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .formitiva-container {
+    padding: calc(var(--formitiva-space) * 0.8);
+  }
+  
+    .formitiva-field {
+      gap: calc(var(--formitiva-column-gap) * 0.8);
+    }
+}
+
+@media (max-width: 768px) {
+  .formitiva-field {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  
+  .formitiva-label {
+    justify-self: start;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+  }
+  
+  .formitiva-container {
+    padding: var(--formitiva-space);
+  }
+  
+  .formitiva-input,
+  .formitiva-textarea,
+  .formitiva-select {
+    font-size: 16px; /* Prevent zoom on iOS */
+    padding: var(--formitiva-input-padding);
+  }
+  
+  .formitiva-checkbox-wrapper,
+  .formitiva-radio-wrapper {
+    padding: 8px 0;
+    min-height: 44px;
+    align-items: center;
+  }
+  
+  .formitiva-group {
+    margin-bottom: calc(var(--formitiva-space) * 1.5);
+  }
+}
+
+@media (max-width: 480px) {
+  .formitiva-container {
+    padding: calc(var(--formitiva-space) * 0.7);
+  }
+  
+  .formitiva-field {
+    gap: 8px;
+  }
+  
+  .formitiva-label {
+    font-size: 0.85rem;
+    line-height: 1.3;
+  }
+  
+  .formitiva-input,
+  .formitiva-textarea,
+  .formitiva-select {
+    padding: 14px;
+  }
+  
+  
+}

@@ -1,0 +1,30 @@
+{
+  "name": "formitiva-monorepo",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Formitiva monorepo — shared core with React, Vue, Angular, and Vanilla adapters",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean",
+    "build:core": "turbo run build --filter=@formitiva/core",
+    "build:react": "turbo run build --filter=@formitiva/react",
+    "build:vue": "turbo run build --filter=@formitiva/vue",
+    "build:angular": "turbo run build --filter=@formitiva/angular",
+    "build:vanilla": "turbo run build --filter=@formitiva/vanilla"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^4.1.0",
+    "rimraf": "^5.0.0",
+    "turbo": "^2.3.0",
+    "typescript": "~5.4.0",
+    "vitest": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.0.0"
+}
