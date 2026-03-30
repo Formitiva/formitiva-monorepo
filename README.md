@@ -1,80 +1,50 @@
 # Formitiva
 
-> Schema-driven forms for React, Vue, Angular, and Vanilla JS.
+**Build dynamic, schema-driven forms across React, Vue, Angular, and Vanilla JS — fully decoupling data, UI, and logic.**
 
-[![npm](https://img.shields.io/npm/v/@formitiva/core)](https://www.npmjs.com/search?q=%40formitiva)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+## Overview
 
----
+**Formitiva** is a **framework-agnostic runtime form engine** for building forms from **JSON schemas**. The same definition can be rendered in React, Vue, Angular, or Vanilla JS without rewriting the form UI or business logic.
 
-## 🤔 What is Formitiva?
+Formitiva is perfect for:
 
-Formitiva is a schema-driven form system for modern web applications.
-
-Instead of writing forms in template or JSX code, forms are defined using JSON schemas and rendered dynamically.
-
-```json
-{
-  "name": "email",
-  "type": "email",
-  "required": true
-}
-```
-
-This allows forms to be:
-
-- generated from APIs
-- stored in databases
-- edited visually
-- reused across applications
-- updated without redeploying code
-
-Formitiva is designed for applications where forms must be **dynamic, configurable, and extensible** — and it works with your existing framework of choice.
-
-![Formitiva Example](https://raw.githubusercontent.com/Formitiva/react/master/docs/assets/images/formitiva_example.gif)
+- Dynamic, backend-driven forms
+- Low-code or visual form editors
+- Reusable form components across multiple projects
+- Enterprise-grade applications requiring extensible, maintainable form workflows
 
 ---
 
-## 🤔 Why Schema-Driven Forms?
+## Why Formitiva?
 
-Most form libraries assume forms are written directly in code.
+Traditional form development often mixes **data, UI, and logic**, which makes forms harder to maintain and extend. Formitiva separates these concerns:
 
-Traditional React forms often combine multiple responsibilities inside the same component:
+- Schema (Data): Form structure and metadata
+- Registry (UI + Logic Mapping): Connects schema fields to UI components and behaviors
+- Renderer (Framework UI): Dynamically renders forms in React, Vue, Angular, or Vanilla JS
 
-- data structure
-- UI rendering
-- validation logic
-- submission workflows
+This architecture allows you to:
 
-```javascript
-  function UserForm() {
-    const handleSubmit = (data) => {
-      validatePassword(data);
-      api.saveUser(data);
-    };
-
-    return (
-      <form>
-        <input name="username" />
-        <input name="password" />
-      </form>
-    );
-  }
-```
-This approach works well for small forms, but it becomes difficult to scale when:
-
-    many forms exist across a platform
-    validation rules must be reused
-    forms are generated dynamically
-    domain-specific field types are needed
-
-Schema-driven forms attempt to solve this by defining forms using structured data.
+- Dynamically generate forms at runtime
+- Swap or extend UI components easily
+- Add conditional logic, validation, and plugins without touching schemas
+- Keep forms maintainable across projects and teams
 
 ---
 
-## 🏗 Architecture
+## Core Features
 
-Formitiva is built around three fully decoupled layers.
+- Framework-Agnostic: Supports React, Vue, Angular, and Vanilla JS
+- Dynamic Validation & Conditional Logic: Fields and sections can adapt in real-time
+- Plugin System & Extensibility: Add custom components, field types, or validation rules
+- Runtime Configurable: Forms can be sourced from APIs, databases, CMS, or code
+- Decoupled Architecture: Separates schema, UI, and logic for scalability and maintainability
+
+---
+
+## Architecture
+
+Formitiva is built around three decoupled layers:
 
 ```
 Schema (Data)
@@ -90,15 +60,15 @@ Renderer (Framework UI)
 | Registry | Maps schema field types to components and logic |
 | Renderer | Dynamically renders the UI |
 
-This separation allows the system to remain **flexible, extensible, and maintainable**.
+This separation keeps the system **flexible, extensible, and maintainable**.
 
-- schemas can come from APIs
+- Schemas can come from APIs
 - UI components can be swapped
-- logic can be extended via plugins
+- Logic can be extended via plugins
 
 ---
 
-## 🧩 Core Concepts
+## Core Concepts
 
 ### Schema
 
@@ -128,61 +98,7 @@ Reads the schema, resolves components through the registry, and produces the fin
 
 ---
 
-## 📊 Comparison with Schema-Driven Form Systems
-
-### Cross-Framework Support for JSON Schema Form Libraries
-| Library | React | Vue | Angular | Vanilla JS |
-|---|:---:|:---:|:---:|:---:|
-| react-jsonschema-form | ✅ | ❌ | ❌ | ❌ |
-| JSON Forms | ✅ | ✅ | ❌* | ⚠️ |
-| Uniforms | ✅ | ❌ | ❌ | ❌ |
-| Form.io | ✅ | ✅ | ✅ | ✅ |
-| Formitiva | ✅ | ✅ | ✅ | ✅ |
-
-### Data, UI and Logic Decoupling Comparison
-
-| Library | Data | UI | Logic | Decoupling |
-|---|---|---|---|---|
-| RJSF | JSON Schema | Widgets | Component logic | Medium |
-| JSON Forms | JSON Schema | UI Schema | Rules engine | Medium-High |
-| Uniforms | Schema adapters | Themes | Component logic | Medium |
-| Form.io | JSON definitions | Renderer | Embedded logic | Medium-High |
-| Formitiva | Schema definition | Component registry | Registered logic | High |
-
-
----
-
-## 🎨 Visual Builder
-
-Formitiva includes a drag-and-drop visual builder for creating schemas.
-
-Capabilities:
-
-- visually build forms
-- configure validation and conditional logic
-- preview instantly
-- export production-ready schemas
-
-<img src="./docs/assets/images/form_builder_ui.png" alt="Formitiva Builder Screenshot" width="900" style="max-width:80%;height:auto;display:block;margin:0.5rem auto;" />
-
-👉 https://formitiva.com/form-builder
-
----
-
-## ✨ Key Features
-
-- **Schema-Driven Forms** — define forms using structured data instead of templates
-- **Decoupled Architecture** — data, UI, and logic are independent layers
-- **Runtime Form Rendering** — forms can change dynamically without redeploying
-- **Extensibility** — custom components, validators, submission handlers, themes, i18n
-- **Conditional Logic** — show/hide fields dynamically based on other field values
-- **Theming** — CSS variable-based themes, light/dark modes, customizable styling
-- **Internationalization** — built-in translation support with per-form dictionaries
-- **Performance & Accessibility** — incremental mounting, batched updates, ARIA-compliant components
-
----
-
-## 📦 Packages
+## Packages
 
 | Package | Framework | npm |
 |---|---|---|
@@ -194,7 +110,13 @@ Capabilities:
 
 ---
 
-## 🚀 Installation & Quick Start
+## Installation & Quick Start
+
+Framework packages re-export the shared core APIs, so you usually only install the framework package you use. Built-in theme CSS files are separate assets and should be imported from `@formitiva/core/themes/*`, for example:
+
+```ts
+import '@formitiva/core/themes/material-dark.css';
+```
 
 ### React
 
@@ -209,15 +131,17 @@ import { Formitiva } from "@formitiva/react";
 
 const definition = {
   name: "contactForm",
+  version: "1.0.0",
+  displayName: "Contact Form",
   properties: [
     { name: "fullName", type: "text", required: true },
     { name: "email",    type: "email", required: true }
   ]
 };
 
-const handleSubmit: FormSubmissionHandler = (_def, _instanceName, values, _t) => {
+const handleSubmit = (_def, _instanceName, values) => {
   console.log('Form submitted with values:', values);
-  return undefined; // no errors → form submitted successfully
+  return undefined;
 };
 
 export default function App() {
@@ -241,15 +165,17 @@ import { Formitiva } from "@formitiva/vue";
 
 const definition = {
   name: "contactForm",
+  version: "1.0.0",
+  displayName: "Contact Form",
   properties: [
     { name: "fullName", type: "text", required: true },
     { name: "email",    type: "email", required: true }
   ]
 };
 
-const handleSubmit: FormSubmissionHandler = (_def, _instanceName, values, _t) => {
+const handleSubmit = (_def, _instanceName, values) => {
   console.log('Form submitted with values:', values);
-  return undefined; // no errors → form submitted successfully
+  return undefined;
 };
 
 </script>
@@ -267,40 +193,40 @@ const handleSubmit: FormSubmissionHandler = (_def, _instanceName, values, _t) =>
 npm install @formitiva/angular
 ```
 
-Peer dependencies: `@angular/core ^18`, `@angular/common ^18`, `@angular/forms ^18`, `rxjs ^7`
+Peer dependencies: `@angular/core >=18`, `@angular/common >=18`, `@angular/forms >=18`, `rxjs >=7`
 
 ```typescript
-// app.module.ts
-import { FormitivaModule } from "@formitiva/angular";
-
-@NgModule({
-  imports: [FormitivaModule]
-})
-export class AppModule {}
-```
-
-```html
-<!-- app.component.html -->
-<formitiva-form [definitionData]="definition" [formSubmit="handleSubmit" />
-```
-
-```typescript
-// app.component.ts
 import { Component } from "@angular/core";
+import { FormitivaComponent } from "@formitiva/angular";
 
-@Component({ templateUrl: "./app.component.html" })
+const definition = {
+  name: "contactForm",
+  version: "1.0.0",
+  displayName: "Contact Form",
+  properties: [
+    { name: "fullName", type: "text", required: true },
+    { name: "email", type: "email", required: true }
+  ]
+};
+
+@Component({
+  selector: "app-home",
+  standalone: true,
+  imports: [FormitivaComponent],
+  template: `
+    <fv-formitiva
+      [definitionData]="definition"
+      [onSubmit]="handleSubmit"
+      theme="material-dark"
+    ></fv-formitiva>
+  `,
+})
 export class AppComponent {
-  definition = {
-    name: "contactForm",
-    properties: [
-      { name: "fullName", type: "text", required: true },
-      { name: "email",    type: "email", required: true }
-    ]
-  };
+  definition = definition;
 
-  handleSubmit: FormSubmissionHandler = (_def, _instanceName, values, _t) => {
+  handleSubmit = (_def, _instanceName, values) => {
     console.log('Form submitted with values:', values);
-    return undefined; // no errors → form submitted successfully
+    return undefined;
   };
 }
 ```
@@ -320,6 +246,8 @@ import { Formitiva } from "@formitiva/vanilla";
 
 const definition = {
   name: "contactForm",
+  version: "1.0.0",
+  displayName: "Contact Form",
   properties: [
     { name: "fullName", type: "text", required: true },
     { name: "email",    type: "email", required: true }
@@ -343,7 +271,7 @@ const form = new Formitiva({
 
 ---
 
-## 🎭 Conditional Logic
+## Conditional Logic
 
 Fields can be dynamically shown or hidden based on other field values — works identically across all frameworks.
 
@@ -361,7 +289,7 @@ The `state` field is only displayed when `country` equals `"US"`.
 
 ---
 
-## 🔒 Validation
+## Validation
 
 Supported validation modes:
 
@@ -371,14 +299,14 @@ Supported validation modes:
 
 Validation types:
 
-- field-level validation
-- form-level validation
-- built-in type validators
-- custom validators via the registry
+- Field-level validation
+- Form-level validation
+- Built-in type validators
+- Custom validators via the registry
 
 ---
 
-## 📤 Submission Handling
+## Submission Handling
 
 **Direct callback** — works like other form libraries:
 
@@ -404,39 +332,32 @@ Referenced in schema:
 
 ---
 
-## 📚 Documentation
+## Learn More
 
-Full documentation in React: https://formitiva.com/docs
-
----
-
-## 👥 Use Cases
-
-Formitiva is designed for **dynamic or configurable UI systems**.
-
-Common scenarios:
-
-- SaaS settings pages
-- admin dashboards
-- CMS-driven forms
-- product configurators
-- low-code platforms
-- enterprise dynamic UIs
+- [Official site](https://formitiva.com)
+- [Documentation](https://formitiva.com/docs)
+- [Schema-Driven Forms Guide](https://dev.to/yanggmtl/schema-driven-framework-agnostic-forms-building-a-runtime-engine-for-react-vue-angular--3o26?utm_source=chatgpt.com)
+- [Decouple Data, UI, and Logic](https://dev.to/yanggmtl/decouple-data-ui-and-logic-in-react-forms-using-the-formitiva-registry-system-67n)
 
 ---
 
-## 🗺 Roadmap
+## Visual Builder
 
-- schema versioning
-- multi-step forms
-- advanced conditional logic
-- layout system (grid, tabs, steps)
-- visual logic editor
-- plugin marketplace
+Formitiva provides a drag-and-drop visual builder for creating schemas.
+
+Capabilities:
+
+- Visually build forms
+- Configure validation and conditional logic
+- Preview instantly
+- Export production-ready schemas
+
+👉 https://formitiva.com/form-builder
 
 ---
 
-## 🤝 Contributing
+
+## Contributing
 
 Contributions are welcome. Open an issue or submit a pull request at:
 
