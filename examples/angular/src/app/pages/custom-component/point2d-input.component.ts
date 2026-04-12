@@ -11,13 +11,13 @@
  *  - Emit value changes via `this.emitChange(newValue)`.
  *  - Drive error display through `this.updateError(msg)` / `this.errorSig()`.
  *  - Register a type-level validation handler with
- *    `registerFieldTypeValidationHandler` so any `point2d` field is
+ *    `registerTypeValidator` so any `point2d` field is
  *    automatically validated.
  */
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
   BaseFieldComponent,
-  registerFieldTypeValidationHandler,
+  registerTypeValidator,
   StandardFieldLayoutComponent,
 } from '@formitiva/angular';
 import type {
@@ -27,7 +27,7 @@ import type {
 } from '@formitiva/angular';
 
 // ── Type-level validator (runs according to fieldValidationMode) ──────────────
-registerFieldTypeValidationHandler(
+registerTypeValidator(
   'point2d',
   (
     _field: DefinitionPropertyField,

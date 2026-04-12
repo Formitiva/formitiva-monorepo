@@ -317,7 +317,7 @@ Validation types:
 **Registered handlers** — fully decouples submission logic from the form UI:
 
 ```ts
-registerSubmissionHandler("api:saveForm", async (data) => {
+registerSubmitter("api:saveForm", async (data) => {
   await fetch("/api/form", { method: "POST", body: JSON.stringify(data) });
 });
 ```
@@ -326,7 +326,7 @@ Referenced in schema:
 
 ```json
 {
-  "submitHandlerName": "api:saveForm"
+  "submitterRef": "api:saveForm"
 }
 ```
 

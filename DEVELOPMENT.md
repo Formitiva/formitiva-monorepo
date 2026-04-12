@@ -161,7 +161,7 @@ Each framework package's `src/index.ts` has commented-out exports. Uncomment the
 
 ## What changed in `validationHandlerRegistry`
 
-The shared `validationHandlerRegistry` in core no longer imports `isBuiltinComponentType` from a component registry (which was a circular dependency risk). Instead, it maintains its own internal `builtinTypeNames` Set. Call `registerBuiltinFieldTypeValidationHandler` (instead of `registerFieldTypeValidationHandler`) when registering handlers for built-in field types — this atomically registers the handler AND marks the type as protected.
+The shared `validationHandlerRegistry` in core no longer imports `isBuiltinComponentType` from a component registry (which was a circular dependency risk). Instead, it maintains its own internal `builtinTypeNames` Set. Call `registerBuiltinTypeValidator` (instead of `registerTypeValidator`) when registering handlers for built-in field types — this atomically registers the handler AND marks the type as protected.
 
 ## Publish
 pnpm turbo build

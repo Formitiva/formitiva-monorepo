@@ -14,8 +14,8 @@ import { Component, signal } from '@angular/core';
 import { FormitivaComponent } from '@formitiva/angular';
 import {
   registerComponent,
-  registerFieldCustomValidationHandler,
-  registerFormValidationHandler,
+  registerFieldValidator,
+  registerFormValidator,
 } from '@formitiva/angular';
 import type {
   FormSubmissionHandler,
@@ -31,8 +31,8 @@ registerComponent('point2d', Point2DInputComponent);
 // ── Field-level custom validator ──────────────────────────────────────────────
 // Ensures coordinates are non-negative.
 // Category key must match the definition name; handler key must match the
-// field's `validationHandlerName` array: ["point2d", "nonNegativePoint"].
-registerFieldCustomValidationHandler(
+// field's `validatorRef` array: ["point2d", "nonNegativePoint"].
+registerFieldValidator(
   'point2d',
   'nonNegativePoint',
   (_fieldName: string, value: FieldValueType | unknown, t: TranslationFunction) => {
@@ -63,14 +63,14 @@ const regionValidator: FormValidationHandler = (valuesMap, t) => {
   return errors.length > 0 ? errors : undefined;
 };
 
-registerFormValidationHandler('point2d:regionValidator', regionValidator);
+registerFormValidator('point2d:regionValidator', regionValidator);
 // ─────────────────────────────────────────────────────────────────────────────
 
 const definition = {
   name: 'RectangleRegion',
   displayName: 'Rectangle Region',
   version: '1.0.0',
-  validationHandlerName: 'point2d:regionValidator',
+  validatorRef: 'point2d:regionValidator',
   properties: [
     {
       type: 'point2d',
@@ -79,7 +79,7 @@ const definition = {
       defaultValue: ['0', '0'],
       required: true,
       // References: category='point2d', handler='nonNegativePoint'
-      validationHandlerName: ['point2d', 'nonNegativePoint'],
+      validatorRef: ['point2d', 'nonNegativePoint'],
     },
     {
       type: 'point2d',

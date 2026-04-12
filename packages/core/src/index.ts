@@ -3,7 +3,7 @@ export type {
   FieldValueType,
   ErrorType,
   ParentField,
-  ValidationHandlerName,
+  ValidatorRefType,
   DefinitionPropertyField,
   FormitivaDefinition,
   FormitivaInstance,
@@ -46,7 +46,9 @@ export { BaseRegistry } from './core/registries/baseRegistry';
 export { default as baseRegistry } from './core/registries/baseRegistry';
 
 export {
+  registerSubmitter,
   registerSubmissionHandler,
+  getSubmitter,
   getFormSubmissionHandler,
   getSubmissionHandler,
 } from './core/registries/submissionHandlerRegistry';
@@ -61,13 +63,22 @@ export {
 export type { ButtonHandler } from './core/registries/buttonHandlerRegistry';
 
 export {
+  registerFormValidator,
+  registerFieldValidator,
+  registerTypeValidator,
+  registerBuiltinTypeValidator,
   registerFormValidationHandler,
   registerFieldCustomValidationHandler,
   registerFieldTypeValidationHandler,
   registerBuiltinFieldTypeValidationHandler,
+  getFieldValidator,
+  getFormValidator,
+  getTypeValidator,
   getFieldCustomValidationHandler,
   getFormValidationHandler,
   getFieldTypeValidationHandler,
+  listFieldValidators,
+  listFormValidators,
   listFieldCustomValidationHandlers,
   listFormValidationHandlers,
 } from './core/registries/validationHandlerRegistry';

@@ -1,12 +1,12 @@
 /**
  * submitHandler.ts — Named Submit Handler Example
  */
-import { Formitiva, registerSubmissionHandler } from '@formitiva/vanilla';
+import { Formitiva, registerSubmitter } from '@formitiva/vanilla';
 import type { FormitivaDefinition, FormitivaInstance, FieldValueType, TranslationFunction } from '@formitiva/vanilla';
 
 let _onSubmitted: ((instance: FormitivaInstance) => void) | null = null;
 
-registerSubmissionHandler(
+registerSubmitter(
   'exampleSubmitHandler',
   (
     definition: FormitivaDefinition | Record<string, unknown>,
@@ -29,7 +29,7 @@ const definition = {
   name: 'submit_handler_app',
   version: '1.0.0',
   displayName: 'Submit Handler Example',
-  submitHandlerName: 'exampleSubmitHandler',
+  submitterRef: 'exampleSubmitHandler',
   properties: [
     { name: 'firstName', displayName: 'First Name',              type: 'string',   defaultValue: '', required: true },
     { name: 'age',       displayName: 'Age',                     type: 'int',      defaultValue: 30, min: 0 },
@@ -60,8 +60,8 @@ export default async function render(container: HTMLElement) {
     <div class="page-content">
       <h2>Named Submit Handler</h2>
       <p class="desc">
-        Call <code>registerSubmissionHandler(name, fn)</code> once, then reference the name via
-        <code>submitHandlerName</code> in the definition. Formitiva invokes the handler on submit.
+        Call <code>registerSubmitter(name, fn)</code> once, then reference the name via
+        <code>submitterRef</code> in the definition. Formitiva invokes the handler on submit.
         The serialised instance is shown below after each submission.
       </p>
     </div>

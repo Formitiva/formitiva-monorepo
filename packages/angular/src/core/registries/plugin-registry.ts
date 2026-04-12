@@ -1,14 +1,13 @@
 import { Type } from '@angular/core';
 import { registerComponent, getComponent } from './component-registry';
 import {
-  registerFieldCustomValidationHandler,
-  registerFormValidationHandler,
-  registerFieldTypeValidationHandler,
-  getFieldCustomValidationHandler,
-  getFormValidationHandler,
-  getFieldTypeValidationHandler,
+  registerFieldValidator,
+  registerFormValidator,
+  registerTypeValidator,
+  getFormValidator,
+  getTypeValidator,
 } from '@formitiva/core';
-import { registerSubmissionHandler } from '@formitiva/core';
+import { registerSubmitter } from '@formitiva/core';
 import type {
   FieldCustomValidationHandler,
   FieldTypeValidationHandler,
@@ -68,38 +67,38 @@ export function registerPlugin(
   if (plugin.fieldCustomValidators) {
     for (const [category, validators] of Object.entries(plugin.fieldCustomValidators)) {
       for (const [name, fn] of Object.entries(validators)) {
-        registerFieldCustomValidationHandler(category, name, fn);
+        registerFieldValidator(category, name, fn);
       }
     }
   }
 
   if (plugin.fieldTypeValidators) {
     for (const [type, fn] of Object.entries(plugin.fieldTypeValidators)) {
-      const existing = getFieldTypeValidationHandler(type);
+      const existing = getTypeValidator(type);
       if (existing && conflictResolution === 'warn') {
         console.warn(`[Formitiva] Plugin "${plugin.name}": field type validator "${type}" already registered.`);
       }
       if (!existing || conflictResolution === 'override') {
-        registerFieldTypeValidationHandler(type, fn);
+        registerTypeValidator(type, fn);
       }
     }
   }
 
   if (plugin.formValidators) {
     for (const [name, fn] of Object.entries(plugin.formValidators)) {
-      const existing = getFormValidationHandler(name);
+      const existing = getFormValidator(name);
       if (existing && conflictResolution === 'warn') {
         console.warn(`[Formitiva] Plugin "${plugin.name}": form validator "${name}" already registered.`);
       }
       if (!existing || conflictResolution === 'override') {
-        registerFormValidationHandler(name, fn);
+        registerFormValidator(name, fn);
       }
     }
   }
 
   if (plugin.submissionHandlers) {
     for (const [name, fn] of Object.entries(plugin.submissionHandlers)) {
-      registerSubmissionHandler(name, fn);
+      registerSubmitter(name, fn);
     }
   }
 

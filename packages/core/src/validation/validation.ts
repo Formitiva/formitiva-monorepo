@@ -8,9 +8,9 @@ import type {
 } from "../core/formitivaTypes";
 
 import {
-  getFieldTypeValidationHandler,
-  getFieldCustomValidationHandler,
-  getFormValidationHandler,
+  getTypeValidator,
+  getFieldValidator,
+  getFormValidator,
 } from "../core/registries/validationHandlerRegistry";
 
 function isThenable<T = unknown>(v: unknown): v is PromiseLike<T> {
@@ -25,6 +25,30 @@ function isThenable<T = unknown>(v: unknown): v is PromiseLike<T> {
 const fieldHandlerCache = new Map<string, FieldCustomValidationHandler | null>();
 const formHandlerCache = new Map<string, FormValidationHandler | null>();
 
+function getFieldValidatorRef(field: DefinitionPropertyField): DefinitionPropertyField["validatorRef"] | undefined {
+  const legacyCompatibleField = field as DefinitionPropertyField & {
+    validationHandlerName?: DefinitionPropertyField["validatorRef"];
+  };
+
+  return legacyCompatibleField.validatorRef ?? legacyCompatibleField.validationHandlerName;
+}
+
+function getFormValidatorRef(definition: FormitivaDefinition): string | undefined {
+  const legacyCompatibleDefinition = definition as FormitivaDefinition & {
+    validationHandlerName?: string;
+  };
+
+  if (typeof legacyCompatibleDefinition.validatorRef === "string") {
+    return legacyCompatibleDefinition.validatorRef;
+  }
+
+  if (typeof legacyCompatibleDefinition.validationHandlerName === "string") {
+    return legacyCompatibleDefinition.validationHandlerName;
+  }
+
+  return undefined;
+}
+
 // Validate a single field value using its validation handler
 // Returns first error string or null if valid
 export function validateFieldWithCustomHandler(
@@ -33,18 +57,23 @@ export function validateFieldWithCustomHandler(
   value: FieldValueType,
   t: TranslationFunction
 ): string | null {
-  if (!field || !field.validationHandlerName) {
+  if (!field) {
+    return null;
+  }
+
+  const validatorRef = getFieldValidatorRef(field);
+  if (!validatorRef) {
     return null;
   }
 
   let category: string;
   let key: string;
   
-  if (typeof field.validationHandlerName === "string") {
+  if (typeof validatorRef === "string") {
     category = definitionName;
-    key = field.validationHandlerName;
-  } else if (Array.isArray(field.validationHandlerName)) {
-    const [cat, k] = field.validationHandlerName;
+    key = validatorRef;
+  } else if (Array.isArray(validatorRef)) {
+    const [cat, k] = validatorRef;
     if (k) {
       category = cat;
       key = k;
@@ -64,7 +93,7 @@ export function validateFieldWithCustomHandler(
   let validationHandler = fieldHandlerCache.get(cacheKey);
   if (validationHandler === undefined) {
     // Lookup by category and handler name
-    validationHandler = getFieldCustomValidationHandler(category, key) || null;
+    validationHandler = getFieldValidator(category, key) || null;
     fieldHandlerCache.set(cacheKey, validationHandler);
   }
 
@@ -96,7 +125,7 @@ export function validateField(
   input: FieldValueType,
   t: TranslationFunction
 ): string | null {
-  const typeValidator = getFieldTypeValidationHandler(field.type);
+  const typeValidator = getTypeValidator(field.type);
   if (typeValidator) {
     const err = typeValidator(field, input, t);
     if (err) {
@@ -121,16 +150,19 @@ export async function validateFormValues(
   valuesMap: Record<string, FieldValueType | unknown>,
   t: (key: string) => string
 ): Promise<string[] | null> {
-  if (!definition || typeof definition.validationHandlerName !== "string") {
+  if (!definition) {
     return null;
   }
 
-  const handlerName = definition.validationHandlerName;
+  const handlerName = getFormValidatorRef(definition);
+  if (!handlerName) {
+    return null;
+  }
 
   // Check cache first
   let validationHandler = formHandlerCache.get(handlerName);
   if (validationHandler === undefined) {
-    validationHandler = getFormValidationHandler(handlerName) || null;
+    validationHandler = getFormValidator(handlerName) || null;
     formHandlerCache.set(handlerName, validationHandler);
   }
 

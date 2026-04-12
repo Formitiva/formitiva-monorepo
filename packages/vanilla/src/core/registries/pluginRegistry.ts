@@ -8,16 +8,16 @@ import {
   getComponent,
 } from './componentRegistry';
 import {
-  registerFieldCustomValidationHandler,
-  registerFormValidationHandler,
-  registerFieldTypeValidationHandler,
-  getFieldCustomValidationHandler,
-  getFormValidationHandler,
-  getFieldTypeValidationHandler,
+  registerFieldValidator,
+  registerFormValidator,
+  registerTypeValidator,
+  getFieldValidator,
+  getFormValidator,
+  getTypeValidator,
 } from '@formitiva/core';
 import {
-  registerSubmissionHandler,
-  getSubmissionHandler,
+  registerSubmitter,
+  getSubmitter,
 } from '@formitiva/core';
 
 import type {
@@ -109,7 +109,7 @@ function handleConflicts(plugin: FormitivaPlugin): PluginConflict[] {
       for (const name of Object.keys(validators)) {
         const categoryMap = registrationOwnership.fieldValidators.get(category);
         const existingPlugin = categoryMap?.get(name);
-        const existingHandler = getFieldCustomValidationHandler(category, name);
+        const existingHandler = getFieldValidator(category, name);
         if (existingHandler && existingPlugin && existingPlugin !== plugin.name) {
           conflicts.push({ type: 'fieldCustomValidator', name: `${category}:${name}`, existingPlugin, newPlugin: plugin.name });
         }
@@ -118,7 +118,7 @@ function handleConflicts(plugin: FormitivaPlugin): PluginConflict[] {
   }
   if (plugin.fieldTypeValidators) {
     for (const name of Object.keys(plugin.fieldTypeValidators)) {
-      const existingHandler = getFieldTypeValidationHandler(name);
+      const existingHandler = getTypeValidator(name);
       const existingPlugin = registrationOwnership.fieldTypeValidators.get(name);
       if (existingHandler && existingPlugin && existingPlugin !== plugin.name) {
         conflicts.push({ type: 'fieldTypeValidator', name: `type:${name}`, existingPlugin, newPlugin: plugin.name });
@@ -127,7 +127,7 @@ function handleConflicts(plugin: FormitivaPlugin): PluginConflict[] {
   }
   if (plugin.formValidators) {
     for (const name of Object.keys(plugin.formValidators)) {
-      const existingHandler = getFormValidationHandler(name);
+      const existingHandler = getFormValidator(name);
       const existingPlugin = registrationOwnership.formValidators.get(name);
       if (existingHandler && existingPlugin && existingPlugin !== plugin.name) {
         conflicts.push({ type: 'formValidator', name, existingPlugin, newPlugin: plugin.name });
@@ -136,7 +136,7 @@ function handleConflicts(plugin: FormitivaPlugin): PluginConflict[] {
   }
   if (plugin.submissionHandlers) {
     for (const name of Object.keys(plugin.submissionHandlers)) {
-      const existingHandler = getSubmissionHandler(name);
+      const existingHandler = getSubmitter(name);
       const existingPlugin = registrationOwnership.submissionHandlers.get(name);
       if (existingHandler && existingPlugin && existingPlugin !== plugin.name) {
         conflicts.push({ type: 'submissionHandler', name, existingPlugin, newPlugin: plugin.name });
@@ -170,7 +170,7 @@ export function registerPlugin(plugin: FormitivaPlugin, options?: PluginRegistra
           const cm = registrationOwnership.fieldValidators.get(category) || new Map<string, string>();
           cm.set(name, plugin.name);
           registrationOwnership.fieldValidators.set(category, cm);
-          registerFieldCustomValidationHandler(category, name, handler);
+          registerFieldValidator(category, name, handler);
         }
       }
     }
@@ -180,7 +180,7 @@ export function registerPlugin(plugin: FormitivaPlugin, options?: PluginRegistra
       const conflict = conflicts.find(c => c.type === 'formValidator' && c.name === name) ?? null;
       if (shouldRegister(conflict, strategy, options?.onConflict)) {
         registrationOwnership.formValidators.set(name, plugin.name);
-        registerFormValidationHandler(name, handler);
+        registerFormValidator(name, handler);
       }
     }
   }
@@ -189,7 +189,7 @@ export function registerPlugin(plugin: FormitivaPlugin, options?: PluginRegistra
       const conflict = conflicts.find(c => c.type === 'fieldTypeValidator' && c.name === `type:${name}`) ?? null;
       if (shouldRegister(conflict, strategy, options?.onConflict)) {
         registrationOwnership.fieldTypeValidators.set(name, plugin.name);
-        registerFieldTypeValidationHandler(name, handler);
+        registerTypeValidator(name, handler);
       }
     }
   }
@@ -198,7 +198,7 @@ export function registerPlugin(plugin: FormitivaPlugin, options?: PluginRegistra
       const conflict = conflicts.find(c => c.type === 'submissionHandler' && c.name === name) ?? null;
       if (shouldRegister(conflict, strategy, options?.onConflict)) {
         registrationOwnership.submissionHandlers.set(name, plugin.name);
-        registerSubmissionHandler(name, handler);
+        registerSubmitter(name, handler);
       }
     }
   }

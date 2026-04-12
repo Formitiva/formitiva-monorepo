@@ -3,19 +3,27 @@ import BaseRegistry from './baseRegistry';
 
 const registry = new BaseRegistry<FormSubmissionHandler>();
 
-export function registerSubmissionHandler(submitterName: string, fn: FormSubmissionHandler): void {
+export function registerSubmitter(submitterName: string, fn: FormSubmissionHandler): void {
   registry.register(submitterName, fn);
 }
 
-export function getFormSubmissionHandler(submitterName: string): FormSubmissionHandler | undefined {
+export function registerSubmissionHandler(submitterName: string, fn: FormSubmissionHandler): void {
+  registerSubmitter(submitterName, fn);
+}
+
+export function getSubmitter(submitterName: string): FormSubmissionHandler | undefined {
   return registry.get(submitterName);
+}
+
+export function getFormSubmissionHandler(submitterName: string): FormSubmissionHandler | undefined {
+  return getSubmitter(submitterName);
 }
 
 export function getSubmissionHandler(submitterName: string): FormSubmissionHandler | undefined {
-  return registry.get(submitterName);
+  return getSubmitter(submitterName);
 }
 
-registerSubmissionHandler(
+registerSubmitter(
   'Preset_AlertSubmitHandler',
   (definition, instanceName, valuesMap) => {
     const instance: FormitivaInstance = {

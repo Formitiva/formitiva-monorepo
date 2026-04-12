@@ -4,8 +4,8 @@
  * Demonstrates two integrated approaches:
  *
  *  1. Registering a submission handler by name with
- *     `registerSubmissionHandler('myHandler', fn)` and referencing it
- *     via `submitHandlerName` in the definition so the form always
+ *     `registerSubmitter('myHandler', fn)` and referencing it
+ *     via `submitterRef` in the definition so the form always
  *     uses it regardless of where it is rendered.
  *
  *  2. Using the `[onSubmit]` @Input as an alternative inline callback
@@ -15,7 +15,7 @@
  * current values are displayed after each submission.
  */
 import { Component, signal } from '@angular/core';
-import { FormitivaComponent, registerSubmissionHandler } from '@formitiva/angular';
+import { FormitivaComponent, registerSubmitter } from '@formitiva/angular';
 import type {
   FormSubmissionHandler,
   FormitivaDefinition,
@@ -31,7 +31,7 @@ import type {
 //
 let _onSubmitted: ((instance: FormitivaInstance) => void) | null = null;
 
-registerSubmissionHandler(
+registerSubmitter(
   'exampleSubmitHandler',
   (
     definition: FormitivaDefinition | Record<string, unknown>,
@@ -56,7 +56,7 @@ const definition = {
   version: '1.0.0',
   displayName: 'Submit Handler Example',
   // References the globally registered handler:
-  submitHandlerName: 'exampleSubmitHandler',
+  submitterRef: 'exampleSubmitHandler',
   properties: [
     {
       name: 'firstName',
@@ -100,9 +100,9 @@ const initialInstance: FormitivaInstance = {
     <div class="page-content">
       <h2>Named Submit Handler</h2>
       <p class="desc">
-        Call <code>registerSubmissionHandler(name, fn)</code> once (e.g. in <code>main.ts</code>
+        Call <code>registerSubmitter(name, fn)</code> once (e.g. in <code>main.ts</code>
         or an <code>APP_INITIALIZER</code>), then reference the name via
-        <code>submitHandlerName</code> in the definition. Formitiva invokes the handler on submit.
+        <code>submitterRef</code> in the definition. Formitiva invokes the handler on submit.
         The serialised instance is shown below after each submission.
       </p>
 

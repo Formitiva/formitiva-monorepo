@@ -2,8 +2,8 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { validateField, validateFieldWithCustomHandler, validateFormValues } from './validation';
 import { ensureBuiltinFieldTypeValidatorsRegistered } from './registerBuiltinTypeValidators';
 import {
-  registerFieldCustomValidationHandler,
-  registerFormValidationHandler,
+  registerFieldValidator,
+  registerFormValidator,
 } from '../core/registries/validationHandlerRegistry';
 import type { DefinitionPropertyField, FormitivaDefinition, TranslationFunction } from '../core/formitivaTypes';
 
@@ -50,39 +50,39 @@ describe('validateField', () => {
 // ─── validateFieldWithCustomHandler ──────────────────────────────────────────
 
 describe('validateFieldWithCustomHandler', () => {
-  it('returns null when the field has no validationHandlerName', () => {
+  it('returns null when the field has no validatorRef', () => {
     const f: DefinitionPropertyField = { name: 'f', type: 'text', displayName: 'F' } as DefinitionPropertyField;
     expect(validateFieldWithCustomHandler('Form', f, 'val', t)).toBeNull();
   });
 
   it('calls a registered custom handler by string name', () => {
-    registerFieldCustomValidationHandler('FormA', 'noXValidator', (_name, value) =>
+    registerFieldValidator('FormA', 'noXValidator', (_name, value) =>
       String(value).includes('X') ? 'No X allowed' : undefined,
     );
     const f: DefinitionPropertyField = {
-      name: 'f', type: 'text', displayName: 'F', validationHandlerName: 'noXValidator',
+      name: 'f', type: 'text', displayName: 'F', validatorRef: 'noXValidator',
     } as DefinitionPropertyField;
     expect(validateFieldWithCustomHandler('FormA', f, 'hello', t)).toBeNull();
     expect(validateFieldWithCustomHandler('FormA', f, 'helloX', t)).toBe('No X allowed');
   });
 
-  it('calls a registered handler when validationHandlerName is a single-element array', () => {
-    registerFieldCustomValidationHandler('FormB', 'singleArrValidator', (_name, value) =>
+  it('calls a registered handler when validatorRef is a single-element array', () => {
+    registerFieldValidator('FormB', 'singleArrValidator', (_name, value) =>
       String(value) === 'bad' ? 'Value is bad' : undefined,
     );
     const f: DefinitionPropertyField = {
-      name: 'f', type: 'text', displayName: 'F', validationHandlerName: ['singleArrValidator'],
+      name: 'f', type: 'text', displayName: 'F', validatorRef: ['singleArrValidator'],
     } as DefinitionPropertyField;
     expect(validateFieldWithCustomHandler('FormB', f, 'ok', t)).toBeNull();
     expect(validateFieldWithCustomHandler('FormB', f, 'bad', t)).toBe('Value is bad');
   });
 
-  it('calls a handler when validationHandlerName is a [category, name] tuple', () => {
-    registerFieldCustomValidationHandler('CatC', 'tupleValidator', (_name, value) =>
+  it('calls a handler when validatorRef is a [category, name] tuple', () => {
+    registerFieldValidator('CatC', 'tupleValidator', (_name, value) =>
       Number(value) < 0 ? 'Must not be negative' : undefined,
     );
     const f: DefinitionPropertyField = {
-      name: 'f', type: 'int', displayName: 'F', validationHandlerName: ['CatC', 'tupleValidator'],
+      name: 'f', type: 'int', displayName: 'F', validatorRef: ['CatC', 'tupleValidator'],
     } as DefinitionPropertyField;
     expect(validateFieldWithCustomHandler('AnyForm', f, 5, t)).toBeNull();
     expect(validateFieldWithCustomHandler('AnyForm', f, -1, t)).toBe('Must not be negative');
@@ -90,17 +90,29 @@ describe('validateFieldWithCustomHandler', () => {
 
   it('returns null when handler is not found', () => {
     const f: DefinitionPropertyField = {
-      name: 'f', type: 'text', displayName: 'F', validationHandlerName: 'nonExistentHandler',
+      name: 'f', type: 'text', displayName: 'F', validatorRef: 'nonExistentHandler',
     } as DefinitionPropertyField;
     expect(validateFieldWithCustomHandler('FormX', f, 'val', t)).toBeNull();
+  });
+
+  it('supports legacy field validationHandlerName during migration', () => {
+    registerFieldValidator('LegacyForm', 'legacyValidator', (_name, value) =>
+      String(value) === 'legacy' ? 'Legacy error' : undefined,
+    );
+    const f = {
+      name: 'f', type: 'text', displayName: 'F', validationHandlerName: 'legacyValidator',
+    } as DefinitionPropertyField & { validationHandlerName: string };
+
+    expect(validateFieldWithCustomHandler('LegacyForm', f, 'ok', t)).toBeNull();
+    expect(validateFieldWithCustomHandler('LegacyForm', f, 'legacy', t)).toBe('Legacy error');
   });
 });
 
 // ─── validateFormValues ───────────────────────────────────────────────────────
 
 describe('validateFormValues', () => {
-  it('returns null when definition has no validationHandlerName', async () => {
-    const def: FormitivaDefinition = { name: 'F', version: '1.0.0', properties: [] };
+  it('returns null when definition has no validatorRef', async () => {
+    const def: FormitivaDefinition = { name: 'F', version: '1.0.0', displayName: 'F', properties: [] };
     expect(await validateFormValues(def, {}, t)).toBeNull();
   });
 
@@ -110,34 +122,43 @@ describe('validateFormValues', () => {
 
   it('returns null when no handler is registered for the name', async () => {
     const def: FormitivaDefinition = {
-      name: 'F', version: '1.0.0', properties: [], validationHandlerName: 'unregisteredHandler',
+      name: 'F', version: '1.0.0', displayName: 'F', properties: [], validatorRef: 'unregisteredHandler',
     };
     expect(await validateFormValues(def, {}, t)).toBeNull();
   });
 
   it('runs the registered sync form handler and returns errors', async () => {
-    registerFormValidationHandler('syncFormValidator', (_values) => ['Form-level error']);
+    registerFormValidator('syncFormValidator', (_values) => ['Form-level error']);
     const def: FormitivaDefinition = {
-      name: 'F', version: '1.0.0', properties: [], validationHandlerName: 'syncFormValidator',
+      name: 'F', version: '1.0.0', displayName: 'F', properties: [], validatorRef: 'syncFormValidator',
     };
     const result = await validateFormValues(def, {}, t);
     expect(result).toEqual(['Form-level error']);
   });
 
   it('runs the registered async form handler and returns errors', async () => {
-    registerFormValidationHandler('asyncFormValidator', async (_values) => ['Async error']);
+    registerFormValidator('asyncFormValidator', async (_values) => ['Async error']);
     const def: FormitivaDefinition = {
-      name: 'F', version: '1.0.0', properties: [], validationHandlerName: 'asyncFormValidator',
+      name: 'F', version: '1.0.0', displayName: 'F', properties: [], validatorRef: 'asyncFormValidator',
     };
     const result = await validateFormValues(def, {}, t);
     expect(result).toEqual(['Async error']);
   });
 
   it('returns null when form handler returns undefined', async () => {
-    registerFormValidationHandler('okFormValidator', () => undefined);
+    registerFormValidator('okFormValidator', () => undefined);
     const def: FormitivaDefinition = {
-      name: 'F', version: '1.0.0', properties: [], validationHandlerName: 'okFormValidator',
+      name: 'F', version: '1.0.0', displayName: 'F', properties: [], validatorRef: 'okFormValidator',
     };
     expect(await validateFormValues(def, {}, t)).toBeNull();
+  });
+
+  it('supports legacy form validationHandlerName during migration', async () => {
+    registerFormValidator('legacyFormValidator', () => ['Legacy form error']);
+    const def = {
+      name: 'F', version: '1.0.0', displayName: 'F', properties: [], validationHandlerName: 'legacyFormValidator',
+    } as FormitivaDefinition & { validationHandlerName: string };
+
+    expect(await validateFormValues(def, {}, t)).toEqual(['Legacy form error']);
   });
 });

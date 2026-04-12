@@ -3,8 +3,8 @@
  *
  * Demonstrates two ways to add cross-field validation:
  *
- *  1. Via the definition's `validationHandlerName` property +
- *     `registerFormValidationHandler()` (registered at module load time).
+ *  1. Via the definition's `validatorRef` property +
+ *     `registerFormValidator()` (registered at module load time).
  *
  *  2. Via the `[onValidation]` @Input on <fv-formitiva> (inline handler).
  *
@@ -12,11 +12,11 @@
  * lowerLimit < upperLimit before the form can submit.
  */
 import { Component, signal } from '@angular/core';
-import { FormitivaComponent, registerFormValidationHandler } from '@formitiva/angular';
+import { FormitivaComponent, registerFormValidator } from '@formitiva/angular';
 import type { FormValidationHandler, FormSubmissionHandler } from '@formitiva/angular';
 
 // ── Register the form-level validation handler (once, at module load) ─────────
-// The handler is referenced by name in the definition's `validationHandlerName`.
+// The handler is referenced by name in the definition's `validatorRef`.
 const rangeValidator: FormValidationHandler = (valuesMap, t) => {
   const lower = Number(valuesMap['lowerLimit'] ?? NaN);
   const upper = Number(valuesMap['upperLimit'] ?? NaN);
@@ -30,7 +30,7 @@ const rangeValidator: FormValidationHandler = (valuesMap, t) => {
   return undefined;
 };
 
-registerFormValidationHandler('rangeValidator', rangeValidator);
+registerFormValidator('rangeValidator', rangeValidator);
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -39,7 +39,7 @@ const definition = {
   version: '1.0.0',
   displayName: 'Range Validation Demo',
   // References the handler registered above
-  validationHandlerName: 'rangeValidator',
+  validatorRef: 'rangeValidator',
   properties: [
     {
       name: 'lowerLimit',
@@ -76,8 +76,8 @@ const definition = {
     <div class="page-content">
       <h2>Form Validation</h2>
       <p class="desc">
-        Register a form-level validator with <code>registerFormValidationHandler(name, fn)</code>,
-        then reference it via <code>validationHandlerName</code> in the definition.
+        Register a form-level validator with <code>registerFormValidator(name, fn)</code>,
+        then reference it via <code>validatorRef</code> in the definition.
         The validator receives all field values and returns an array of error strings (or
         <code>undefined</code> for no errors).
       </p>

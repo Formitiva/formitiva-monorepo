@@ -18,21 +18,33 @@ const builtinTypeNames = new Set<string>();
 
 // ─── Form-level validators ───────────────────────────────────────────────────
 
-export function registerFormValidationHandler(name: string, fn: FormValidationHandler): void {
+export function registerFormValidator(name: string, fn: FormValidationHandler): void {
   formValidationRegistry.register(name, fn);
 }
 
-export function getFormValidationHandler(name: string): FormValidationHandler | null {
+export function registerFormValidationHandler(name: string, fn: FormValidationHandler): void {
+  registerFormValidator(name, fn);
+}
+
+export function getFormValidator(name: string): FormValidationHandler | null {
   return formValidationRegistry.get(name) ?? null;
 }
 
-export function listFormValidationHandlers(): string[] {
+export function getFormValidationHandler(name: string): FormValidationHandler | null {
+  return getFormValidator(name);
+}
+
+export function listFormValidators(): string[] {
   return formValidationRegistry.list();
+}
+
+export function listFormValidationHandlers(): string[] {
+  return listFormValidators();
 }
 
 // ─── Field custom validators ─────────────────────────────────────────────────
 
-export function registerFieldCustomValidationHandler(
+export function registerFieldValidator(
   category: string,
   name: string,
   fn: FieldCustomValidationHandler,
@@ -43,24 +55,43 @@ export function registerFieldCustomValidationHandler(
   fieldCustomValidationMap[category][name] = fn;
 }
 
-export function getFieldCustomValidationHandler(
+export function registerFieldCustomValidationHandler(
+  category: string,
+  name: string,
+  fn: FieldCustomValidationHandler,
+): void {
+  registerFieldValidator(category, name, fn);
+}
+
+export function getFieldValidator(
   category: string,
   name: string,
 ): FieldCustomValidationHandler | null {
   return fieldCustomValidationMap[category]?.[name] ?? null;
 }
 
-export function listFieldCustomValidationHandlers(category?: string): string[] {
+export function getFieldCustomValidationHandler(
+  category: string,
+  name: string,
+): FieldCustomValidationHandler | null {
+  return getFieldValidator(category, name);
+}
+
+export function listFieldValidators(category?: string): string[] {
   if (category) {
     return Object.keys(fieldCustomValidationMap[category] ?? {});
   }
   return Object.keys(fieldCustomValidationMap);
 }
 
+export function listFieldCustomValidationHandlers(category?: string): string[] {
+  return listFieldValidators(category);
+}
+
 // ─── Field type validators ───────────────────────────────────────────────────
 
 /** Register a built-in type validator (cannot be overridden by plugins). */
-export function registerBuiltinFieldTypeValidationHandler(
+export function registerBuiltinTypeValidator(
   name: string,
   fn: FieldTypeValidationHandler,
 ): void {
@@ -68,8 +99,15 @@ export function registerBuiltinFieldTypeValidationHandler(
   fieldTypeValidationRegistry.register(name, fn);
 }
 
+export function registerBuiltinFieldTypeValidationHandler(
+  name: string,
+  fn: FieldTypeValidationHandler,
+): void {
+  registerBuiltinTypeValidator(name, fn);
+}
+
 /** Register a custom type validator. Cannot override built-in types. */
-export function registerFieldTypeValidationHandler(
+export function registerTypeValidator(
   name: string,
   fn: FieldTypeValidationHandler,
 ): void {
@@ -82,6 +120,17 @@ export function registerFieldTypeValidationHandler(
   fieldTypeValidationRegistry.register(name, fn);
 }
 
-export function getFieldTypeValidationHandler(name: string): FieldTypeValidationHandler | null {
+export function registerFieldTypeValidationHandler(
+  name: string,
+  fn: FieldTypeValidationHandler,
+): void {
+  registerTypeValidator(name, fn);
+}
+
+export function getTypeValidator(name: string): FieldTypeValidationHandler | null {
   return fieldTypeValidationRegistry.get(name) ?? null;
+}
+
+export function getFieldTypeValidationHandler(name: string): FieldTypeValidationHandler | null {
+  return getTypeValidator(name);
 }

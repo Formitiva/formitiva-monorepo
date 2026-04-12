@@ -9,16 +9,16 @@ import {
   getComponent,
 } from './componentRegistry';
 import {
-  registerFieldCustomValidationHandler,
-  registerFormValidationHandler,
-  registerFieldTypeValidationHandler,
-  getFieldCustomValidationHandler,
-  getFormValidationHandler,
-  getFieldTypeValidationHandler,
+  registerFieldValidator,
+  registerFormValidator,
+  registerTypeValidator,
+  getFieldValidator,
+  getFormValidator,
+  getTypeValidator,
 } from '@formitiva/core';
 import {
-  registerSubmissionHandler,
-  getSubmissionHandler,
+  registerSubmitter,
+  getSubmitter,
 } from '@formitiva/core';
 
 import type {
@@ -144,7 +144,7 @@ function handleConflicts(plugin: FormitivaPlugin): PluginConflict[] {
       for (const name of Object.keys(validators)) {
         const categoryMap = registrationOwnership.fieldValidators.get(category);
         const existingPlugin = categoryMap?.get(name);
-        const existingHandler = getFieldCustomValidationHandler(category, name);
+        const existingHandler = getFieldValidator(category, name);
         if (existingHandler && existingPlugin && existingPlugin !== plugin.name) {
           conflicts.push({
             type: 'fieldCustomValidator',
@@ -160,7 +160,7 @@ function handleConflicts(plugin: FormitivaPlugin): PluginConflict[] {
   // Type-level field validators (validators registered by type)
   if (plugin.fieldTypeValidators) {
     for (const name of Object.keys(plugin.fieldTypeValidators)) {
-      const existingHandler = getFieldTypeValidationHandler(name);
+      const existingHandler = getTypeValidator(name);
       const existingPlugin = registrationOwnership.fieldTypeValidators.get(name);
       if (existingHandler && existingPlugin && existingPlugin !== plugin.name) {
         conflicts.push({
@@ -176,7 +176,7 @@ function handleConflicts(plugin: FormitivaPlugin): PluginConflict[] {
   // Form validators
   if (plugin.formValidators) {
     for (const name of Object.keys(plugin.formValidators)) {
-      const existingHandler = getFormValidationHandler(name);
+      const existingHandler = getFormValidator(name);
       const existingPlugin = registrationOwnership.formValidators.get(name);
       if (existingHandler && existingPlugin && existingPlugin !== plugin.name) {
         conflicts.push({
@@ -192,7 +192,7 @@ function handleConflicts(plugin: FormitivaPlugin): PluginConflict[] {
   // Submission handlers
   if (plugin.submissionHandlers) {
     for (const name of Object.keys(plugin.submissionHandlers)) {
-      const existingHandler = getSubmissionHandler(name);
+      const existingHandler = getSubmitter(name);
       const existingPlugin = registrationOwnership.submissionHandlers.get(name);
       if (existingHandler && existingPlugin && existingPlugin !== plugin.name) {
         conflicts.push({
@@ -293,7 +293,7 @@ export function registerPlugin(plugin: FormitivaPlugin, options?: PluginRegistra
       registerItems(
         validators,
         registrationOwnership.fieldValidators,
-        (name, handler) => registerFieldCustomValidationHandler(category, name, handler),
+        (name, handler) => registerFieldValidator(category, name, handler),
         plugin,
         conflicts,
         strategy,
@@ -308,7 +308,7 @@ export function registerPlugin(plugin: FormitivaPlugin, options?: PluginRegistra
     registerItems(
       plugin.formValidators,
       registrationOwnership.formValidators,
-      registerFormValidationHandler,
+      registerFormValidator,
       plugin,
       conflicts,
       strategy,
@@ -321,7 +321,7 @@ export function registerPlugin(plugin: FormitivaPlugin, options?: PluginRegistra
     registerItems(
       plugin.fieldTypeValidators,
       registrationOwnership.fieldTypeValidators,
-      registerFieldTypeValidationHandler,
+      registerTypeValidator,
       plugin,
       conflicts,
       strategy,
@@ -335,7 +335,7 @@ export function registerPlugin(plugin: FormitivaPlugin, options?: PluginRegistra
     registerItems(
       plugin.submissionHandlers,
       registrationOwnership.submissionHandlers,
-      registerSubmissionHandler,
+      registerSubmitter,
       plugin,
       conflicts,
       strategy,

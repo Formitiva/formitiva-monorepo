@@ -2,18 +2,17 @@
  * SubmitHandler.tsx — Named Submit Handler Example
  *
  * Demonstrates registering a submission handler by name with
- * `registerSubmissionHandler('myHandler', fn)` and referencing it
- * via `submitHandlerName` in the definition.
+ * `registerSubmitter('myHandler', fn)` and referencing it
+ * via `submitterRef` in the definition.
  */
 import { useState, useEffect } from 'react';
-import { Formitiva } from '@formitiva/react';
-import { registerSubmissionHandler } from '@formitiva/react';
+import { Formitiva, registerSubmitter } from '@formitiva/react';
 import type { FormitivaDefinition, FormitivaInstance, FieldValueType, TranslationFunction } from '@formitiva/react';
 
 // Module-level callback so the registered handler can update component state
 let _onSubmitted: ((instance: FormitivaInstance) => void) | null = null;
 
-registerSubmissionHandler(
+registerSubmitter(
   'exampleSubmitHandler',
   (
     definition: FormitivaDefinition | Record<string, unknown>,
@@ -36,7 +35,7 @@ const definition = {
   name: 'submit_handler_app',
   version: '1.0.0',
   displayName: 'Submit Handler Example',
-  submitHandlerName: 'exampleSubmitHandler',
+  submitterRef: 'exampleSubmitHandler',
   properties: [
     { name: 'firstName', displayName: 'First Name', type: 'string',   defaultValue: '', required: true },
     { name: 'age',       displayName: 'Age',         type: 'int',      defaultValue: 30, min: 0 },
@@ -67,8 +66,8 @@ export default function SubmitHandler() {
     <div className="page-content">
       <h2>Named Submit Handler</h2>
       <p className="desc">
-        Call <code>registerSubmissionHandler(name, fn)</code> once, then reference the name via{' '}
-        <code>submitHandlerName</code> in the definition. Formitiva invokes the handler on submit.
+        Call <code>registerSubmitter(name, fn)</code> once, then reference the name via{' '}
+        <code>submitterRef</code> in the definition. Formitiva invokes the handler on submit.
         The serialised instance is shown below after each submission.
       </p>
 

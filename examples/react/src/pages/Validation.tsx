@@ -2,12 +2,12 @@
  * Validation.tsx — Form Validation Example
  *
  * Demonstrates registering a cross-field validation handler via
- * `registerFormValidationHandler()` and referencing it in the definition's
- * `validationHandlerName` field.
+ * `registerFormValidator()` and referencing it in the definition's
+ * `validatorRef` field.
  */
 import { useState } from 'react';
 import { Formitiva } from '@formitiva/react';
-import { registerFormValidationHandler } from '@formitiva/react';
+import { registerFormValidator } from '@formitiva/react';
 import type { FormValidationHandler, FormSubmissionHandler } from '@formitiva/react';
 
 // Register the form-level validation handler once (at module load)
@@ -19,13 +19,13 @@ const rangeValidator: FormValidationHandler = (valuesMap, t) => {
   return undefined;
 };
 
-registerFormValidationHandler('rangeValidator', rangeValidator);
+registerFormValidator('rangeValidator', rangeValidator);
 
 const definition = {
   name: 'rangeForm',
   version: '1.0.0',
   displayName: 'Range Validation Demo',
-  validationHandlerName: 'rangeValidator',
+  validatorRef: 'rangeValidator',
   properties: [
     { name: 'lowerLimit', displayName: 'Lower Limit', type: 'int', defaultValue: 0 },
     { name: 'upperLimit', displayName: 'Upper Limit', type: 'int', defaultValue: 10 },
@@ -51,8 +51,8 @@ export default function Validation() {
     <div className="page-content">
       <h2>Form Validation</h2>
       <p className="desc">
-        Register a form-level validator with <code>registerFormValidationHandler(name, fn)</code>,
-        then reference it via <code>validationHandlerName</code> in the definition.
+        Register a form-level validator with <code>registerFormValidator(name, fn)</code>,
+        then reference it via <code>validatorRef</code> in the definition.
         The validator receives all field values and returns an array of error strings (or{' '}
         <code>undefined</code> for no errors).
       </p>

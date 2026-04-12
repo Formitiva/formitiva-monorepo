@@ -18,7 +18,7 @@ export type ErrorType = string | null;
 
 export type ParentField = Record<string, string[] | Integer[] | boolean[]>;
 
-export type ValidationHandlerName =
+export type ValidatorRefType =
   | string
   | [string]
   | [string, string];
@@ -36,8 +36,8 @@ export interface DefinitionPropertyField {
   tooltip?: string;
   labelLayout?: 'row' | 'column-left' | 'column-center';
 
-  // Custom validation handler name
-  validationHandlerName?: ValidationHandlerName;
+  // Custom validator reference
+  validatorRef?: ValidatorRefType;
 
   // Unit field properties
   dimension?: string; // for 'unit' type fields, e.g. 'length', 'angle', etc.
@@ -101,8 +101,8 @@ export interface FormitivaDefinition {
   displayName: string;
   localization?: string;
   properties: DefinitionPropertyField[];
-  validationHandlerName?: string;
-  submitHandlerName?: string;
+  validatorRef?: string;
+  submitterRef?: string;
 }
 
 export interface FormitivaInstance {

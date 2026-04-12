@@ -114,8 +114,8 @@ const definition = {
   name: 'RectangleRegion',
   displayName: 'Rectangle Region (via Plugin)',
   version: '1.0.0',
-  validationHandlerName: 'point2d:regionValidator',
-  submitHandlerName: 'point2d:alertSubmission',
+  validatorRef: 'point2d:regionValidator',
+  submitterRef: 'point2d:alertSubmission',
   properties: [
     {
       type: 'point2d',
@@ -123,7 +123,7 @@ const definition = {
       displayName: 'Top-Left Position',
       defaultValue: ['0', '0'],
       required: true,
-      validationHandlerName: ['point2d', 'nonNegativePoint'],
+      validatorRef: ['point2d', 'nonNegativePoint'],
     },
     {
       type: 'point2d',

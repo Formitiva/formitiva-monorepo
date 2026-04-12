@@ -7,13 +7,29 @@ import type {
   FormValidationHandler,
 } from './formitivaTypes';
 import { validateFormValues } from '../validation/validation';
-import { getFormSubmissionHandler } from './registries/submissionHandlerRegistry';
+import { getSubmitter } from './registries/submissionHandlerRegistry';
 
 export interface SubmitResult {
   success: boolean;
   message: string;
   data?: Record<string, unknown>;
   errors?: string[];
+}
+
+function getSubmitterRef(definition: FormitivaDefinition): string | undefined {
+  const legacyCompatibleDefinition = definition as FormitivaDefinition & {
+    submitHandlerName?: string;
+  };
+
+  if (typeof legacyCompatibleDefinition.submitterRef === 'string') {
+    return legacyCompatibleDefinition.submitterRef;
+  }
+
+  if (typeof legacyCompatibleDefinition.submitHandlerName === 'string') {
+    return legacyCompatibleDefinition.submitHandlerName;
+  }
+
+  return undefined;
 }
 
 export async function submitForm(
@@ -130,8 +146,9 @@ export async function submitForm(
         errors: [String(error instanceof Error ? error.message : error)],
       };
     }
-  } else if (definition && typeof definition.submitHandlerName === 'string') {
-    const submitHandler = getFormSubmissionHandler(definition.submitHandlerName);
+  } else {
+    const submitterRef = getSubmitterRef(definition);
+    const submitHandler = submitterRef ? getSubmitter(submitterRef) : null;
     if (submitHandler) {
       try {
         const result = await submitHandler(definition, instance?.name ?? null, finalMap, t);

@@ -8,9 +8,9 @@ import { useState, useCallback } from 'react';
 import { Formitiva } from '@formitiva/react';
 import {
   registerComponent,
-  registerFieldCustomValidationHandler,
-  registerFormValidationHandler,
-  registerFieldTypeValidationHandler,
+  registerFieldValidator,
+  registerFormValidator,
+  registerTypeValidator,
   StandardFieldLayout,
 } from '@formitiva/react';
 import type {
@@ -60,7 +60,7 @@ function Point2DInput({ field, value, error, disabled, onChange }: BaseInputProp
 
 registerComponent('point2d', Point2DInput);
 
-registerFieldTypeValidationHandler(
+registerTypeValidator(
   'point2d',
   (_field: DefinitionPropertyField, input: FieldValueType, t: TranslationFunction) => {
     if (!Array.isArray(input) || input.length !== 2) return t('Value must be a 2D point [x, y]');
@@ -71,7 +71,7 @@ registerFieldTypeValidationHandler(
   }
 );
 
-registerFieldCustomValidationHandler(
+registerFieldValidator(
   'point2d', 'nonNegativePoint',
   (_fieldName: string, value: FieldValueType | unknown, t: TranslationFunction) => {
     const [x, y] = value as [unknown, unknown];
@@ -90,7 +90,7 @@ const regionValidator: FormValidationHandler = (valuesMap, t) => {
   return errors.length > 0 ? errors : undefined;
 };
 
-registerFormValidationHandler('point2d:regionValidator', regionValidator);
+registerFormValidator('point2d:regionValidator', regionValidator);
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -98,9 +98,9 @@ const definition = {
   name: 'RectangleRegion',
   displayName: 'Rectangle Region',
   version: '1.0.0',
-  validationHandlerName: 'point2d:regionValidator',
+  validatorRef: 'point2d:regionValidator',
   properties: [
-    { type: 'point2d', name: 'pos2d_1', displayName: 'Top-Left Position',     defaultValue: ['0', '0'],     required: true, validationHandlerName: ['point2d', 'nonNegativePoint'] },
+    { type: 'point2d', name: 'pos2d_1', displayName: 'Top-Left Position',     defaultValue: ['0', '0'],     required: true, validatorRef: ['point2d', 'nonNegativePoint'] },
     { type: 'point2d', name: 'pos2d_2', displayName: 'Bottom-Right Position', defaultValue: ['100', '100'], required: true },
     { name: 'submitBtn', displayName: 'Save Region', type: 'button', action: 'submit' },
   ],

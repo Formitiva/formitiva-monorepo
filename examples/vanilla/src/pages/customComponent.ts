@@ -6,9 +6,9 @@
 import {
   Formitiva,
   registerComponent,
-  registerFieldTypeValidationHandler,
-  registerFieldCustomValidationHandler,
-  registerFormValidationHandler,
+  registerTypeValidator,
+  registerFieldValidator,
+  registerFormValidator,
   createStandardFieldLayout,
 } from '@formitiva/vanilla';
 import type { FieldFactory, FieldWidget, FieldValueType } from '@formitiva/vanilla';
@@ -100,7 +100,7 @@ function ensureRegistered() {
   registerComponent('point2d', point2dFactory);
 
   // Type-level validator: value must be a { x, y } object with numbers in [-100, 100]
-  registerFieldTypeValidationHandler('point2d', (_field, input) => {
+  registerTypeValidator('point2d', (_field, input) => {
     if (!input || typeof input !== 'object' || !('x' in input) || !('y' in input)) {
       return 'Please enter both X and Y coordinates.';
     }
@@ -111,7 +111,7 @@ function ensureRegistered() {
   });
 
   // Custom field validator: named handler "mustBePositive"
-  registerFieldCustomValidationHandler('point2d', 'mustBePositive', (_fieldName, value) => {
+  registerFieldValidator('point2d', 'mustBePositive', (_fieldName, value) => {
     if (!value || typeof value !== 'object') return undefined;
     const { x, y } = value as { x: unknown; y: unknown };
     if (typeof x !== 'number' || typeof y !== 'number') return undefined;
@@ -119,7 +119,7 @@ function ensureRegistered() {
   });
 
   // Form-level validator: x + y must be ≤ 100
-  registerFormValidationHandler('point2d:sumLimit', (values) => {
+  registerFormValidator('point2d:sumLimit', (values) => {
     const pt = values['location'] as { x?: number; y?: number } | undefined;
     if (!pt || typeof pt.x !== 'number' || typeof pt.y !== 'number') return undefined;
     return (pt.x + pt.y <= 100) ? undefined : ['The sum of X and Y must not exceed 100.'];
