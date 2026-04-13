@@ -39,6 +39,10 @@ jobs:
 
       # ── Packages ──────────────────────────────────────────────────────────
 
+      - name: Clean workspace (remove dist outputs)
+        run: pnpm run clean || true
+
+
       - name: Build all packages
         run: pnpm build
 
