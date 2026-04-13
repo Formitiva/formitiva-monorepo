@@ -357,6 +357,83 @@ Capabilities:
 ---
 
 
+## Development
+
+### Prerequisites
+
+- Node.js ≥ 18
+- pnpm ≥ 9 (`npm install -g pnpm`)
+
+### Install dependencies
+
+```bash
+pnpm install
+```
+
+---
+
+### Build packages
+
+Build all packages at once (respects dependency order via Turborepo):
+
+```bash
+pnpm build
+```
+
+Build individual packages:
+
+```bash
+pnpm build:core       # @formitiva/core
+pnpm build:react      # @formitiva/react
+pnpm build:vue        # @formitiva/vue
+pnpm build:angular    # @formitiva/angular
+pnpm build:vanilla    # @formitiva/vanilla
+```
+
+### Run tests
+
+```bash
+pnpm test
+```
+
+### Lint
+
+```bash
+pnpm lint
+```
+
+---
+
+### Build examples
+
+Each example app depends on the workspace packages, so build the packages first.
+
+```bash
+# React example (Vite)
+pnpm --filter formitiva-react-demo build
+
+# Vue example (Vite)
+pnpm --filter formitiva-vue-demo build
+
+# Angular example (Angular CLI)
+pnpm --filter formitiva-angular-demo build
+```
+
+Preview a built example locally:
+
+```bash
+pnpm --filter formitiva-react-demo preview
+pnpm --filter formitiva-vue-demo preview
+```
+
+Start an example in development mode (packages are rebuilt on change via `pnpm dev`):
+
+```bash
+pnpm dev
+```
+
+---
+
 ## Contributing
 
 Contributions are welcome. Open an issue or submit a pull request at:

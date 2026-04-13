@@ -1,6 +1,6 @@
 {
   "name": "@formitiva/vue",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Formitiva Vue 3 adapter — components, composables and registries",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "vue", "vue3", "composables", "typescript"],
   "repository": {
@@ -34,6 +34,7 @@
     "dev": "tsc -p tsconfig.json --watch",
     "clean": "rimraf dist",
     "lint": "tsc --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
   },

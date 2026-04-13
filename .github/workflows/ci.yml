@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      # ── Packages ──────────────────────────────────────────────────────────
+
+      - name: Build all packages
+        run: pnpm build
+
+      - name: Run tests
+        run: pnpm test
+
+      # ── Examples ──────────────────────────────────────────────────────────
+
+      - name: Build React example
+        run: pnpm --filter formitiva-react-demo build
+
+      - name: Build Vue example
+        run: pnpm --filter formitiva-vue-demo build
+
+      - name: Build Angular example
+        run: pnpm --filter formitiva-angular-demo build
+
+      - name: Build Vanilla example
+        run: pnpm --filter formitiva-vanilla-demo build
