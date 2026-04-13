@@ -34,17 +34,13 @@ jobs:
       - name: Run lint
         run: pnpm run lint
 
-      - name: Typecheck
-        run: pnpm run typecheck
-
       # ── Packages ──────────────────────────────────────────────────────────
-
-      - name: Clean workspace (remove dist outputs)
-        run: pnpm run clean || true
-
 
       - name: Build all packages
         run: pnpm build
+
+      - name: Typecheck
+        run: pnpm run typecheck
 
       - name: Run tests
         run: pnpm test
