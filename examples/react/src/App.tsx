@@ -5,20 +5,20 @@ import Parents from './pages/Parents';
 import Validation from './pages/Validation';
 import SubmitHandler from './pages/SubmitHandler';
 import Translation from './pages/Translation';
-import CustomComponent from './pages/CustomComponent';
-import Plugin from './pages/Plugin';
+import ComponentDemo from './pages/Component';
 import Visibility from './pages/Visibility';
+import ComputedValues from './pages/ComputedValues';
 
 const navItems = [
   { path: '/basic',            label: 'Basic / Quick Start',   description: 'Contact form with inline submit' },
   { path: '/groups',           label: 'Field Groups',           description: 'Organize fields into collapsible groups' },
   { path: '/parents',          label: 'Conditional Fields',     description: 'Show/hide fields based on other values' },
-  { path: '/validation',       label: 'Form Validation',        description: 'Cross-field validation handler' },
-  { path: '/submit-handler',   label: 'Submit Handler',         description: 'Named registered submission handler' },
+  { path: '/validation',       label: 'Form Validation',        description: 'Cross-field validation handler via plugin' },
+  { path: '/submit-handler',   label: 'Submit Handler',         description: 'Named submission handler via plugin' },
   { path: '/translation',      label: 'Translation / i18n',     description: 'Switch language at runtime' },
-  { path: '/custom-component', label: 'Custom Component',       description: 'Point2D field via registerComponent' },
-  { path: '/plugin',           label: 'Plugin',                 description: 'Bundle handlers into a plugin' },
+  { path: '/component',        label: 'Component',              description: 'Custom Point2D field component via plugin' },
   { path: '/visibility',     label: 'Visibility Handler',     description: 'Show/hide/disable fields via registered handlers' },
+  { path: '/computed-values', label: 'Computed Values',        description: 'Derive field values from other fields (e.g. total = qty × price)' },
 ];
 
 export default function App() {
@@ -54,9 +54,9 @@ export default function App() {
           <Route path="/validation" element={<Validation />} />
           <Route path="/submit-handler" element={<SubmitHandler />} />
           <Route path="/translation" element={<Translation />} />
-          <Route path="/custom-component" element={<CustomComponent />} />
-          <Route path="/plugin" element={<Plugin />} />
+          <Route path="/component" element={<ComponentDemo />} />
           <Route path="/visibility" element={<Visibility />} />
+          <Route path="/computed-values" element={<ComputedValues />} />
         </Routes>
       </main>
     </div>

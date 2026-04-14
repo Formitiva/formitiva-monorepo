@@ -1,8 +1,8 @@
 /**
  * validation.ts — Form Validation Example
  */
-import { Formitiva, registerFormValidator } from '@formitiva/vanilla';
-import type { FormValidationHandler } from '@formitiva/vanilla';
+import { Formitiva, registerPlugin } from '@formitiva/vanilla';
+import type { FormitivaPlugin, FormValidationHandler } from '@formitiva/vanilla';
 
 const rangeValidator: FormValidationHandler = (valuesMap, t) => {
   const lower = Number(valuesMap['lowerLimit'] ?? NaN);
@@ -12,7 +12,12 @@ const rangeValidator: FormValidationHandler = (valuesMap, t) => {
   return undefined;
 };
 
-registerFormValidator('rangeValidator', rangeValidator);
+const ValidationDemoPlugin: FormitivaPlugin = {
+  name: 'validation-demo-plugin',
+  version: '1.0.0',
+  formValidators: { rangeValidator },
+};
+registerPlugin(ValidationDemoPlugin, { conflictResolution: 'skip' });
 
 const definition = {
   name: 'rangeForm',
@@ -49,8 +54,8 @@ export default async function render(container: HTMLElement) {
     <div class="page-content">
       <h2>Form Validation</h2>
       <p class="desc">
-        Register a form-level validator with <code>registerFormValidator(name, fn)</code>,
-        then reference it via <code>validatorRef</code> in the definition.
+        Use a <code>FormitivaPlugin</code> with a <code>formValidators</code> map,
+        then reference the validator name via <code>validatorRef</code> in the definition.
         The validator receives all field values and returns an array of error strings.
       </p>
     </div>

@@ -13,9 +13,9 @@ const router = createRouter({
     { path: '/validation',     component: () => import('./pages/Validation.vue') },
     { path: '/submit-handler', component: () => import('./pages/SubmitHandler.vue') },
     { path: '/translation',    component: () => import('./pages/Translation.vue') },
-    { path: '/custom-component', component: () => import('./pages/CustomComponent.vue') },
-    { path: '/plugin',         component: () => import('./pages/Plugin.vue') },
+    { path: '/component',       component: () => import('./pages/Component.vue') },
     { path: '/visibility',     component: () => import('./pages/Visibility.vue') },
+    { path: '/computed-values', component: () => import('./pages/ComputedValues.vue') },
   ],
 });
 

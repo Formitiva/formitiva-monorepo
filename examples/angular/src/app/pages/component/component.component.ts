@@ -24,7 +24,7 @@ import type {
   TranslationFunction,
   DefinitionPropertyField,
 } from '@formitiva/angular';
-import { Point2DInputComponent } from '../custom-component/point2d-input.component';
+import { Point2DInputComponent } from './point2d-input.component'; // same folder
 
 // ── Plugin definition ─────────────────────────────────────────────────────────
 
@@ -106,7 +106,7 @@ export const PointPlugin: FormitivaPlugin = {
 // Module-level callback so the plugin's submission handler can update component state
 let pluginSubmitCallback: ((output: string) => void) | null = null;
 
-// Install the plugin (skip if already registered by the custom-component page visit)
+// Install once; conflictResolution:'skip' handles repeated lazy-load visits
 registerPlugin(PointPlugin, { conflictResolution: 'skip' });
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -146,18 +146,18 @@ const initialInstance = {
 };
 
 @Component({
-  selector: 'app-plugin',
+  selector: 'app-component-demo',
   standalone: true,
   imports: [FormitivaComponent],
   template: `
     <div class="page-content">
-      <h2>Plugin</h2>
+      <h2>Component</h2>
       <p class="desc">
-        Bundle components, validators, and submission handlers into a
-        <code>FormitivaPlugin</code> object, then call
+        Register a custom field component inside a <code>FormitivaPlugin</code> object
+        with a <code>components</code> map, then call
         <code>registerPlugin(plugin, &#123; conflictResolution: 'skip' &#125;)</code>.
-        This page uses the same <em>Point2D</em> feature as the previous example,
-        but installed as a self-contained plugin rather than individual registrations.
+        Any field with <code>type: 'point2d'</code> will render the <em>Point2DInputComponent</em>.
+        Validators and a submission handler are bundled in the same plugin.
       </p>
 
       <fv-formitiva
@@ -172,7 +172,7 @@ const initialInstance = {
     </div>
   `,
 })
-export class PluginComponent {
+export class ComponentDemoComponent {
   definition = definition;
   initialInstance = initialInstance;
   lastSubmission = signal('');

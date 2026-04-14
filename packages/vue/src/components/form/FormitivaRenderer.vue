@@ -18,6 +18,7 @@ import {
   updateVisibilityMap,
   updateVisibilityBasedOnSelection,
   applyVisibilityRefs,
+  applyComputedRefs,
 } from '@formitiva/core';
 import type { FieldVisibilityStatus } from '@formitiva/core';
 import { renameDuplicatedGroups, groupConsecutiveFields } from '@formitiva/core';
@@ -121,6 +122,10 @@ const initialize = () => {
 
   updatedProperties.value = updatedProps;
   fieldMap.value = nameToField;
+  // Apply computed value handlers before setting initial state
+  const initComputed = applyComputedRefs(updatedProps, valuesMapInit, t.value);
+  Object.assign(valuesMapInit, initComputed);
+
   valuesMap.value = valuesMapInit;
   visibility.value = updateVisibilityMap(updatedProps, valuesMapInit, vis, nameToField);
   instanceName.value = props.instance.name;
@@ -143,8 +148,10 @@ const handleChange = (name: string, value: FieldValueType) => {
   submissionMessage.value = null;
   submissionSuccess.value = null;
 
-  // Update values map
-  const newValues = { ...valuesMap.value, [name]: value };
+  // Update values map; merge in any computed values that depend on the changed field
+  const baseValues = { ...valuesMap.value, [name]: value };
+  const computedVals = applyComputedRefs(updatedProperties.value, baseValues, t.value);
+  const newValues = Object.keys(computedVals).length > 0 ? { ...baseValues, ...computedVals } : baseValues;
   valuesMap.value = newValues;
 
   // Update visibility

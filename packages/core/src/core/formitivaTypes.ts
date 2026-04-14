@@ -44,6 +44,9 @@ export interface DefinitionPropertyField {
   // Custom visibility handler reference
   visibilityRef?: string;
 
+  // Computed value handler reference
+  computedRef?: string;
+
   // Unit field properties
   dimension?: string; // for 'unit' type fields, e.g. 'length', 'angle', etc.
   defaultUnit?: string; // for 'unit' type fields

@@ -1,8 +1,8 @@
 /**
- * plugin.ts — Plugin System Example
+ * component.ts — Custom Field Component Example
  *
- * Bundles the Point2D field widget into a FormitivaPlugin and registers it
- * with registerPlugin({ conflictResolution: 'skip' }).
+ * Registers a custom Point2D field widget inside a FormitivaPlugin with a
+ * components map, then installs it with registerPlugin({ conflictResolution: 'skip' }).
  */
 import {
   Formitiva,
@@ -13,7 +13,7 @@ import type { FieldFactory, FieldWidget, FormitivaPlugin, FieldValueType } from 
 import type { FormitivaInstance } from '@formitiva/vanilla';
 
 // ------------------------------------------------------------------
-// Point2D field factory (same implementation as customComponent.ts)
+// Point2D field factory
 // ------------------------------------------------------------------
 const point2dFactory: FieldFactory = (field, ctx, onChange, _onError, initialValue, _initialError, disabled) => {
   const layout = createStandardFieldLayout(field, ctx);
@@ -167,12 +167,12 @@ export default async function render(container: HTMLElement) {
 
   container.innerHTML = `
     <div class="page-content">
-      <h2>Plugin System</h2>
+      <h2>Component</h2>
       <p class="desc">
-        Bundle components, validators, and submission handlers into a
-        <code>FormitivaPlugin</code> object and register it with
+        Register a custom field widget inside a <code>FormitivaPlugin</code> object
+        with a <code>components</code> map, then install it with
         <code>registerPlugin(plugin, { conflictResolution: 'skip' })</code>.
-        The plugin is registered once at module load; subsequent navigations reuse it.
+        Any field with <code>type: 'point2d'</code> renders your custom widget.
       </p>
       <div id="form-container"></div>
       <div id="result-box" class="result-box" style="display:none"></div>

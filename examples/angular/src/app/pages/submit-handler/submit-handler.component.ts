@@ -15,8 +15,9 @@
  * current values are displayed after each submission.
  */
 import { Component, signal } from '@angular/core';
-import { FormitivaComponent, registerSubmitter } from '@formitiva/angular';
+import { FormitivaComponent, registerPlugin } from '@formitiva/angular';
 import type {
+  FormitivaPlugin,
   FormSubmissionHandler,
   FormitivaDefinition,
   FormitivaInstance,
@@ -31,25 +32,28 @@ import type {
 //
 let _onSubmitted: ((instance: FormitivaInstance) => void) | null = null;
 
-registerSubmitter(
-  'exampleSubmitHandler',
-  (
-    definition: FormitivaDefinition | Record<string, unknown>,
-    instanceName: string | null,
-    valuesMap: Record<string, FieldValueType | unknown>,
-    _t: TranslationFunction
-  ): string[] | undefined => {
-    const newInstance: FormitivaInstance = {
-      name: instanceName ?? 'unnamed',
-      definition: (definition as FormitivaDefinition).name ?? '',
-      version: (definition as FormitivaDefinition).version ?? '1.0.0',
-      values: valuesMap as Record<string, FieldValueType>,
-    };
-    _onSubmitted?.(newInstance);
-    return undefined; // no errors
-  }
-);
-// ─────────────────────────────────────────────────────────────────────────────
+const SubmitDemoPlugin: FormitivaPlugin = {
+  name: 'submit-demo-plugin',
+  version: '1.0.0',
+  submissionHandlers: {
+    exampleSubmitHandler: (
+      definition: FormitivaDefinition | Record<string, unknown>,
+      instanceName: string | null,
+      valuesMap: Record<string, FieldValueType | unknown>,
+      _t: TranslationFunction
+    ): string[] | undefined => {
+      const newInstance: FormitivaInstance = {
+        name: instanceName ?? 'unnamed',
+        definition: (definition as FormitivaDefinition).name ?? '',
+        version: (definition as FormitivaDefinition).version ?? '1.0.0',
+        values: valuesMap as Record<string, FieldValueType>,
+      };
+      _onSubmitted?.(newInstance);
+      return undefined;
+    },
+  },
+};
+registerPlugin(SubmitDemoPlugin, { conflictResolution: 'skip' });
 
 const definition = {
   name: 'submit_handler_app',
@@ -100,10 +104,9 @@ const initialInstance: FormitivaInstance = {
     <div class="page-content">
       <h2>Named Submit Handler</h2>
       <p class="desc">
-        Call <code>registerSubmitter(name, fn)</code> once (e.g. in <code>main.ts</code>
-        or an <code>APP_INITIALIZER</code>), then reference the name via
-        <code>submitterRef</code> in the definition. Formitiva invokes the handler on submit.
-        The serialised instance is shown below after each submission.
+        Use a <code>FormitivaPlugin</code> with a <code>submissionHandlers</code> map,
+        then reference the handler name via <code>submitterRef</code> in the definition.
+        Formitiva invokes the handler on submit; the serialised instance is shown below.
       </p>
 
       <fv-formitiva

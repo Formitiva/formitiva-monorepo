@@ -35,7 +35,7 @@ export type {
   InstanceLoadResult,
 } from './core/formitivaModel';
 
-export { updateVisibilityMap, updateVisibilityBasedOnSelection, applyVisibilityRefs } from './core/fieldVisibility';
+export { updateVisibilityMap, updateVisibilityBasedOnSelection, applyVisibilityRefs, applyComputedRefs } from './core/fieldVisibility';
 
 export { submitForm } from './core/submitForm';
 export type { SubmitResult } from './core/submitForm';
@@ -71,6 +71,15 @@ export {
   listVisibilityHandlers,
 } from './core/registries/visibilityHandlerRegistry';
 export type { VisibilityHandler } from './core/registries/visibilityHandlerRegistry';
+
+export {
+  registerComputedValueHandler,
+  getComputedValueHandler,
+  hasComputedValueHandler,
+  unregisterComputedValueHandler,
+  listComputedValueHandlers,
+} from './core/registries/computedValueHandlerRegistry';
+export type { ComputedValueHandler } from './core/registries/computedValueHandlerRegistry';
 
 export {
   registerFormValidator,

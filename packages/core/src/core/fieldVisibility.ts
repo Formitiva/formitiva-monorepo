@@ -1,5 +1,6 @@
 import type { DefinitionPropertyField, FieldValueType, FieldVisibilityStatus, TranslationFunction } from './formitivaTypes';
 import { getVisibilityHandler } from './registries/visibilityHandlerRegistry';
+import { getComputedValueHandler } from './registries/computedValueHandlerRegistry';
 
 const showChildrenRecursively = (
   parentName: string,
@@ -132,6 +133,33 @@ export const applyVisibilityRefs = (
       const handler = getVisibilityHandler(field.visibilityRef);
       if (handler) {
         result[field.name] = handler(field.name, values, t);
+      }
+    }
+  }
+  return result;
+};
+
+/**
+ * Apply computedRef handlers for all fields that declare one.
+ * Returns a map of field name → computed FieldValueType for each field whose
+ * registered handler was found and invoked and returned a non-undefined value.
+ * Call after any value change and merge results back into the values map so
+ * dependent fields always show up-to-date derived values.
+ */
+export const applyComputedRefs = (
+  fields: DefinitionPropertyField[],
+  values: Record<string, FieldValueType>,
+  t: TranslationFunction,
+): Record<string, FieldValueType> => {
+  const result: Record<string, FieldValueType> = {};
+  for (const field of fields) {
+    if (field.computedRef) {
+      const handler = getComputedValueHandler(field.computedRef);
+      if (handler) {
+        const computed = handler(field.name, values, t);
+        if (computed !== undefined) {
+          result[field.name] = computed;
+        }
       }
     }
   }

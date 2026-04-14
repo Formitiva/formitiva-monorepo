@@ -18,6 +18,7 @@ import {
   updateVisibilityMap,
   updateVisibilityBasedOnSelection,
   applyVisibilityRefs,
+  applyComputedRefs,
 } from '@formitiva/core';
 import type { FieldVisibilityStatus } from '@formitiva/core';
 import { renameDuplicatedGroups, groupConsecutiveFields } from '@formitiva/core';
@@ -91,6 +92,10 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
   Object.keys(instance.values).forEach(key => {
     if (nameToField[key] !== undefined) valuesMap[key] = instance.values[key];
   });
+
+  // Apply computed value handlers before setting initial state
+  const initComputed = applyComputedRefs(updatedProperties, valuesMap, t);
+  Object.assign(valuesMap, initComputed);
 
   // Visibility
   const vis: Record<string, boolean> = {};
@@ -166,6 +171,24 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
     if (!field) return;
     valuesMap[name] = value;
     submMsg.update(null, null);
+
+    // Apply computed value handlers and update affected widgets
+    const computedVals = applyComputedRefs(updatedProperties, valuesMap, t);
+    const computedChanged = Object.keys(computedVals).length > 0 &&
+      Object.entries(computedVals).some(([k, v]) => valuesMap[k] !== v);
+    if (computedChanged) {
+      Object.assign(valuesMap, computedVals);
+      Object.entries(computedVals).forEach(([cName, cVal]) => {
+        const cEntry = activeEntries.find(e => e.type === 'field' && e.name === cName);
+        if (cEntry && cEntry.type === 'field') {
+          (cEntry.result as FieldRendererResult).update(
+            cVal,
+            errorsMap[cName] ?? null,
+            Boolean(nameToField[cName]?.disabled),
+          );
+        }
+      });
+    }
 
     // Always update the DOM widget for the changed field so button handlers
     // that externally set a field's value are reflected immediately.

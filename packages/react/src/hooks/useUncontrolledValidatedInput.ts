@@ -56,11 +56,26 @@ export function useUncontrolledValidatedInput<
 
   // Sync external value and validate when not focused
   React.useEffect(() => {
+    // Helper: get the DOM element for a given index, falling back to
+    // inputRef.current for index 0 when fields use `ref={inputRef}` directly
+    // instead of `ref={getInputRef(0)}` (which would populate inputElementsRef).
+    const getEl = (i: number): T | null =>
+      inputElementsRef.current[i] ?? (i === 0 ? inputRef.current : null);
+
     if (disabled) {
       if (prevErrorRef.current !== null) {
         prevErrorRef.current = null;
         onErrorRef.current?.(null);
         setError(null);
+      }
+      // Sync DOM value for disabled/computed fields so externally-driven value
+      // changes (e.g. computedRef) are reflected in the uncontrolled input.
+      const strValues = normalizeValueToArray(value);
+      for (let i = 0; i < normalizedCount; i += 1) {
+        const el = getEl(i);
+        if (el && el.value !== strValues[i]) {
+          el.value = strValues[i];
+        }
       }
       return;
     }
@@ -68,7 +83,9 @@ export function useUncontrolledValidatedInput<
     const strValues = normalizeValueToArray(value);
     const isFocused =
       typeof document !== "undefined" &&
-      inputElementsRef.current.slice(0, normalizedCount).some((el) => document.activeElement === el);
+      Array.from({ length: normalizedCount }, (_, i) => getEl(i)).some(
+        (el) => el !== null && document.activeElement === el
+      );
 
     if (!isFocused) {
       const valueForValidate = (normalizedCount === 1 ? strValues[0] : strValues) as TValue;
@@ -81,7 +98,7 @@ export function useUncontrolledValidatedInput<
 
       // sync DOM values for all managed inputs
       for (let i = 0; i < normalizedCount; i += 1) {
-        const el = inputElementsRef.current[i];
+        const el = getEl(i);
         if (el && el.value !== strValues[i]) {
           el.value = strValues[i];
         }

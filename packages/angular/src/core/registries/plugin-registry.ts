@@ -9,12 +9,14 @@ import {
 } from '@formitiva/core';
 import { registerSubmitter } from '@formitiva/core';
 import { registerVisibilityHandler } from '@formitiva/core';
+import { registerComputedValueHandler } from '@formitiva/core';
 import type {
   FieldCustomValidationHandler,
   FieldTypeValidationHandler,
   FormValidationHandler,
   FormSubmissionHandler,
   VisibilityHandler,
+  ComputedValueHandler,
 } from '@formitiva/core';
 
 export type ConflictResolution = 'error' | 'warn' | 'override' | 'skip';
@@ -33,6 +35,7 @@ export interface FormitivaPlugin {
   formValidators?: Record<string, FormValidationHandler>;
   submissionHandlers?: Record<string, FormSubmissionHandler>;
   visibilityHandlers?: Record<string, VisibilityHandler>;
+  computedHandlers?: Record<string, ComputedValueHandler>;
   setup?: () => void;
   cleanup?: () => void;
 }
@@ -108,6 +111,12 @@ export function registerPlugin(
   if (plugin.visibilityHandlers) {
     for (const [name, fn] of Object.entries(plugin.visibilityHandlers)) {
       registerVisibilityHandler(name, fn);
+    }
+  }
+
+  if (plugin.computedHandlers) {
+    for (const [name, fn] of Object.entries(plugin.computedHandlers)) {
+      registerComputedValueHandler(name, fn);
     }
   }
 

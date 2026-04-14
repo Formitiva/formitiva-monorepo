@@ -16,6 +16,7 @@ import {
   updateVisibilityMap,
   updateVisibilityBasedOnSelection,
   applyVisibilityRefs,
+  applyComputedRefs,
 } from '@formitiva/core';
 import type { FieldVisibilityStatus } from '@formitiva/core';
 import { renameDuplicatedGroups, groupConsecutiveFields } from '@formitiva/core';
@@ -151,7 +152,9 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
 
     // Initialize visibility map
     const vis = Object.fromEntries(updatedProps.map((field) => [field.name, false]));
-
+      // Apply computed value handlers before setting initial state
+      const initComputed = applyComputedRefs(updatedProps, valuesMapInit, t);
+      Object.assign(valuesMapInit, initComputed);
     // Defer state updates to avoid synchronous setState inside effect
     const raf = requestAnimationFrame(() => {
       setUpdatedProperties(updatedProps);
@@ -215,8 +218,13 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
       // float array value: a string which joins floats with commas
       // We need to parse them back to number or number[] when submitting the form
       setValuesMap((prevValues) => {
-        const newValues = { ...prevValues, [name]: value };
-        return newValues;
+        const baseValues = { ...prevValues, [name]: value };
+        const computedVals = applyComputedRefs(
+          Object.values(fieldMap) as import('@formitiva/core').DefinitionPropertyField[],
+          baseValues,
+          t
+        );
+        return Object.keys(computedVals).length > 0 ? { ...baseValues, ...computedVals } : baseValues;
       });
 
       // Update visibility separately to ensure we're using the latest values

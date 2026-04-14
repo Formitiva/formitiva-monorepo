@@ -5,12 +5,12 @@ const navItems = [
   { path: '/basic',            label: 'Basic / Quick Start',   description: 'Contact form with inline submit' },
   { path: '/groups',           label: 'Field Groups',           description: 'Organize fields into collapsible groups' },
   { path: '/parents',          label: 'Conditional Fields',     description: 'Show/hide fields based on other values' },
-  { path: '/validation',       label: 'Form Validation',        description: 'Cross-field validation handler' },
-  { path: '/submit-handler',   label: 'Submit Handler',         description: 'Named registered submission handler' },
+  { path: '/validation',       label: 'Form Validation',        description: 'Cross-field validation handler via plugin' },
+  { path: '/submit-handler',   label: 'Submit Handler',         description: 'Named submission handler via plugin' },
   { path: '/translation',      label: 'Translation / i18n',     description: 'Switch language at runtime' },
-  { path: '/custom-component', label: 'Custom Component',       description: 'Point2D field via registerComponent' },
-  { path: '/plugin',           label: 'Plugin',                 description: 'Bundle handlers into a plugin' },
+  { path: '/component',        label: 'Component',              description: 'Custom Point2D field component via plugin' },
   { path: '/visibility',     label: 'Visibility Handler',     description: 'Show/hide/disable fields via registered handlers' },
+  { path: '/computed-values', label: 'Computed Values',        description: 'Derive field values from other fields (e.g. total = qty × price)' },
 ];
 </script>
 

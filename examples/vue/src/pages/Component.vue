@@ -88,13 +88,13 @@ onUnmounted(() => { pluginSubmitCallback = null; });
 
 <template>
   <div class="page-content">
-    <h2>Plugin</h2>
+    <h2>Component</h2>
     <p class="desc">
-      Bundle components, validators, and submission handlers into a
-      <code>FormitivaPlugin</code> object, then call
+      Register a custom field component inside a <code>FormitivaPlugin</code> object
+      with a <code>components</code> map, then call
       <code>registerPlugin(plugin, { conflictResolution: 'skip' })</code>.
-      This page uses the same <em>Point2D</em> feature as the previous example,
-      but installed as a self-contained plugin rather than individual registrations.
+      Any field with <code>type: 'point2d'</code> will render your custom <em>Point2DInput</em>.
+      Validators and a submission handler are bundled in the same plugin.
     </p>
 
     <Formitiva

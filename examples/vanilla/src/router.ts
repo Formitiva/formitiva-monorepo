@@ -12,9 +12,9 @@ const pages: Record<string, () => Promise<{ default: PageRenderer }>> = {
   'validation':       () => import('./pages/validation'),
   'submit-handler':   () => import('./pages/submitHandler'),
   'translation':      () => import('./pages/translation'),
-  'custom-component': () => import('./pages/customComponent'),
-  'plugin':           () => import('./pages/plugin'),
+  'component':        () => import('./pages/component'),
   'visibility':       () => import('./pages/visibility'),
+  'computed-values':  () => import('./pages/computedValues'),
 };
 
 class Router {

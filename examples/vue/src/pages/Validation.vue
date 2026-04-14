@@ -3,9 +3,8 @@
  * Validation.vue — Form Validation Example
  */
 import { ref } from 'vue';
-import { Formitiva } from '@formitiva/vue';
-import { registerFormValidator } from '@formitiva/vue';
-import type { FormValidationHandler, FormSubmissionHandler } from '@formitiva/vue';
+import { Formitiva, registerPlugin } from '@formitiva/vue';
+import type { FormitivaPlugin, FormValidationHandler, FormSubmissionHandler } from '@formitiva/vue';
 
 const rangeValidator: FormValidationHandler = (valuesMap, t) => {
   const lower = Number(valuesMap['lowerLimit'] ?? NaN);
@@ -15,7 +14,12 @@ const rangeValidator: FormValidationHandler = (valuesMap, t) => {
   return undefined;
 };
 
-registerFormValidator('rangeValidator', rangeValidator);
+const ValidationDemoPlugin: FormitivaPlugin = {
+  name: 'validation-demo-plugin',
+  version: '1.0.0',
+  formValidators: { rangeValidator },
+};
+registerPlugin(ValidationDemoPlugin, { conflictResolution: 'skip' });
 
 const definition = {
   name: 'rangeForm',
@@ -47,8 +51,8 @@ const handleSubmit: FormSubmissionHandler = (_def, _instanceName, values, _t) =>
   <div class="page-content">
     <h2>Form Validation</h2>
     <p class="desc">
-      Register a form-level validator with <code>registerFormValidator(name, fn)</code>,
-      then reference it via <code>validatorRef</code> in the definition.
+      Use a <code>FormitivaPlugin</code> with a <code>formValidators</code> map,
+      then reference the validator name via <code>validatorRef</code> in the definition.
       The validator receives all field values and returns an array of error strings (or
       <code>undefined</code> for no errors).
     </p>

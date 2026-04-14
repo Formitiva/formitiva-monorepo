@@ -17,6 +17,7 @@ import {
   updateVisibilityMap,
   updateVisibilityBasedOnSelection,
   applyVisibilityRefs,
+  applyComputedRefs,
 } from '@formitiva/core';
 import type { FieldVisibilityStatus } from '@formitiva/core';
 import { renameDuplicatedGroups, groupConsecutiveFields } from '@formitiva/core';
@@ -196,7 +197,9 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
 
     const vis = Object.fromEntries(updatedProps.map(f => [f.name, false]));
     const updatedVis = updateVisibilityMap(updatedProps, valuesMapInit, vis, nameToField);
-
+      // Apply computed value handlers before setting initial state
+      const initComputed = applyComputedRefs(updatedProps, valuesMapInit, this.ctx.t());
+      if (Object.keys(initComputed).length > 0) Object.assign(valuesMapInit, initComputed);
     this.rafHandle = requestAnimationFrame(() => {
       this.updatedProperties = updatedProps;
       this.fieldMap = nameToField;
@@ -245,7 +248,11 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
     this.submissionMessage.set(null);
     this.submissionSuccess.set(null);
 
-    this.valuesMap.update(prev => ({ ...prev, [name]: value }));
+    this.valuesMap.update(prev => {
+      const baseValues = { ...prev, [name]: value };
+      const computedVals = applyComputedRefs(Object.values(this.fieldMap), baseValues, this.ctx.t());
+      return Object.keys(computedVals).length > 0 ? { ...baseValues, ...computedVals } : baseValues;
+    });
     this.ctx.valuesMap.set(this.valuesMap());
 
     const hasChildren = field.children && Object.keys(field.children).length > 0;

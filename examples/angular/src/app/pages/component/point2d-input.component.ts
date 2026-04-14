@@ -1,49 +1,8 @@
-/**
- * point2d-input.component.ts — Custom Field Component Demo
- *
- * Implements a `point2d` field type: two paired numeric inputs for X and Y.
- *
- * Key patterns shown:
- *  - Extend `BaseFieldComponent<T>` to integrate with Formitiva's validation
- *    pipeline and field validation mode (onEdit / onBlur / onSubmission).
- *  - Read `this.field`, `this.value`, `this.error`, `this.disabled` from the
- *    base class @Input properties.
- *  - Emit value changes via `this.emitChange(newValue)`.
- *  - Drive error display through `this.updateError(msg)` / `this.errorSig()`.
- *  - Register a type-level validation handler with
- *    `registerTypeValidator` so any `point2d` field is
- *    automatically validated.
- */
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
   BaseFieldComponent,
-  registerTypeValidator,
   StandardFieldLayoutComponent,
 } from '@formitiva/angular';
-import type {
-  DefinitionPropertyField,
-  FieldValueType,
-  TranslationFunction,
-} from '@formitiva/angular';
-
-// ── Type-level validator (runs according to fieldValidationMode) ──────────────
-registerTypeValidator(
-  'point2d',
-  (
-    _field: DefinitionPropertyField,
-    input: FieldValueType,
-    t: TranslationFunction
-  ) => {
-    if (!Array.isArray(input) || input.length !== 2) {
-      return t('Value must be a 2D point [x, y]');
-    }
-    const [x, y] = input;
-    if (!Number.isFinite(Number(x))) return t('X must be a valid number');
-    if (!Number.isFinite(Number(y))) return t('Y must be a valid number');
-    return undefined;
-  }
-);
-// ─────────────────────────────────────────────────────────────────────────────
 
 export type Point2DValue = [string, string];
 

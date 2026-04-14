@@ -23,6 +23,10 @@ import {
   registerVisibilityHandler,
   getVisibilityHandler,
 } from '@formitiva/core';
+import {
+  registerComputedValueHandler,
+  getComputedValueHandler,
+} from '@formitiva/core';
 
 import type {
   FieldCustomValidationHandler,
@@ -30,6 +34,7 @@ import type {
   FormValidationHandler,
   FormSubmissionHandler,
   VisibilityHandler,
+  ComputedValueHandler,
 } from '@formitiva/core';
 
 export type ConflictResolution = 'error' | 'warn' | 'override' | 'skip';
@@ -40,7 +45,7 @@ export interface PluginRegistrationOptions {
 }
 
 export interface PluginConflict {
-  type: 'component' | 'fieldCustomValidator' | 'fieldTypeValidator' | 'formValidator' | 'submissionHandler' | 'visibilityHandler' | 'plugin';
+  type: 'component' | 'fieldCustomValidator' | 'fieldTypeValidator' | 'formValidator' | 'submissionHandler' | 'visibilityHandler' | 'computedHandler' | 'plugin';
   name: string;
   existingPlugin: string;
   newPlugin: string;
@@ -56,6 +61,7 @@ export interface FormitivaPlugin {
   formValidators?: Record<string, FormValidationHandler>;
   submissionHandlers?: Record<string, FormSubmissionHandler>;
   visibilityHandlers?: Record<string, VisibilityHandler>;
+  computedHandlers?: Record<string, ComputedValueHandler>;
   setup?: () => void;
   cleanup?: () => void;
 }
@@ -69,6 +75,7 @@ const registrationOwnership = {
   formValidators: new Map<string, string>(),
   submissionHandlers: new Map<string, string>(),
   visibilityHandlers: new Map<string, string>(),
+  computedHandlers: new Map<string, string>(),
 };
 
 function shouldRegister(
@@ -159,6 +166,15 @@ function handleConflicts(plugin: FormitivaPlugin): PluginConflict[] {
       }
     }
   }
+  if (plugin.computedHandlers) {
+    for (const name of Object.keys(plugin.computedHandlers)) {
+      const existingHandler = getComputedValueHandler(name);
+      const existingPlugin = registrationOwnership.computedHandlers.get(name);
+      if (existingHandler && existingPlugin && existingPlugin !== plugin.name) {
+        conflicts.push({ type: 'computedHandler', name, existingPlugin, newPlugin: plugin.name });
+      }
+    }
+  }
   return conflicts;
 }
 
@@ -227,6 +243,15 @@ export function registerPlugin(plugin: FormitivaPlugin, options?: PluginRegistra
       }
     }
   }
+  if (plugin.computedHandlers) {
+    for (const [name, handler] of Object.entries(plugin.computedHandlers)) {
+      const conflict = conflicts.find(c => c.type === 'computedHandler' && c.name === name) ?? null;
+      if (shouldRegister(conflict, strategy, options?.onConflict)) {
+        registrationOwnership.computedHandlers.set(name, plugin.name);
+        registerComputedValueHandler(name, handler);
+      }
+    }
+  }
   if (plugin.setup) plugin.setup();
   installedPlugins.set(plugin.name, plugin);
 }
@@ -249,6 +274,7 @@ export function unregisterPlugin(pluginName: string, removeRegistrations = false
     if (plugin.fieldTypeValidators) { for (const n of Object.keys(plugin.fieldTypeValidators)) registrationOwnership.fieldTypeValidators.delete(n); }
     if (plugin.submissionHandlers) { for (const n of Object.keys(plugin.submissionHandlers)) registrationOwnership.submissionHandlers.delete(n); }
     if (plugin.visibilityHandlers) { for (const n of Object.keys(plugin.visibilityHandlers)) registrationOwnership.visibilityHandlers.delete(n); }
+    if (plugin.computedHandlers) { for (const n of Object.keys(plugin.computedHandlers)) registrationOwnership.computedHandlers.delete(n); }
   }
   installedPlugins.delete(pluginName);
   return true;

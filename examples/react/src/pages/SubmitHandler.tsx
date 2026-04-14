@@ -6,30 +6,34 @@
  * via `submitterRef` in the definition.
  */
 import { useState, useEffect } from 'react';
-import { Formitiva, registerSubmitter } from '@formitiva/react';
-import type { FormitivaDefinition, FormitivaInstance, FieldValueType, TranslationFunction } from '@formitiva/react';
+import { Formitiva, registerPlugin } from '@formitiva/react';
+import type { FormitivaPlugin, FormitivaDefinition, FormitivaInstance, FieldValueType, TranslationFunction } from '@formitiva/react';
 
 // Module-level callback so the registered handler can update component state
 let _onSubmitted: ((instance: FormitivaInstance) => void) | null = null;
 
-registerSubmitter(
-  'exampleSubmitHandler',
-  (
-    definition: FormitivaDefinition | Record<string, unknown>,
-    instanceName: string | null,
-    valuesMap: Record<string, FieldValueType | unknown>,
-    _t: TranslationFunction
-  ): string[] | undefined => {
-    const newInstance: FormitivaInstance = {
-      name: instanceName ?? 'unnamed',
-      definition: (definition as FormitivaDefinition).name ?? '',
-      version: (definition as FormitivaDefinition).version ?? '1.0.0',
-      values: valuesMap as Record<string, FieldValueType>,
-    };
-    _onSubmitted?.(newInstance);
-    return undefined;
-  }
-);
+const SubmitDemoPlugin: FormitivaPlugin = {
+  name: 'submit-demo-plugin',
+  version: '1.0.0',
+  submissionHandlers: {
+    exampleSubmitHandler: (
+      definition: FormitivaDefinition | Record<string, unknown>,
+      instanceName: string | null,
+      valuesMap: Record<string, FieldValueType | unknown>,
+      _t: TranslationFunction
+    ): string[] | undefined => {
+      const newInstance: FormitivaInstance = {
+        name: instanceName ?? 'unnamed',
+        definition: (definition as FormitivaDefinition).name ?? '',
+        version: (definition as FormitivaDefinition).version ?? '1.0.0',
+        values: valuesMap as Record<string, FieldValueType>,
+      };
+      _onSubmitted?.(newInstance);
+      return undefined;
+    },
+  },
+};
+registerPlugin(SubmitDemoPlugin, { conflictResolution: 'skip' });
 
 const definition = {
   name: 'submit_handler_app',
@@ -66,9 +70,9 @@ export default function SubmitHandler() {
     <div className="page-content">
       <h2>Named Submit Handler</h2>
       <p className="desc">
-        Call <code>registerSubmitter(name, fn)</code> once, then reference the name via{' '}
-        <code>submitterRef</code> in the definition. Formitiva invokes the handler on submit.
-        The serialised instance is shown below after each submission.
+        Use a <code>FormitivaPlugin</code> with a <code>submissionHandlers</code> map,
+        then reference the handler name via <code>submitterRef</code> in the definition.
+        Formitiva invokes the handler on submit; the serialised instance is shown below.
       </p>
 
       <Formitiva

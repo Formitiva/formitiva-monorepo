@@ -12,8 +12,8 @@
  * lowerLimit < upperLimit before the form can submit.
  */
 import { Component, signal } from '@angular/core';
-import { FormitivaComponent, registerFormValidator } from '@formitiva/angular';
-import type { FormValidationHandler, FormSubmissionHandler } from '@formitiva/angular';
+import { FormitivaComponent, registerPlugin } from '@formitiva/angular';
+import type { FormitivaPlugin, FormValidationHandler, FormSubmissionHandler } from '@formitiva/angular';
 
 // ── Register the form-level validation handler (once, at module load) ─────────
 // The handler is referenced by name in the definition's `validatorRef`.
@@ -30,7 +30,12 @@ const rangeValidator: FormValidationHandler = (valuesMap, t) => {
   return undefined;
 };
 
-registerFormValidator('rangeValidator', rangeValidator);
+const ValidationDemoPlugin: FormitivaPlugin = {
+  name: 'validation-demo-plugin',
+  version: '1.0.0',
+  formValidators: { rangeValidator },
+};
+registerPlugin(ValidationDemoPlugin, { conflictResolution: 'skip' });
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -76,8 +81,8 @@ const definition = {
     <div class="page-content">
       <h2>Form Validation</h2>
       <p class="desc">
-        Register a form-level validator with <code>registerFormValidator(name, fn)</code>,
-        then reference it via <code>validatorRef</code> in the definition.
+        Use a <code>FormitivaPlugin</code> with a <code>formValidators</code> map,
+        then reference the validator name via <code>validatorRef</code> in the definition.
         The validator receives all field values and returns an array of error strings (or
         <code>undefined</code> for no errors).
       </p>

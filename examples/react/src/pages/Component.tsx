@@ -1,7 +1,7 @@
 /**
- * Plugin.tsx — Plugin Example
+ * Component.tsx — Custom Field Component Example
  *
- * Demonstrates bundling multiple registrations into a single
+ * Demonstrates registering a custom field component (Point2D) inside a
  * `FormitivaPlugin` object and installing it with `registerPlugin()`.
  */
 import { useState, useEffect } from 'react';
@@ -16,7 +16,7 @@ import type {
   BaseInputProps,
 } from '@formitiva/react';
 
-// ── Point2D component (same as CustomComponent page) ─────────────────────────
+// ── Point2D component ───────────────────────────────────────────────────────
 function Point2DInput({ field, value, error, disabled, onChange }: BaseInputProps) {
   const [x, y] = Array.isArray(value) ? [String(value[0] ?? ''), String(value[1] ?? '')] : ['', ''];
   const emit = (newX: string, newY: string) => {
@@ -105,7 +105,7 @@ const initialInstance = {
   values: { pos2d_1: ['10', '20'], pos2d_2: ['100', '200'] },
 };
 
-export default function Plugin() {
+export default function ComponentDemo() {
   const [lastSubmission, setLastSubmission] = useState('');
 
   useEffect(() => {
@@ -115,9 +115,9 @@ export default function Plugin() {
 
   return (
     <div className="page-content">
-      <h2>Plugin</h2>
+      <h2>Component</h2>
       <p className="desc">
-        Bundle components, validators, and submission handlers into a{' '}
+        Register a custom field component inside a{' '}
         <code>FormitivaPlugin</code> object, then call{' '}
         <code>registerPlugin(plugin, {'{ conflictResolution: \'skip\' }'})</code>.
         This page uses the same <em>Point2D</em> feature as the previous example,
