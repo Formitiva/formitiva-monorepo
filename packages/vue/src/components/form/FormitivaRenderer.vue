@@ -17,7 +17,9 @@ import { InstanceName } from '../layout/LayoutComponents';
 import {
   updateVisibilityMap,
   updateVisibilityBasedOnSelection,
+  applyVisibilityRefs,
 } from '@formitiva/core';
+import type { FieldVisibilityStatus } from '@formitiva/core';
 import { renameDuplicatedGroups, groupConsecutiveFields } from '@formitiva/core';
 import { submitForm } from '@formitiva/core';
 import { validateField } from '@formitiva/core';
@@ -54,6 +56,8 @@ const updatedProperties = ref<DefinitionPropertyField[]>([]);
 const fieldMap = ref<Record<string, DefinitionPropertyField>>({});
 const valuesMap = ref<Record<string, FieldValueType>>({});
 const visibility = ref<Record<string, boolean>>({});
+const visibilityRefStatus = ref<Record<string, FieldVisibilityStatus>>({});
+const disabledByRef = ref<Record<string, boolean>>({});
 const errors = ref<Record<string, string>>({});
 const submissionMessage = ref<string | null>(null);
 const submissionSuccess = ref<boolean | null>(null);
@@ -120,6 +124,12 @@ const initialize = () => {
   valuesMap.value = valuesMapInit;
   visibility.value = updateVisibilityMap(updatedProps, valuesMapInit, vis, nameToField);
   instanceName.value = props.instance.name;
+
+  const refStatus = applyVisibilityRefs(updatedProps, valuesMapInit, t.value);
+  visibilityRefStatus.value = refStatus;
+  disabledByRef.value = Object.fromEntries(
+    Object.entries(refStatus).map(([name, s]) => [name, s === 'disable'])
+  );
 };
 
 watch([() => properties, () => props.instance, () => props.definition], initialize, { immediate: true });
@@ -152,6 +162,12 @@ const handleChange = (name: string, value: FieldValueType) => {
       value
     );
   }
+
+  const refStatus = applyVisibilityRefs(updatedProperties.value, newValues, t.value);
+  visibilityRefStatus.value = refStatus;
+  disabledByRef.value = Object.fromEntries(
+    Object.entries(refStatus).map(([n, s]) => [n, s === 'disable'])
+  );
 };
 
 // When active instance changes
@@ -259,7 +275,11 @@ const isApplyDisabled = computed(() =>
 );
 
 const visibleFields = computed(() =>
-  updatedProperties.value.filter((field) => visibility.value[field.name])
+  updatedProperties.value.filter((field) => {
+    const refStatus = visibilityRefStatus.value[field.name];
+    if (refStatus !== undefined) return refStatus !== 'invisible';
+    return visibility.value[field.name];
+  })
 );
 
 const groups = computed(() => {
@@ -307,6 +327,7 @@ watchEffect(() => {
         :t="t"
         :handleChange="handleChange"
         :handleError="handleError"
+        :disabled-by-ref="disabledByRef"
       />
       <template v-else>
         <FieldRenderer
@@ -317,6 +338,7 @@ watchEffect(() => {
           :errors-map="errors"
           :handleChange="handleChange"
           :handleError="handleError"
+          :disabled-by-ref="disabledByRef"
         />
       </template>
     </template>

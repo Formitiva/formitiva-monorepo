@@ -15,7 +15,9 @@ import { InstanceName } from "../layout/LayoutComponents";
 import {
   updateVisibilityMap,
   updateVisibilityBasedOnSelection,
+  applyVisibilityRefs,
 } from '@formitiva/core';
+import type { FieldVisibilityStatus } from '@formitiva/core';
 import { renameDuplicatedGroups, groupConsecutiveFields } from '@formitiva/core';
 import { submitForm } from '@formitiva/core';
 import { validateField } from '@formitiva/core';
@@ -66,6 +68,8 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
     {}
   );
   const [visibility, setVisibility] = React.useState<Record<string, boolean>>({});
+  const [visibilityRefStatus, setVisibilityRefStatus] = React.useState<Record<string, FieldVisibilityStatus>>({});
+  const [disabledByRef, setDisabledByRef] = React.useState<Record<string, boolean>>({});
   const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [submissionMessage, setSubmissionMessage] = React.useState<string | null>(null);
   const [submissionSuccess, setSubmissionSuccess] = React.useState<boolean | null>(null);
@@ -159,6 +163,10 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
       setInitDone(true);
       // Update instance name in state to sync with current instance
       setInstanceName(instance.name);
+      // Apply visibilityRef handlers
+      const refStatus = applyVisibilityRefs(updatedProps, valuesMapInit, t);
+      setVisibilityRefStatus(refStatus);
+      setDisabledByRef(Object.fromEntries(Object.entries(refStatus).map(([n, s]) => [n, s === 'disable'])));
     });
     return () => cancelAnimationFrame(raf);
   }, [properties, instance, definition]);
@@ -233,6 +241,12 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
           );
         });
       }
+
+      // Apply visibilityRef handlers with the new value
+      const refValues = { ...valuesMap, [name]: value };
+      const refStatus = applyVisibilityRefs(Object.values(fieldMap) as import('@formitiva/core').DefinitionPropertyField[], refValues, t);
+      setVisibilityRefStatus(refStatus);
+      setDisabledByRef(Object.fromEntries(Object.entries(refStatus).map(([n, s]) => [n, s === 'disable'])));
     },
     [fieldMap, valuesMap]
   );
@@ -401,7 +415,11 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
       )}
         <>
           {(() => {
-            const visibleFields = updatedProperties.slice(0, loadedCount).filter((field) => visibility[field.name]);
+            const visibleFields = updatedProperties.slice(0, loadedCount).filter((field) => {
+              const refStatus = visibilityRefStatus[field.name];
+              if (refStatus !== undefined) return refStatus !== 'invisible';
+              return visibility[field.name];
+            });
             const { groups } = groupConsecutiveFields(visibleFields);
 
             return groups.map((group, index) => {
@@ -417,6 +435,7 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
                     handleError={handleError}
                     errorsMap={errors}
                     t={t}
+                    disabledByRef={disabledByRef}
                   />
                 );
               }
@@ -432,6 +451,7 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
                       handleChange={handleChange}
                       handleError={handleError}
                       errorsMap={errors}
+                      disabledByRef={disabledByRef}
                     />
                   ))}
                 </React.Fragment>

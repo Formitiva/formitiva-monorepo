@@ -17,7 +17,9 @@ import { createFieldGroup, type FieldGroupResult } from '../layout/FieldGroup';
 import {
   updateVisibilityMap,
   updateVisibilityBasedOnSelection,
+  applyVisibilityRefs,
 } from '@formitiva/core';
+import type { FieldVisibilityStatus } from '@formitiva/core';
 import { renameDuplicatedGroups, groupConsecutiveFields } from '@formitiva/core';
 import { submitForm } from '@formitiva/core';
 import { validateField } from '@formitiva/core';
@@ -94,6 +96,10 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
   const vis: Record<string, boolean> = {};
   updatedProperties.forEach(f => { vis[f.name] = false; });
   Object.assign(vis, updateVisibilityMap(updatedProperties, valuesMap, vis, nameToField));
+
+  // VisibilityRef handler results
+  const visRefStatus: Record<string, FieldVisibilityStatus> = {};
+  Object.assign(visRefStatus, applyVisibilityRefs(updatedProperties, valuesMap, t));
 
   const errorsMap: Record<string, string> = {};
   let submissionMessage: string | null = null;
@@ -173,6 +179,14 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
     if (hasChildren || isParentToOthers) {
       const newVis = updateVisibilityBasedOnSelection({ ...vis }, nameToField, valuesMap, name, value);
       Object.assign(vis, newVis);
+    }
+
+    // Update visibilityRef handler results
+    const newVisRefStatus = applyVisibilityRefs(updatedProperties, valuesMap, t);
+    const visRefChanged = Object.entries(newVisRefStatus).some(([k, v]) => visRefStatus[k] !== v);
+    Object.assign(visRefStatus, newVisRefStatus);
+
+    if (hasChildren || isParentToOthers || visRefChanged) {
       reconcileFields();
     }
     // Update button valuesMap
@@ -201,7 +215,11 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
   }
 
   function reconcileFields() {
-    const visibleFields = updatedProperties.filter(f => vis[f.name]);
+    const visibleFields = updatedProperties.filter(f => {
+      const refStatus = visRefStatus[f.name];
+      if (refStatus !== undefined) return refStatus !== 'invisible';
+      return vis[f.name];
+    });
     const { groups } = groupConsecutiveFields(visibleFields);
 
     // Build wanted list: { key, type, fields? }
@@ -255,7 +273,7 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
           (entry.result as FieldGroupResult).update(valuesMap, errorsMap);
         } else {
           const f = w.field!;
-          (entry.result as FieldRendererResult).update(valuesMap[f.name], errorsMap[f.name] ?? null, Boolean(f.disabled));
+          (entry.result as FieldRendererResult).update(valuesMap[f.name], errorsMap[f.name] ?? null, Boolean(f.disabled) || visRefStatus[f.name] === 'disable');
         }
       }
       newOrder.push(entry);

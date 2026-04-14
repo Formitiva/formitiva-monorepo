@@ -23,6 +23,8 @@ export type ValidatorRefType =
   | [string]
   | [string, string];
 
+export type FieldVisibilityStatus = 'visible' | 'invisible' | 'enable' | 'disable';
+
 export interface DefinitionPropertyField {
   name: string;
   displayName: string;
@@ -38,6 +40,9 @@ export interface DefinitionPropertyField {
 
   // Custom validator reference
   validatorRef?: ValidatorRefType;
+
+  // Custom visibility handler reference
+  visibilityRef?: string;
 
   // Unit field properties
   dimension?: string; // for 'unit' type fields, e.g. 'length', 'angle', etc.

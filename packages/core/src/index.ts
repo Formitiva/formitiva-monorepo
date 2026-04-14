@@ -4,6 +4,7 @@ export type {
   ErrorType,
   ParentField,
   ValidatorRefType,
+  FieldVisibilityStatus,
   DefinitionPropertyField,
   FormitivaDefinition,
   FormitivaInstance,
@@ -34,7 +35,7 @@ export type {
   InstanceLoadResult,
 } from './core/formitivaModel';
 
-export { updateVisibilityMap, updateVisibilityBasedOnSelection } from './core/fieldVisibility';
+export { updateVisibilityMap, updateVisibilityBasedOnSelection, applyVisibilityRefs } from './core/fieldVisibility';
 
 export { submitForm } from './core/submitForm';
 export type { SubmitResult } from './core/submitForm';
@@ -61,6 +62,15 @@ export {
   listButtonHandlers,
 } from './core/registries/buttonHandlerRegistry';
 export type { ButtonHandler } from './core/registries/buttonHandlerRegistry';
+
+export {
+  registerVisibilityHandler,
+  getVisibilityHandler,
+  hasVisibilityHandler,
+  unregisterVisibilityHandler,
+  listVisibilityHandlers,
+} from './core/registries/visibilityHandlerRegistry';
+export type { VisibilityHandler } from './core/registries/visibilityHandlerRegistry';
 
 export {
   registerFormValidator,

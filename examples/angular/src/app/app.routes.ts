@@ -52,4 +52,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/plugin/plugin.component').then((m) => m.PluginComponent),
   },
+  {
+    path: 'visibility',
+    loadComponent: () =>
+      import('./pages/visibility/visibility.component').then(
+        (m) => m.VisibilityComponent
+      ),
+  },
 ];

@@ -14,6 +14,7 @@ const pages: Record<string, () => Promise<{ default: PageRenderer }>> = {
   'translation':      () => import('./pages/translation'),
   'custom-component': () => import('./pages/customComponent'),
   'plugin':           () => import('./pages/plugin'),
+  'visibility':       () => import('./pages/visibility'),
 };
 
 class Router {

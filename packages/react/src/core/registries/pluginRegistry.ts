@@ -20,12 +20,17 @@ import {
   registerSubmitter,
   getSubmitter,
 } from '@formitiva/core';
+import {
+  registerVisibilityHandler,
+  getVisibilityHandler,
+} from '@formitiva/core';
 
 import type {
   FieldCustomValidationHandler,
   FieldTypeValidationHandler,
   FormValidationHandler,
   FormSubmissionHandler,
+  VisibilityHandler,
 } from '@formitiva/core';
 
 /** Conflict resolution strategies */
@@ -43,7 +48,7 @@ export interface PluginRegistrationOptions {
 
 /** Plugin conflict information */
 export interface PluginConflict {
-  type: 'component' | 'fieldCustomValidator' | 'fieldTypeValidator' | 'formValidator' | 'submissionHandler' | 'plugin';
+  type: 'component' | 'fieldCustomValidator' | 'fieldTypeValidator' | 'formValidator' | 'submissionHandler' | 'visibilityHandler' | 'plugin';
   name: string;
   existingPlugin: string;
   newPlugin: string;
@@ -59,6 +64,7 @@ export interface FormitivaPlugin {
   fieldTypeValidators?: Record<string, FieldTypeValidationHandler>;
   formValidators?: Record<string, FormValidationHandler>;
   submissionHandlers?: Record<string, FormSubmissionHandler>;
+  visibilityHandlers?: Record<string, VisibilityHandler>;
   setup?: () => void;
   cleanup?: () => void;
 }
@@ -73,6 +79,7 @@ const registrationOwnership = {
   fieldTypeValidators: new Map<string, string>(),
   formValidators: new Map<string, string>(),
   submissionHandlers: new Map<string, string>(),
+  visibilityHandlers: new Map<string, string>(),
 };
 
 /** Decide whether to register based on conflict resolution */
@@ -205,6 +212,22 @@ function handleConflicts(plugin: FormitivaPlugin): PluginConflict[] {
     }
   }
 
+  // Visibility handlers
+  if (plugin.visibilityHandlers) {
+    for (const name of Object.keys(plugin.visibilityHandlers)) {
+      const existingHandler = getVisibilityHandler(name);
+      const existingPlugin = registrationOwnership.visibilityHandlers.get(name);
+      if (existingHandler && existingPlugin && existingPlugin !== plugin.name) {
+        conflicts.push({
+          type: 'visibilityHandler',
+          name,
+          existingPlugin,
+          newPlugin: plugin.name,
+        });
+      }
+    }
+  }
+
   return conflicts;
 }
 
@@ -231,6 +254,8 @@ function registerItems<T>(
       conflict = conflicts.find(c => c.type === 'fieldTypeValidator' && c.name === `type:${key}`);
     } else if (items === plugin.submissionHandlers) {
       conflict = conflicts.find(c => c.type === 'submissionHandler' && c.name === key);
+    } else if (items === plugin.visibilityHandlers) {
+      conflict = conflicts.find(c => c.type === 'visibilityHandler' && c.name === key);
     }
 
     if (shouldRegister(conflict || null, strategy, onConflict)) {
@@ -343,6 +368,19 @@ export function registerPlugin(plugin: FormitivaPlugin, options?: PluginRegistra
     );
   }
 
+  // Register visibility handlers
+  if (plugin.visibilityHandlers) {
+    registerItems(
+      plugin.visibilityHandlers,
+      registrationOwnership.visibilityHandlers,
+      registerVisibilityHandler,
+      plugin,
+      conflicts,
+      strategy,
+      options?.onConflict
+    );
+  }
+
   // Setup hook
   if (plugin.setup) plugin.setup();
 
@@ -394,6 +432,13 @@ export function unregisterPlugin(pluginName: string, removeRegistrations = false
     if (plugin.submissionHandlers) {
       for (const name of Object.keys(plugin.submissionHandlers)) {
         registrationOwnership.submissionHandlers.delete(name);
+      }
+    }
+
+    // Remove visibility handlers
+    if (plugin.visibilityHandlers) {
+      for (const name of Object.keys(plugin.visibilityHandlers)) {
+        registrationOwnership.visibilityHandlers.delete(name);
       }
     }
   }

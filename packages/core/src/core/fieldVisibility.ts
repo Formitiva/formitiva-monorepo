@@ -1,4 +1,5 @@
-import type { DefinitionPropertyField, FieldValueType } from './formitivaTypes';
+import type { DefinitionPropertyField, FieldValueType, FieldVisibilityStatus, TranslationFunction } from './formitivaTypes';
+import { getVisibilityHandler } from './registries/visibilityHandlerRegistry';
 
 const showChildrenRecursively = (
   parentName: string,
@@ -112,4 +113,27 @@ export const updateVisibilityBasedOnSelection = (
   });
 
   return newVisibility;
+};
+
+/**
+ * Apply visibilityRef handlers for all fields that declare one.
+ * Returns a map of field name → FieldVisibilityStatus for each field whose
+ * registered handler was found and invoked.
+ * Results take precedence over parent-child visibility for those fields.
+ */
+export const applyVisibilityRefs = (
+  fields: DefinitionPropertyField[],
+  values: Record<string, FieldValueType>,
+  t: TranslationFunction,
+): Record<string, FieldVisibilityStatus> => {
+  const result: Record<string, FieldVisibilityStatus> = {};
+  for (const field of fields) {
+    if (field.visibilityRef) {
+      const handler = getVisibilityHandler(field.visibilityRef);
+      if (handler) {
+        result[field.name] = handler(field.name, values, t);
+      }
+    }
+  }
+  return result;
 };

@@ -29,6 +29,7 @@ import { FormitivaContextService } from '../../services/formitiva-context.servic
           [handleChange]="handleChange"
           [handleError]="handleError"
           [errorsMap]="errorsMap"
+          [disabledByRef]="disabledByRef"
         ></fv-field-renderer>
       </ng-container>
     </fieldset>
@@ -42,6 +43,7 @@ export class FieldGroupComponent {
   @Input({ required: true }) handleChange!: (name: string, value: FieldValueType) => void;
   @Input() handleError?: (name: string, error: ErrorType) => void;
   @Input() errorsMap?: Record<string, string>;
+  @Input() disabledByRef?: Record<string, boolean>;
 
   readonly ctx = inject(FormitivaContextService);
   readonly isOpen = signal(true);

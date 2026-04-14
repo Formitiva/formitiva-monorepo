@@ -9,6 +9,7 @@ export interface FieldRendererProps {
   handleChange: (fieldName: string, value: FieldValueType) => void;
   handleError?: (fieldName: string, error: ErrorType) => void;
   errorsMap?: Record<string, string>;
+  disabledByRef?: Record<string, boolean>;
 }
 
 /**
@@ -16,11 +17,11 @@ export interface FieldRendererProps {
  * and optimized re-render prevention
  */
 export const FieldRenderer = React.memo<FieldRendererProps>(
-  ({ field, valuesMap, handleChange, handleError, errorsMap }) => {
+  ({ field, valuesMap, handleChange, handleError, errorsMap, disabledByRef }) => {
     const Component = getComponent(field.type) as JSX.ElementType | undefined;
     const value = valuesMap[field.name];
     const fieldError = errorsMap ? errorsMap[field.name] ?? null : undefined;
-    const isDisabled = Boolean(field.disabled);
+    const isDisabled = Boolean(field.disabled) || Boolean(disabledByRef?.[field.name]);
 
     const stableValue = React.useMemo(() => value, [value]);
 
@@ -77,7 +78,8 @@ export const FieldRenderer = React.memo<FieldRendererProps>(
     prevProps.valuesMap[prevProps.field.name] === nextProps.valuesMap[nextProps.field.name] &&
     prevProps.handleChange === nextProps.handleChange &&
     prevProps.handleError === nextProps.handleError &&
-    prevProps.errorsMap?.[prevProps.field.name] === nextProps.errorsMap?.[nextProps.field.name]
+    prevProps.errorsMap?.[prevProps.field.name] === nextProps.errorsMap?.[nextProps.field.name] &&
+    prevProps.disabledByRef?.[prevProps.field.name] === nextProps.disabledByRef?.[nextProps.field.name]
 );
 
 FieldRenderer.displayName = "FieldRenderer";

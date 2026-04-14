@@ -16,7 +16,9 @@ import { SubmissionMessageComponent } from './submission-message.component';
 import {
   updateVisibilityMap,
   updateVisibilityBasedOnSelection,
+  applyVisibilityRefs,
 } from '@formitiva/core';
+import type { FieldVisibilityStatus } from '@formitiva/core';
 import { renameDuplicatedGroups, groupConsecutiveFields } from '@formitiva/core';
 import { submitForm } from '@formitiva/core';
 import { validateField } from '@formitiva/core';
@@ -68,6 +70,7 @@ import type {
             [handleChange]="handleChangeFn"
             [handleError]="handleErrorFn"
             [errorsMap]="errors()"
+            [disabledByRef]="disabledByRef()"
           ></fv-field-group>
         </ng-container>
         <ng-template #ungrouped>
@@ -78,6 +81,7 @@ import type {
             [handleChange]="handleChangeFn"
             [handleError]="handleErrorFn"
             [errorsMap]="errors()"
+            [disabledByRef]="disabledByRef()"
           ></fv-field-renderer>
         </ng-template>
       </ng-container>
@@ -110,6 +114,8 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   fieldMap: Record<string, DefinitionPropertyField> = {};
   valuesMap = signal<Record<string, FieldValueType>>({});
   visibility = signal<Record<string, boolean>>({});
+  visibilityRefStatus = signal<Record<string, FieldVisibilityStatus>>({});
+  disabledByRef = signal<Record<string, boolean>>({});
   errors = signal<Record<string, string>>({});
   submissionMessage = signal<string | null>(null);
   submissionSuccess = signal<boolean | null>(null);
@@ -200,6 +206,12 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
       this.instanceName.set(this.instance.name ?? '');
       this.initDone = true;
       this.scheduleChunk();
+
+      // Apply visibilityRef handlers
+      const refStatus = applyVisibilityRefs(updatedProps, valuesMapInit, this.ctx.t());
+      this.visibilityRefStatus.set(refStatus);
+      this.disabledByRef.set(Object.fromEntries(Object.entries(refStatus).map(([n, s]) => [n, s === 'disable'])));
+
       this.updateVisibleGroups();
       this.cdr.markForCheck();
     });
@@ -217,7 +229,12 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
 
   private updateVisibleGroups(): void {
     const visMap = this.visibility();
-    const visible = this.updatedProperties.slice(0, this.loadedCount()).filter(f => visMap[f.name]);
+    const refMap = this.visibilityRefStatus();
+    const visible = this.updatedProperties.slice(0, this.loadedCount()).filter(f => {
+      const refStatus = refMap[f.name];
+      if (refStatus !== undefined) return refStatus !== 'invisible';
+      return visMap[f.name];
+    });
     const { groups } = groupConsecutiveFields(visible);
     this.visibleGroups.set(groups.map(g => ({ fields: g.fields, name: g.name ?? undefined })));
   }
@@ -238,6 +255,12 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
         updateVisibilityBasedOnSelection(prev, this.fieldMap, { ...this.valuesMap(), [name]: value }, name, value)
       );
     }
+
+    // Apply visibilityRef handlers
+    const refStatus = applyVisibilityRefs(Object.values(this.fieldMap), this.valuesMap(), this.ctx.t());
+    this.visibilityRefStatus.set(refStatus);
+    this.disabledByRef.set(Object.fromEntries(Object.entries(refStatus).map(([n, s]) => [n, s === 'disable'])));
+
     this.updateVisibleGroups();
     this.cdr.markForCheck();
   }

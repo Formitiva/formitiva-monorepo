@@ -12,6 +12,7 @@ export interface FieldGroupProps {
   handleError?: (fieldName: string, error: ErrorType) => void;
   errorsMap?: Record<string, string>;
   t: (key: string) => string;
+  disabledByRef?: Record<string, boolean>;
 }
 
 const props = withDefaults(defineProps<FieldGroupProps>(), {
@@ -37,6 +38,7 @@ const onToggle = () => { isOpen.value = !isOpen.value; };
         :handleChange="handleChange"
         :handleError="handleError"
         :errorsMap="errorsMap"
+        :disabled-by-ref="disabledByRef"
       />
     </template>
   </fieldset>

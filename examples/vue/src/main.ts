@@ -15,6 +15,7 @@ const router = createRouter({
     { path: '/translation',    component: () => import('./pages/Translation.vue') },
     { path: '/custom-component', component: () => import('./pages/CustomComponent.vue') },
     { path: '/plugin',         component: () => import('./pages/Plugin.vue') },
+    { path: '/visibility',     component: () => import('./pages/Visibility.vue') },
   ],
 });
 

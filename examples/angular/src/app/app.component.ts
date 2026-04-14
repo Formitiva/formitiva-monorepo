@@ -123,5 +123,6 @@ export class AppComponent {
     { path: 'translation',      label: 'Translation / i18n',     description: 'Switch language at runtime' },
     { path: 'custom-component', label: 'Custom Component',       description: 'Point2D field via registerComponent' },
     { path: 'plugin',           label: 'Plugin',                 description: 'Bundle handlers into a plugin' },
+    { path: 'visibility',     label: 'Visibility Handler',     description: 'Show/hide/disable fields via registered handlers' },
   ];
 }

@@ -11,13 +11,14 @@ export interface FieldGroupProps {
   handleError?: (fieldName: string, error: ErrorType) => void;
   errorsMap?: Record<string, string>;
   t: (key: string) => string;
+  disabledByRef?: Record<string, boolean>;
 }
 
 /**
  * Self-managing collapsible field group component with internal toggle state
  */
 export const FieldGroup = React.memo<FieldGroupProps>(
-  ({ groupName, defaultOpen = true, fields, valuesMap, handleChange, handleError, errorsMap, t }) => {
+  ({ groupName, defaultOpen = true, fields, valuesMap, handleChange, handleError, errorsMap, t, disabledByRef }) => {
     const [isOpen, setIsOpen] = React.useState(defaultOpen);
     const onToggle = React.useCallback(() => setIsOpen(prev => !prev), []);
 
@@ -36,6 +37,7 @@ export const FieldGroup = React.memo<FieldGroupProps>(
               handleChange={handleChange}
               handleError={handleError}
               errorsMap={errorsMap}
+              disabledByRef={disabledByRef}
             />
           ))}
       </fieldset>

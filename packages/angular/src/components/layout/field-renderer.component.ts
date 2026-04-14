@@ -36,6 +36,7 @@ export class FieldRendererComponent implements OnChanges {
   @Input({ required: true }) handleChange!: (name: string, value: FieldValueType) => void;
   @Input() handleError?: (name: string, error: ErrorType) => void;
   @Input() errorsMap?: Record<string, string>;
+  @Input() disabledByRef?: Record<string, boolean>;
 
   componentType: Type<unknown> | null = null;
   isDisabled = false;
@@ -45,7 +46,7 @@ export class FieldRendererComponent implements OnChanges {
     if (changes['field'] || !this.componentType) {
       this.componentType = getComponent(this.field.type) ?? null;
     }
-    this.isDisabled = Boolean(this.field.disabled);
+    this.isDisabled = Boolean(this.field.disabled) || Boolean(this.disabledByRef?.[this.field.name]);
     this.updateInputs();
   }
 

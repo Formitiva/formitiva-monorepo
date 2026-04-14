@@ -7,6 +7,7 @@ import SubmitHandler from './pages/SubmitHandler';
 import Translation from './pages/Translation';
 import CustomComponent from './pages/CustomComponent';
 import Plugin from './pages/Plugin';
+import Visibility from './pages/Visibility';
 
 const navItems = [
   { path: '/basic',            label: 'Basic / Quick Start',   description: 'Contact form with inline submit' },
@@ -17,6 +18,7 @@ const navItems = [
   { path: '/translation',      label: 'Translation / i18n',     description: 'Switch language at runtime' },
   { path: '/custom-component', label: 'Custom Component',       description: 'Point2D field via registerComponent' },
   { path: '/plugin',           label: 'Plugin',                 description: 'Bundle handlers into a plugin' },
+  { path: '/visibility',     label: 'Visibility Handler',     description: 'Show/hide/disable fields via registered handlers' },
 ];
 
 export default function App() {
@@ -54,6 +56,7 @@ export default function App() {
           <Route path="/translation" element={<Translation />} />
           <Route path="/custom-component" element={<CustomComponent />} />
           <Route path="/plugin" element={<Plugin />} />
+          <Route path="/visibility" element={<Visibility />} />
         </Routes>
       </main>
     </div>

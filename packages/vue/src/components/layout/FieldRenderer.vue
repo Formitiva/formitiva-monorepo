@@ -9,6 +9,7 @@ export interface FieldRendererProps {
   handleChange: (fieldName: string, value: FieldValueType) => void;
   handleError?: (fieldName: string, error: ErrorType) => void;
   errorsMap?: Record<string, string>;
+  disabledByRef?: Record<string, boolean>;
 }
 
 const props = defineProps<FieldRendererProps>();
@@ -16,7 +17,7 @@ const props = defineProps<FieldRendererProps>();
 const Component = computed(() => getComponent(props.field.type));
 const value = computed(() => props.valuesMap[props.field.name]);
 const fieldError = computed(() => props.errorsMap ? props.errorsMap[props.field.name] ?? null : undefined);
-const isDisabled = computed(() => Boolean(props.field.disabled));
+const isDisabled = computed(() => Boolean(props.field.disabled) || Boolean(props.disabledByRef?.[props.field.name]));
 
 const onChange = (v: FieldValueType) => props.handleChange(props.field.name, v);
 const onError = (err: ErrorType) => props.handleError?.(props.field.name, err);

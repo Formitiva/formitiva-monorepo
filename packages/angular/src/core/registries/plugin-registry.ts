@@ -8,11 +8,13 @@ import {
   getTypeValidator,
 } from '@formitiva/core';
 import { registerSubmitter } from '@formitiva/core';
+import { registerVisibilityHandler } from '@formitiva/core';
 import type {
   FieldCustomValidationHandler,
   FieldTypeValidationHandler,
   FormValidationHandler,
   FormSubmissionHandler,
+  VisibilityHandler,
 } from '@formitiva/core';
 
 export type ConflictResolution = 'error' | 'warn' | 'override' | 'skip';
@@ -30,6 +32,7 @@ export interface FormitivaPlugin {
   fieldTypeValidators?: Record<string, FieldTypeValidationHandler>;
   formValidators?: Record<string, FormValidationHandler>;
   submissionHandlers?: Record<string, FormSubmissionHandler>;
+  visibilityHandlers?: Record<string, VisibilityHandler>;
   setup?: () => void;
   cleanup?: () => void;
 }
@@ -99,6 +102,12 @@ export function registerPlugin(
   if (plugin.submissionHandlers) {
     for (const [name, fn] of Object.entries(plugin.submissionHandlers)) {
       registerSubmitter(name, fn);
+    }
+  }
+
+  if (plugin.visibilityHandlers) {
+    for (const [name, fn] of Object.entries(plugin.visibilityHandlers)) {
+      registerVisibilityHandler(name, fn);
     }
   }
 
