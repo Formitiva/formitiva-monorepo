@@ -24,7 +24,7 @@ import type {
   TranslationFunction,
   DefinitionPropertyField,
 } from '@formitiva/angular';
-import { Point2DInputComponent } from './point2d-input.component';
+import { Point2DInputComponent } from '../component/point2d-input.component';
 
 // ── Plugin definition ─────────────────────────────────────────────────────────
 
