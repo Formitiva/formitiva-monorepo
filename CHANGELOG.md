@@ -4,7 +4,7 @@
 - Add Core support
 - Add support for Vue, Angular, Vanilla
 
-## 2.1.0 2026-04-15
+## 2.1.1 2026-04-15
 - Add visibility register support
 - Add computer value register support
 - Change json validationHandlerName to validatorRef
