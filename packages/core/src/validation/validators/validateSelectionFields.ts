@@ -6,7 +6,7 @@ export function validateDropdownField(
   t: TranslationFunction
 ): string | undefined {
   const inputStr = String(input);
-  if (inputStr === "" || inputStr === null || inputStr === undefined) {
+  if (inputStr === "") {
     return field.required ? t("Value required") : undefined;
   }
   

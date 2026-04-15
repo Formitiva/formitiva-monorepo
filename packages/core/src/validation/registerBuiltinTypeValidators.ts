@@ -22,14 +22,14 @@ import { validateSliderField } from "./validators/validateSliderField";
 
 import { registerBuiltinTypeValidator } from "../core/registries/validationHandlerRegistry";
 
-let registed = false;
+let registered = false;
 /**
  * Ensures all built-in field validators are registered.
  * This function references all validators to prevent tree-shaking.
  * Safe to call multiple times as handlers are keyed.
  */
 export function ensureBuiltinFieldTypeValidatorsRegistered(): void {
-  if (registed) return;
+  if (registered) return;
   registerBuiltinTypeValidator("int", validateIntegerField);
   registerBuiltinTypeValidator("stepper", validateIntegerField);
   registerBuiltinTypeValidator("int-array", validateIntegerArrayField);
@@ -51,7 +51,7 @@ export function ensureBuiltinFieldTypeValidatorsRegistered(): void {
   registerBuiltinTypeValidator("color", validateColorField);
   registerBuiltinTypeValidator("rating", validateRatingField);
   registerBuiltinTypeValidator("file", validateFileField);
-  registed = true;
+  registered = true;
 }
 
 // Call at module load to ensure registration in typical usage

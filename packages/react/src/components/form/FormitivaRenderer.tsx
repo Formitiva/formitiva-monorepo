@@ -81,6 +81,8 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
   const [instanceName, setInstanceName] = React.useState<string>(instance.name || '');
   const targetInstanceRef = React.useRef<FormitivaInstance>(instance);
   const suppressClearOnNextInstanceUpdate = React.useRef(false);
+  const valuesMapRef = React.useRef(valuesMap);
+  React.useEffect(() => { valuesMapRef.current = valuesMap; }, [valuesMap]);
 
  
   // Step 1: Initialize basic structures immediately
@@ -237,9 +239,8 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
       
       if (hasChildren || isParentToOthers) {
         setVisibility((prevVis) => {
-          // Get the latest values including the one we just updated
-          // Note: we need to compute this with the new value
-          const latestValues = { ...valuesMap, [name]: value };
+          // Use ref to get the latest values including the one we just updated
+          const latestValues = { ...valuesMapRef.current, [name]: value };
           return updateVisibilityBasedOnSelection(
             prevVis,
             fieldMap,
@@ -251,12 +252,12 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
       }
 
       // Apply visibilityRef handlers with the new value
-      const refValues = { ...valuesMap, [name]: value };
+      const refValues = { ...valuesMapRef.current, [name]: value };
       const refStatus = applyVisibilityRefs(Object.values(fieldMap) as import('@formitiva/core').DefinitionPropertyField[], refValues, t);
       setVisibilityRefStatus(refStatus);
       setDisabledByRef(Object.fromEntries(Object.entries(refStatus).map(([n, s]) => [n, s === 'disable'])));
     },
-    [fieldMap, valuesMap]
+    [fieldMap, t]
   );
 
   // Sync language changes: update savedLanguage and clear messages

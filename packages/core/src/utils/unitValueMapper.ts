@@ -4,7 +4,7 @@ export const dimensionUnitsMap: Record<string, string[]> = {
   area: ["m^2", "cm^2", "mm^2", "in^2", "ft^2", "yd^2"],
   volume: ["L", "m^3", "cm^3", "mL", "in^3", "ft^3", "yd^3"],
   weight: ["kg", "g", "mg", "t", "lb", "oz"],
-  time: ["min", "s", "h", "ms", "d"],
+  time: ["min", "s", "h", "ms", "d", "wk"],
   temperature: ["C", "F", "K"],
   angle: ["deg", "rad", "rev"],
 };
@@ -66,7 +66,7 @@ export const dimensionUnitDisplayMap: Record<string, Record<string, string>> = {
   },
 };
 
-export const dimensonUnitFactorsMap: Record<string, Record<string, number>> = {
+export const dimensionUnitFactorsMap: Record<string, Record<string, number>> = {
   length: {
     "mm": 1000,
     "cm": 100,
@@ -87,13 +87,13 @@ export const dimensonUnitFactorsMap: Record<string, Record<string, number>> = {
     "yd^2": (100 / (2.54 * 36)) ** 2,
   },
   volume: {
-    "cm^3": 1000000,
-    "m^3": 1.0,
+    "cm^3": 1000,
+    "m^3": 0.001,
     "L": 1.0,
-    "mL": 1000000,
-    "in^3": (100 / 2.54) ** 3,
-    "ft^3": (100 / (2.54 * 12)) ** 3,
-    "yd^3": (100 / (2.54 * 36)) ** 3,
+    "mL": 1000,
+    "in^3": (100 / 2.54) ** 3 / 1000,
+    "ft^3": (100 / (2.54 * 12)) ** 3 / 1000,
+    "yd^3": (100 / (2.54 * 36)) ** 3 / 1000,
   },
   weight: {
     "mg": 1000000,
@@ -133,7 +133,7 @@ export const unitsByDimension: Record<
 const allDimensions = new Set<string>([
   ...Object.keys(dimensionUnitsMap),
   ...Object.keys(dimensionUnitDisplayMap),
-  ...Object.keys(dimensonUnitFactorsMap),
+  ...Object.keys(dimensionUnitFactorsMap),
 ]);
 
 for (const dim of allDimensions) {
@@ -141,7 +141,7 @@ for (const dim of allDimensions) {
 
   const list = dimensionUnitsMap[dim] ?? [];
   const display = dimensionUnitDisplayMap[dim] ?? {};
-  const factors = dimensonUnitFactorsMap[dim] ?? {};
+  const factors = dimensionUnitFactorsMap[dim] ?? {};
 
   // Start from the ordered list when present
   for (const u of list) {

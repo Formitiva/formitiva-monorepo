@@ -14,11 +14,10 @@ export function validateFileField(
   }
 
   if (!(input instanceof File)) {
-    const inputString = String(input);
-    if (field.required && (input == null || (typeof inputString === "string" && inputString.trim() === ""))) {
-      return t("Select a file");
+    if (input == null || String(input).trim() === "") {
+      return field.required ? t("Select a file") : undefined;
     }
-    return t("Invalid file input: {{1}}", inputString);
+    return t("Invalid file input: {{1}}", String(input));
   }
   return undefined;
 }

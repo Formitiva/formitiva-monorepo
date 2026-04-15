@@ -14,5 +14,6 @@ export default defineConfig({
     name: 'angular',
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    setupFiles: ['src/test-setup.ts'],
   },
 });

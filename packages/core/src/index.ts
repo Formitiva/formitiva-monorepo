@@ -152,7 +152,7 @@ export type {
 export {
   dimensionUnitsMap,
   dimensionUnitDisplayMap,
-  dimensonUnitFactorsMap,
+  dimensionUnitFactorsMap,
   unitsByDimension,
   convertTemperature,
   getUnitFactors,
