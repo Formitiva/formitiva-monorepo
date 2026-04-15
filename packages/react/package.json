@@ -1,6 +1,6 @@
 {
   "name": "@formitiva/react",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Formitiva React adapter — components, hooks and registries",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "react", "react-form", "hooks", "typescript"],
   "repository": {

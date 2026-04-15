@@ -1,6 +1,6 @@
 {
   "name": "@formitiva/vanilla",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Formitiva Vanilla JS adapter — no framework dependencies",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "vanilla", "vanilla-js", "typescript", "no-framework"],
   "repository": {
