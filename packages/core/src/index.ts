@@ -150,6 +150,21 @@ export type {
 } from './utils/translationUtils';
 
 export {
+  buildFieldMap,
+  initFormState,
+  computeFieldChange,
+  computeVisibleGroups,
+  computeSubmitErrors,
+  isSubmitDisabled,
+} from './utils/formStateUtils';
+export type {
+  FieldMapResult,
+  FormStateInit,
+  FieldChangeResult,
+  VisibleGroup,
+} from './utils/formStateUtils';
+
+export {
   dimensionUnitsMap,
   dimensionUnitDisplayMap,
   dimensionUnitFactorsMap,

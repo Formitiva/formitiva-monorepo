@@ -14,15 +14,14 @@ import { FieldGroupComponent } from '../layout/field-group.component';
 import { InstanceNameComponent } from '../layout/layout-components.component';
 import { SubmissionMessageComponent } from './submission-message.component';
 import {
-  updateVisibilityMap,
-  updateVisibilityBasedOnSelection,
-  applyVisibilityRefs,
-  applyComputedRefs,
+  initFormState,
+  computeFieldChange,
+  computeVisibleGroups,
+  computeSubmitErrors,
+  isSubmitDisabled,
 } from '@formitiva/core';
 import type { FieldVisibilityStatus } from '@formitiva/core';
-import { renameDuplicatedGroups, groupConsecutiveFields } from '@formitiva/core';
 import { submitForm } from '@formitiva/core';
-import { validateField } from '@formitiva/core';
 import type {
   DefinitionPropertyField,
   FieldValueType,
@@ -158,62 +157,21 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   private init(): void {
-    const { properties } = this.definition;
-    const nameToField = Object.fromEntries(
-      properties.map(f => [f.name, { ...f, children: {} as Record<string, string[]> }])
-    );
+    const init = initFormState(this.definition, this.instance, this.ctx.t());
 
-    properties.forEach(field => {
-      if (!field.parents) return;
-      Object.entries(field.parents).forEach(([parentName, selections]) => {
-        const pf = nameToField[parentName];
-        if (!pf) return;
-        selections.forEach(sel => {
-          pf.children ??= {};
-          const key = String(sel);
-          pf.children[key] = [...(pf.children[key] ?? []), field.name];
-        });
-      });
-    });
-
-    renameDuplicatedGroups(properties, nameToField);
-    const updatedProps = Object.values(nameToField) as DefinitionPropertyField[];
-
-    const valuesMapInit: Record<string, FieldValueType> = {};
-    updatedProps.forEach(f => {
-      if (f.type === 'unit') {
-        const numVal = typeof f.defaultValue === 'number' ? String(f.defaultValue) : '';
-        const unitVal = typeof f.defaultUnit === 'string' ? f.defaultUnit : String(f.defaultUnit ?? 'm');
-        valuesMapInit[f.name] = [numVal, unitVal] as unknown as FieldValueType;
-      } else {
-        valuesMapInit[f.name] = f.defaultValue;
-      }
-    });
-
-    this.targetInstance = this.instance;
-    Object.keys(this.instance.values).forEach(key => {
-      if (nameToField[key] !== undefined) valuesMapInit[key] = this.instance.values[key];
-    });
-
-    const vis = Object.fromEntries(updatedProps.map(f => [f.name, false]));
-    const updatedVis = updateVisibilityMap(updatedProps, valuesMapInit, vis, nameToField);
-      // Apply computed value handlers before setting initial state
-      const initComputed = applyComputedRefs(updatedProps, valuesMapInit, this.ctx.t());
-      if (Object.keys(initComputed).length > 0) Object.assign(valuesMapInit, initComputed);
     this.rafHandle = requestAnimationFrame(() => {
-      this.updatedProperties = updatedProps;
-      this.fieldMap = nameToField;
-      this.valuesMap.set(valuesMapInit);
-      this.visibility.set(updatedVis);
-      this.totalFields.set(updatedProps.length);
+      this.updatedProperties = init.updatedProperties;
+      this.fieldMap = init.nameToField;
+      this.valuesMap.set(init.valuesMap);
+      this.visibility.set(init.visibility);
+      this.totalFields.set(init.updatedProperties.length);
       this.instanceName.set(this.instance.name ?? '');
+      this.targetInstance = this.instance;
       this.initDone = true;
       this.scheduleChunk();
 
-      // Apply visibilityRef handlers
-      const refStatus = applyVisibilityRefs(updatedProps, valuesMapInit, this.ctx.t());
-      this.visibilityRefStatus.set(refStatus);
-      this.disabledByRef.set(Object.fromEntries(Object.entries(refStatus).map(([n, s]) => [n, s === 'disable'])));
+      this.visibilityRefStatus.set(init.visibilityRefStatus);
+      this.disabledByRef.set(init.disabledByRef);
 
       this.updateVisibleGroups();
       this.cdr.markForCheck();
@@ -231,15 +189,13 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   private updateVisibleGroups(): void {
-    const visMap = this.visibility();
-    const refMap = this.visibilityRefStatus();
-    const visible = this.updatedProperties.slice(0, this.loadedCount()).filter(f => {
-      const refStatus = refMap[f.name];
-      if (refStatus !== undefined) return refStatus !== 'invisible';
-      return visMap[f.name];
-    });
-    const { groups } = groupConsecutiveFields(visible);
-    this.visibleGroups.set(groups.map(g => ({ fields: g.fields, name: g.name ?? undefined })));
+    const groups = computeVisibleGroups(
+      this.updatedProperties,
+      this.visibility(),
+      this.visibilityRefStatus(),
+      this.loadedCount(),
+    );
+    this.visibleGroups.set(groups);
   }
 
   handleChange(name: string, value: FieldValueType): void {
@@ -248,25 +204,18 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
     this.submissionMessage.set(null);
     this.submissionSuccess.set(null);
 
-    this.valuesMap.update(prev => {
-      const baseValues = { ...prev, [name]: value };
-      const computedVals = applyComputedRefs(Object.values(this.fieldMap), baseValues, this.ctx.t());
-      return Object.keys(computedVals).length > 0 ? { ...baseValues, ...computedVals } : baseValues;
-    });
-    this.ctx.valuesMap.set(this.valuesMap());
+    const changed = computeFieldChange(name, value, {
+      fieldMap: this.fieldMap,
+      updatedProperties: this.updatedProperties,
+      valuesMap: this.valuesMap(),
+      visibility: this.visibility(),
+    }, this.ctx.t());
 
-    const hasChildren = field.children && Object.keys(field.children).length > 0;
-    const isParent = Object.values(this.fieldMap).some(f => f.parents && name in f.parents);
-    if (hasChildren || isParent) {
-      this.visibility.update(prev =>
-        updateVisibilityBasedOnSelection(prev, this.fieldMap, { ...this.valuesMap(), [name]: value }, name, value)
-      );
-    }
-
-    // Apply visibilityRef handlers
-    const refStatus = applyVisibilityRefs(Object.values(this.fieldMap), this.valuesMap(), this.ctx.t());
-    this.visibilityRefStatus.set(refStatus);
-    this.disabledByRef.set(Object.fromEntries(Object.entries(refStatus).map(([n, s]) => [n, s === 'disable'])));
+    this.valuesMap.set(changed.newValues);
+    this.ctx.valuesMap.set(changed.newValues);
+    this.visibility.set(changed.newVisibility);
+    this.visibilityRefStatus.set(changed.newVisRefStatus);
+    this.disabledByRef.set(changed.newDisabledByRef);
 
     this.updateVisibleGroups();
     this.cdr.markForCheck();
@@ -299,15 +248,12 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
     let errorsForSubmit = this.errors();
 
     if (this.ctx.fieldValidationMode() === 'onSubmission') {
-      const newErrors: Record<string, string> = {};
-      const t = this.ctx.t();
-      this.updatedProperties.forEach(field => {
-        if (field.disabled) return;
-        const value = this.valuesMap()[field.name];
-        if (value === undefined) return;
-        const err = validateField(this.ctx.definitionName(), field, value, t);
-        if (err) newErrors[field.name] = err;
-      });
+      const newErrors = computeSubmitErrors(
+        this.updatedProperties,
+        this.valuesMap(),
+        this.ctx.definitionName(),
+        this.ctx.t(),
+      );
       this.errors.set(newErrors);
       errorsForSubmit = newErrors;
       if (Object.keys(newErrors).length > 0) {
@@ -343,11 +289,7 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   isApplyDisabled(): boolean {
-    const mode = this.ctx.fieldValidationMode();
-    if (mode === 'onEdit' || mode === 'onBlur' || mode === 'realTime') {
-      return Object.values(this.errors()).some(Boolean);
-    }
-    return false;
+    return isSubmitDisabled(this.ctx.fieldValidationMode(), this.errors());
   }
 
   trackGroup(_: number, g: { name: string | undefined }): string {

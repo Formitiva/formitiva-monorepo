@@ -13,15 +13,14 @@ import { FieldRenderer } from "../layout/FieldRenderer";
 import { FieldGroup } from "../layout/FieldGroup";
 import { InstanceName } from "../layout/LayoutComponents";
 import {
-  updateVisibilityMap,
-  updateVisibilityBasedOnSelection,
-  applyVisibilityRefs,
-  applyComputedRefs,
+  initFormState,
+  computeFieldChange,
+  computeVisibleGroups,
+  computeSubmitErrors,
+  isSubmitDisabled,
 } from '@formitiva/core';
 import type { FieldVisibilityStatus } from '@formitiva/core';
-import { renameDuplicatedGroups, groupConsecutiveFields } from '@formitiva/core';
 import { submitForm } from '@formitiva/core';
-import { validateField } from '@formitiva/core';
 import { SubmissionMessage } from "./SubmissionMessage";
 
 export interface FormitivaRendererProps {
@@ -86,92 +85,17 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
 
  
   // Step 1: Initialize basic structures immediately
-  // Initialization effect performs synchronous state setup from the `definition`
-  // and `instance` props. This is a safe prop->state initialization and will
-  // not cause an infinite update loop.
   React.useEffect(() => {
-    const nameToField = Object.fromEntries(
-      properties.map((f) => [
-        f.name,
-        { ...f, children: {} as Record<string, string[]> },
-      ])
-    );
-
-    properties.forEach((field) => {
-      if (!field.parents) return;
-      Object.entries(field.parents).forEach(([parentName, selections]) => {
-        const parentField = nameToField[parentName];
-        if (!parentField) return;
-        selections.forEach((sel) => {
-          if (!parentField.children) {
-            parentField.children = {};
-          }
-          const key = String(sel);
-          parentField.children[key] = [
-            ...(parentField.children[key] || []),
-            field.name,
-          ];
-        });
-      });
-    });
-
-    // If a group name appears in multiple non-consecutive sequences, rename
-    // later sequences so group names remain unique for rendering. Example:
-    // g1, g1, g2, g1 -> becomes g1, g1, g2, g1(1)
-    renameDuplicatedGroups(properties, nameToField);
-
-    const updatedProps = Object.values(
-      nameToField
-    ) as DefinitionPropertyField[];
-
-    // Initialize valuesMapInit with definition default values
-    const valuesMapInit = {} as Record<string, FieldValueType>;
-    updatedProps.forEach((f) => {
-      // For UnitValue, the value is in [number, unit] format while in schema definition,
-      // it is separated into 2 attributes: defaultValue and defaultUnit
-      if (f.type === "unit") {
-        // `defaultValue` is expected to be a number and `defaultUnit` a string.
-        // Normalize explicitly and assign a typed tuple so TypeScript is happy.
-        const numVal =
-          typeof f.defaultValue === "number" ? String(f.defaultValue) : "";
-        const unitVal =
-          typeof f.defaultUnit === "string"
-            ? f.defaultUnit
-            : String(f.defaultUnit ?? "m");
-        valuesMapInit[f.name] = [numVal, unitVal] as unknown as FieldValueType;
-      } else {
-        valuesMapInit[f.name] = f.defaultValue;
-      }
-    });
-
-    // Use instance to override valuesMapInit
-    targetInstanceRef.current = instance;
-    Object.keys(instance.values).forEach((key) => {
-      if (nameToField[key] !== undefined) {
-        valuesMapInit[key] = instance.values[key];
-      }
-    });
-
-    // Initialize visibility map
-    const vis = Object.fromEntries(updatedProps.map((field) => [field.name, false]));
-      // Apply computed value handlers before setting initial state
-      const initComputed = applyComputedRefs(updatedProps, valuesMapInit, t);
-      Object.assign(valuesMapInit, initComputed);
-    // Defer state updates to avoid synchronous setState inside effect
+    const init = initFormState(definition, instance, t);
     const raf = requestAnimationFrame(() => {
-      setUpdatedProperties(updatedProps);
-      setFieldMap(nameToField);
-      setValuesMap(valuesMapInit);
-      setVisibility(
-        updateVisibilityMap(updatedProps, valuesMapInit, vis, nameToField)
-      );
+      setUpdatedProperties(init.updatedProperties);
+      setFieldMap(init.nameToField);
+      setValuesMap(init.valuesMap);
+      setVisibility(init.visibility);
+      setVisibilityRefStatus(init.visibilityRefStatus);
+      setDisabledByRef(init.disabledByRef);
       setInitDone(true);
-      // Update instance name in state to sync with current instance
       setInstanceName(instance.name);
-      // Apply visibilityRef handlers
-      const refStatus = applyVisibilityRefs(updatedProps, valuesMapInit, t);
-      setVisibilityRefStatus(refStatus);
-      setDisabledByRef(Object.fromEntries(Object.entries(refStatus).map(([n, s]) => [n, s === 'disable'])));
     });
     return () => cancelAnimationFrame(raf);
   }, [properties, instance, definition]);
@@ -206,58 +130,27 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
   const handleChange = React.useCallback(
     (name: string, value: FieldValueType) => {
       const field = fieldMap[name];
-      if (!field) {
-        return;
-      }
+      if (!field) return;
 
-      // Clear any previous submission message when the user changes a value
       setSubmissionMessage(null);
       setSubmissionSuccess(null);
-      
-      // Update values map using functional update to ensure we operate on latest state
-      // For integer, integer array, float and float array, the value is string
-      // integer array value: a string which joins integers with commas
-      // float array value: a string which joins floats with commas
-      // We need to parse them back to number or number[] when submitting the form
+
       setValuesMap((prevValues) => {
-        const baseValues = { ...prevValues, [name]: value };
-        const computedVals = applyComputedRefs(
-          Object.values(fieldMap) as import('@formitiva/core').DefinitionPropertyField[],
-          baseValues,
-          t
-        );
-        return Object.keys(computedVals).length > 0 ? { ...baseValues, ...computedVals } : baseValues;
+        const changed = computeFieldChange(name, value, {
+          fieldMap,
+          updatedProperties,
+          valuesMap: prevValues,
+          visibility,
+        }, t);
+        if (changed.newVisibility !== visibility) {
+          setVisibility(changed.newVisibility);
+        }
+        setVisibilityRefStatus(changed.newVisRefStatus);
+        setDisabledByRef(changed.newDisabledByRef);
+        return changed.newValues;
       });
-
-      // Update visibility separately to ensure we're using the latest values
-      // Check if the field has children that should be shown/hidden OR
-      // if any other fields have this field as a parent
-      const hasChildren = field && field.children && Object.keys(field.children).length > 0;
-      const isParentToOthers = Object.values(fieldMap).some(
-        (f) => f.parents && name in f.parents
-      );
-      
-      if (hasChildren || isParentToOthers) {
-        setVisibility((prevVis) => {
-          // Use ref to get the latest values including the one we just updated
-          const latestValues = { ...valuesMapRef.current, [name]: value };
-          return updateVisibilityBasedOnSelection(
-            prevVis,
-            fieldMap,
-            latestValues,
-            name,
-            value
-          );
-        });
-      }
-
-      // Apply visibilityRef handlers with the new value
-      const refValues = { ...valuesMapRef.current, [name]: value };
-      const refStatus = applyVisibilityRefs(Object.values(fieldMap) as import('@formitiva/core').DefinitionPropertyField[], refValues, t);
-      setVisibilityRefStatus(refStatus);
-      setDisabledByRef(Object.fromEntries(Object.entries(refStatus).map(([n, s]) => [n, s === 'disable'])));
     },
-    [fieldMap, t]
+    [fieldMap, updatedProperties, visibility, t]
   );
 
   // Sync language changes: update savedLanguage and clear messages
@@ -323,38 +216,17 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
   }, [fieldMap]);
 
   const handleSubmit = async () => {
-    // Temporarily apply the edited name so submission handlers receive it.
-    // Mark that we expect an instance update from this submit and we want
-    // to suppress clearing messages when that update arrives.
     suppressClearOnNextInstanceUpdate.current = true;
-
     const prevName = targetInstanceRef.current?.name;
     targetInstanceRef.current.name = instanceName;
 
-    // Determine the error map that will be submitted. We avoid relying on
-    // the (async) state update to `errors` and instead use a local
-    // `errorsForSubmit` which we set to the freshly computed `newErrors`
-    // when running on-submission validation.
     let errorsForSubmit = errors;
 
-    // Go through valuesMap and validate all fields if fieldValidationMode is 'onSubmission'
     if (renderContext.fieldValidationMode === "onSubmission") {
-      const newErrors: Record<string, string> = {};
-      updatedProperties.forEach((field) => {
-        if (field.disabled) return;
-        const value = valuesMap[field.name];
-        if (value === undefined) return;
-        const err = validateField(renderContext.definitionName, field, value, t);
-        if (err) {
-          newErrors[field.name] = err;
-        }
-      });
-
-      // Update state and use the fresh map for the remainder of this function.
+      const newErrors = computeSubmitErrors(updatedProperties, valuesMap, renderContext.definitionName, t);
       setErrors(newErrors);
       errorsForSubmit = newErrors;
 
-      // If there are errors, do not proceed with submission
       if (Object.keys(newErrors).length > 0) {
         setSubmissionMessage(t("Please fix validation errors before submitting the form."));
         setSubmissionSuccess(false);
@@ -365,37 +237,20 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
       }
     }
 
-    // No field validation errors, proceed with submission
-    // Form validation is processed in submitForm
     const result = await submitForm(definition, targetInstanceRef.current, valuesMap, t, errorsForSubmit, onSubmit, onValidation);
-    
-    // Display result message in the UI
     const msg = typeof result.message === 'string' ? result.message : String(result.message);
-    const errMsg = Object.values(result.errors??{}).join("\n");
-    if (errMsg) {
-      setSubmissionMessage(msg + "\n" + errMsg);
-    } else {
-      setSubmissionMessage(msg);
-    }
+    const errMsg = Object.values(result.errors ?? {}).join("\n");
+    setSubmissionMessage(errMsg ? msg + "\n" + errMsg : msg);
     setSubmissionSuccess(result.success);
 
     if (!result.success) {
-      // Revert name if submission failed
       targetInstanceRef.current.name = prevName ?? targetInstanceRef.current.name;
       setInstanceName(prevName ?? "");
     }
   };
 
-  // Memoize expensive computations
   const isApplyDisabled = React.useMemo(
-    () => 
-      (
-        renderContext.fieldValidationMode === "onEdit" ||
-        renderContext.fieldValidationMode === "onBlur" ||
-        renderContext.fieldValidationMode === "realTime"
-      ) 
-      ? Object.values(errors).some(Boolean)
-      : false,
+    () => isSubmitDisabled(renderContext.fieldValidationMode, errors),
     [errors, renderContext.fieldValidationMode]
   );
 
@@ -424,12 +279,7 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
       )}
         <>
           {(() => {
-            const visibleFields = updatedProperties.slice(0, loadedCount).filter((field) => {
-              const refStatus = visibilityRefStatus[field.name];
-              if (refStatus !== undefined) return refStatus !== 'invisible';
-              return visibility[field.name];
-            });
-            const { groups } = groupConsecutiveFields(visibleFields);
+            const groups = computeVisibleGroups(updatedProperties, visibility, visibilityRefStatus, loadedCount);
 
             return groups.map((group, index) => {
               if (group.name) {

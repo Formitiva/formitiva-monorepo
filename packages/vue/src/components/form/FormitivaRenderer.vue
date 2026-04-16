@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, watch, watchEffect, reactive } from 'vue';
-import type { FormitivaContextType } from '@formitiva/core';
+import type { DefinitionPropertyField, FormitivaContextType } from '@formitiva/core';
 import type {
   FieldValueType,
   ErrorType,
-  DefinitionPropertyField,
   FormitivaDefinition,
   FormitivaInstance,
   FormSubmissionHandler,
@@ -15,15 +14,14 @@ import FieldRenderer from '../layout/FieldRenderer.vue';
 import FieldGroup from '../layout/FieldGroup.vue';
 import { InstanceName } from '../layout/LayoutComponents';
 import {
-  updateVisibilityMap,
-  updateVisibilityBasedOnSelection,
-  applyVisibilityRefs,
-  applyComputedRefs,
+  initFormState,
+  computeFieldChange,
+  computeVisibleGroups,
+  computeSubmitErrors,
+  isSubmitDisabled,
 } from '@formitiva/core';
 import type { FieldVisibilityStatus } from '@formitiva/core';
-import { renameDuplicatedGroups, groupConsecutiveFields } from '@formitiva/core';
 import { submitForm } from '@formitiva/core';
-import { validateField } from '@formitiva/core';
 import SubmissionMessage from './SubmissionMessage.vue';
 import SubmissionButton from './SubmissionButton.vue';
 
@@ -68,73 +66,15 @@ const suppressClearOnNextInstanceUpdate = ref(false);
 
 // Initialize all state synchronously so fields are visible on first render
 const initialize = () => {
-  const nameToField = Object.fromEntries(
-    properties.map((f) => [
-      f.name,
-      { ...f, children: {} as Record<string, string[]> },
-    ])
-  );
-
-  properties.forEach((field) => {
-    if (!field.parents) return;
-    Object.entries(field.parents).forEach(([parentName, selections]) => {
-      const parentField = nameToField[parentName];
-      if (!parentField) return;
-      selections.forEach((sel) => {
-        if (!parentField.children) {
-          parentField.children = {};
-        }
-        const key = String(sel);
-        parentField.children[key] = [
-          ...(parentField.children[key] || []),
-          field.name,
-        ];
-      });
-    });
-  });
-
-  renameDuplicatedGroups(properties, nameToField);
-
-  const updatedProps = Object.values(nameToField) as DefinitionPropertyField[];
-
-  // Initialize valuesMapInit with definition default values
-  const valuesMapInit = {} as Record<string, FieldValueType>;
-  updatedProps.forEach((f) => {
-    if (f.type === "unit") {
-      const numVal = typeof f.defaultValue === "number" ? String(f.defaultValue) : "";
-      const unitVal = typeof f.defaultUnit === "string" ? f.defaultUnit : String(f.defaultUnit ?? "m");
-      valuesMapInit[f.name] = [numVal, unitVal] as unknown as FieldValueType;
-    } else {
-      valuesMapInit[f.name] = f.defaultValue;
-    }
-  });
-
-  // Use instance to override valuesMapInit
+  const init = initFormState(props.definition, props.instance, t.value);
   targetInstance.value = props.instance;
-  Object.keys(props.instance.values).forEach((key) => {
-    if (nameToField[key] !== undefined) {
-      valuesMapInit[key] = props.instance.values[key];
-    }
-  });
-
-  // Initialize visibility map
-  const vis = Object.fromEntries(updatedProps.map((field) => [field.name, false]));
-
-  updatedProperties.value = updatedProps;
-  fieldMap.value = nameToField;
-  // Apply computed value handlers before setting initial state
-  const initComputed = applyComputedRefs(updatedProps, valuesMapInit, t.value);
-  Object.assign(valuesMapInit, initComputed);
-
-  valuesMap.value = valuesMapInit;
-  visibility.value = updateVisibilityMap(updatedProps, valuesMapInit, vis, nameToField);
+  updatedProperties.value = init.updatedProperties;
+  fieldMap.value = init.nameToField;
+  valuesMap.value = init.valuesMap;
+  visibility.value = init.visibility;
+  visibilityRefStatus.value = init.visibilityRefStatus;
+  disabledByRef.value = init.disabledByRef;
   instanceName.value = props.instance.name;
-
-  const refStatus = applyVisibilityRefs(updatedProps, valuesMapInit, t.value);
-  visibilityRefStatus.value = refStatus;
-  disabledByRef.value = Object.fromEntries(
-    Object.entries(refStatus).map(([name, s]) => [name, s === 'disable'])
-  );
 };
 
 watch([() => properties, () => props.instance, () => props.definition], initialize, { immediate: true });
@@ -144,37 +84,20 @@ const handleChange = (name: string, value: FieldValueType) => {
   const field = fieldMap.value[name];
   if (!field) return;
 
-  // Clear submission message
   submissionMessage.value = null;
   submissionSuccess.value = null;
 
-  // Update values map; merge in any computed values that depend on the changed field
-  const baseValues = { ...valuesMap.value, [name]: value };
-  const computedVals = applyComputedRefs(updatedProperties.value, baseValues, t.value);
-  const newValues = Object.keys(computedVals).length > 0 ? { ...baseValues, ...computedVals } : baseValues;
-  valuesMap.value = newValues;
+  const changed = computeFieldChange(name, value, {
+    fieldMap: fieldMap.value,
+    updatedProperties: updatedProperties.value,
+    valuesMap: valuesMap.value,
+    visibility: visibility.value,
+  }, t.value);
 
-  // Update visibility
-  const hasChildren = field && field.children && Object.keys(field.children).length > 0;
-  const isParentToOthers = Object.values(fieldMap.value).some(
-    (f) => f.parents && name in f.parents
-  );
-
-  if (hasChildren || isParentToOthers) {
-    visibility.value = updateVisibilityBasedOnSelection(
-      visibility.value,
-      fieldMap.value,
-      newValues,
-      name,
-      value
-    );
-  }
-
-  const refStatus = applyVisibilityRefs(updatedProperties.value, newValues, t.value);
-  visibilityRefStatus.value = refStatus;
-  disabledByRef.value = Object.fromEntries(
-    Object.entries(refStatus).map(([n, s]) => [n, s === 'disable'])
-  );
+  valuesMap.value = changed.newValues;
+  visibility.value = changed.newVisibility;
+  visibilityRefStatus.value = changed.newVisRefStatus;
+  disabledByRef.value = changed.newDisabledByRef;
 };
 
 // When active instance changes
@@ -219,19 +142,13 @@ const handleSubmit = async () => {
 
   let errorsForSubmit = errors.value;
 
-  // Validate on submission if needed
   if (renderContext.value.fieldValidationMode === "onSubmission") {
-    const newErrors: Record<string, string> = {};
-    updatedProperties.value.forEach((field) => {
-      if (field.disabled) return;
-      const value = valuesMap.value[field.name];
-      if (value === undefined) return;
-      const err = validateField(renderContext.value.definitionName, field, value, t.value);
-      if (err) {
-        newErrors[field.name] = err;
-      }
-    });
-
+    const newErrors = computeSubmitErrors(
+      updatedProperties.value,
+      valuesMap.value,
+      renderContext.value.definitionName,
+      t.value,
+    );
     errors.value = newErrors;
     errorsForSubmit = newErrors;
 
@@ -245,7 +162,6 @@ const handleSubmit = async () => {
     }
   }
 
-  // Submit form
   const result = await submitForm(
     props.definition,
     targetInstance.value,
@@ -258,11 +174,7 @@ const handleSubmit = async () => {
 
   const msg = typeof result.message === 'string' ? result.message : String(result.message);
   const errMsg = Object.values(result.errors ?? {}).join("\n");
-  if (errMsg) {
-    submissionMessage.value = msg + "\n" + errMsg;
-  } else {
-    submissionMessage.value = msg;
-  }
+  submissionMessage.value = errMsg ? msg + "\n" + errMsg : msg;
   submissionSuccess.value = result.success;
 
   if (!result.success) {
@@ -272,27 +184,12 @@ const handleSubmit = async () => {
 };
 
 const isApplyDisabled = computed(() =>
-  (
-    renderContext.value.fieldValidationMode === "onEdit" ||
-    renderContext.value.fieldValidationMode === "onBlur" ||
-    renderContext.value.fieldValidationMode === "realTime"
-  )
-    ? Object.values(errors.value).some(Boolean)
-    : false
+  isSubmitDisabled(renderContext.value.fieldValidationMode, errors.value)
 );
 
-const visibleFields = computed(() =>
-  updatedProperties.value.filter((field) => {
-    const refStatus = visibilityRefStatus.value[field.name];
-    if (refStatus !== undefined) return refStatus !== 'invisible';
-    return visibility.value[field.name];
-  })
+const groups = computed(() =>
+  computeVisibleGroups(updatedProperties.value, visibility.value, visibilityRefStatus.value)
 );
-
-const groups = computed(() => {
-  const { groups: fieldGroups } = groupConsecutiveFields(visibleFields.value);
-  return fieldGroups;
-});
 
 // Provide a reactive render context once and keep it in sync with renderContext.
 const providedRenderContext = reactive({ ...(renderContext.value as Record<string, unknown>) }) as unknown as FormitivaContextType;

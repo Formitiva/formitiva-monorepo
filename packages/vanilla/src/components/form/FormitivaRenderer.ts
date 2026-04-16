@@ -15,15 +15,14 @@ import type { FormContext } from '../../context/formitivaContext';
 import { createFieldRenderer, type FieldRendererResult } from '../layout/FieldRenderer';
 import { createFieldGroup, type FieldGroupResult } from '../layout/FieldGroup';
 import {
-  updateVisibilityMap,
-  updateVisibilityBasedOnSelection,
-  applyVisibilityRefs,
-  applyComputedRefs,
+  initFormState,
+  computeFieldChange,
+  computeVisibleGroups,
+  computeSubmitErrors,
+  isSubmitDisabled,
 } from '@formitiva/core';
 import type { FieldVisibilityStatus } from '@formitiva/core';
-import { renameDuplicatedGroups, groupConsecutiveFields } from '@formitiva/core';
 import { submitForm } from '@formitiva/core';
-import { validateField } from '@formitiva/core';
 import { createSubmissionMessage } from './SubmissionMessage';
 import { CSS_CLASSES } from '@formitiva/core';
 
@@ -57,54 +56,15 @@ type GroupEntry = {
 export function createFormitivaRenderer(opts: FormitivaRendererOptions): FormitivaRendererResult {
   const { definition, ctx, onSubmit, onValidation } = opts;
   let instance = opts.instance;
-  const { properties, displayName } = definition;
+  const { displayName } = definition;
   const { t, formStyle } = ctx;
 
-  // Build fieldMap with children populated
-  const nameToField: Record<string, DefinitionPropertyField> = {};
-  properties.forEach(f => { nameToField[f.name] = { ...f, children: {} as Record<string, string[]> }; });
-  properties.forEach(field => {
-    if (!field.parents) return;
-    Object.entries(field.parents).forEach(([parentName, selections]) => {
-      const parentField = nameToField[parentName];
-      if (!parentField) return;
-      selections.forEach(sel => {
-        if (!parentField.children) parentField.children = {};
-        const key = String(sel);
-        parentField.children[key] = [...(parentField.children[key] || []), field.name];
-      });
-    });
-  });
-  renameDuplicatedGroups(properties, nameToField);
-  const updatedProperties = Object.values(nameToField) as DefinitionPropertyField[];
-
-  // Initialize valuesMap
-  const valuesMap: Record<string, FieldValueType> = {};
-  updatedProperties.forEach(f => {
-    if (f.type === 'unit') {
-      const numVal = typeof f.defaultValue === 'number' ? String(f.defaultValue) : '';
-      const unitVal = typeof f.defaultUnit === 'string' ? f.defaultUnit : String(f.defaultUnit ?? 'm');
-      valuesMap[f.name] = [numVal, unitVal] as unknown as FieldValueType;
-    } else {
-      valuesMap[f.name] = f.defaultValue;
-    }
-  });
-  Object.keys(instance.values).forEach(key => {
-    if (nameToField[key] !== undefined) valuesMap[key] = instance.values[key];
-  });
-
-  // Apply computed value handlers before setting initial state
-  const initComputed = applyComputedRefs(updatedProperties, valuesMap, t);
-  Object.assign(valuesMap, initComputed);
-
-  // Visibility
-  const vis: Record<string, boolean> = {};
-  updatedProperties.forEach(f => { vis[f.name] = false; });
-  Object.assign(vis, updateVisibilityMap(updatedProperties, valuesMap, vis, nameToField));
-
-  // VisibilityRef handler results
-  const visRefStatus: Record<string, FieldVisibilityStatus> = {};
-  Object.assign(visRefStatus, applyVisibilityRefs(updatedProperties, valuesMap, t));
+  // ── Init all form state via shared core utility ──────────────────────────
+  const init = initFormState(definition, instance, t);
+  const { nameToField, updatedProperties } = init;
+  const valuesMap: Record<string, FieldValueType> = init.valuesMap;
+  const vis: Record<string, boolean> = init.visibility;
+  const visRefStatus: Record<string, FieldVisibilityStatus> = init.visibilityRefStatus;
 
   const errorsMap: Record<string, string> = {};
   let submissionMessage: string | null = null;
@@ -155,7 +115,6 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
   container.appendChild(fieldsContainer);
 
   // Submit button
-  const isApplyDisabledMode = ctx.fieldValidationMode === 'onEdit' || ctx.fieldValidationMode === 'onBlur' || ctx.fieldValidationMode === 'realTime';
   const submitBtn = document.createElement('button');
   submitBtn.type = 'button';
   submitBtn.className = CSS_CLASSES.button;
@@ -169,26 +128,31 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
   function handleChange(name: string, value: FieldValueType) {
     const field = nameToField[name];
     if (!field) return;
-    valuesMap[name] = value;
     submMsg.update(null, null);
 
-    // Apply computed value handlers and update affected widgets
-    const computedVals = applyComputedRefs(updatedProperties, valuesMap, t);
-    const computedChanged = Object.keys(computedVals).length > 0 &&
-      Object.entries(computedVals).some(([k, v]) => valuesMap[k] !== v);
-    if (computedChanged) {
-      Object.assign(valuesMap, computedVals);
-      Object.entries(computedVals).forEach(([cName, cVal]) => {
-        const cEntry = activeEntries.find(e => e.type === 'field' && e.name === cName);
-        if (cEntry && cEntry.type === 'field') {
-          (cEntry.result as FieldRendererResult).update(
-            cVal,
-            errorsMap[cName] ?? null,
-            Boolean(nameToField[cName]?.disabled),
-          );
-        }
-      });
-    }
+    const changed = computeFieldChange(name, value, {
+      fieldMap: nameToField,
+      updatedProperties,
+      valuesMap: { ...valuesMap },
+      visibility: { ...vis },
+    }, t);
+
+    Object.assign(valuesMap, changed.newValues);
+    Object.assign(vis, changed.newVisibility);
+    Object.assign(visRefStatus, changed.newVisRefStatus);
+
+    // Update DOM widgets for computed-value fields that changed
+    Object.keys(changed.newValues).forEach(cName => {
+      if (cName === name) return;
+      const cEntry = activeEntries.find(e => e.type === 'field' && e.name === cName);
+      if (cEntry && cEntry.type === 'field') {
+        (cEntry.result as FieldRendererResult).update(
+          changed.newValues[cName],
+          errorsMap[cName] ?? null,
+          Boolean(nameToField[cName]?.disabled),
+        );
+      }
+    });
 
     // Always update the DOM widget for the changed field so button handlers
     // that externally set a field's value are reflected immediately.
@@ -197,19 +161,7 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
       (changedEntry.result as FieldRendererResult).update(value, errorsMap[name] ?? null, Boolean(field.disabled));
     }
 
-    const hasChildren = field.children && Object.keys(field.children).length > 0;
-    const isParentToOthers = Object.values(nameToField).some(f => f.parents && name in f.parents);
-    if (hasChildren || isParentToOthers) {
-      const newVis = updateVisibilityBasedOnSelection({ ...vis }, nameToField, valuesMap, name, value);
-      Object.assign(vis, newVis);
-    }
-
-    // Update visibilityRef handler results
-    const newVisRefStatus = applyVisibilityRefs(updatedProperties, valuesMap, t);
-    const visRefChanged = Object.entries(newVisRefStatus).some(([k, v]) => visRefStatus[k] !== v);
-    Object.assign(visRefStatus, newVisRefStatus);
-
-    if (hasChildren || isParentToOthers || visRefChanged) {
+    if (changed.visibilityChanged || changed.newVisibility !== vis) {
       reconcileFields();
     }
     // Update button valuesMap
@@ -232,18 +184,11 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
   }
 
   function updateSubmitBtn() {
-    if (isApplyDisabledMode) {
-      submitBtn.disabled = Object.values(errorsMap).some(Boolean);
-    }
+    submitBtn.disabled = isSubmitDisabled(ctx.fieldValidationMode, errorsMap);
   }
 
   function reconcileFields() {
-    const visibleFields = updatedProperties.filter(f => {
-      const refStatus = visRefStatus[f.name];
-      if (refStatus !== undefined) return refStatus !== 'invisible';
-      return vis[f.name];
-    });
-    const { groups } = groupConsecutiveFields(visibleFields);
+    const groups = computeVisibleGroups(updatedProperties, vis, visRefStatus);
 
     // Build wanted list: { key, type, fields? }
     const wanted: Array<{ key: string; type: 'group' | 'field'; groupName?: string; fields?: DefinitionPropertyField[]; field?: DefinitionPropertyField }> = [];
@@ -326,17 +271,9 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
     let errorsForSubmit = { ...errorsMap };
 
     if (ctx.fieldValidationMode === 'onSubmission') {
-      const newErrors: Record<string, string> = {};
-      updatedProperties.forEach(f => {
-        if (f.disabled) return;
-        const value = valuesMap[f.name];
-        if (value === undefined) return;
-        const err = validateField(ctx.definitionName, f, value, t);
-        if (err) newErrors[f.name] = err;
-      });
-      Object.assign(errorsMap, newErrors);
-      // Clear old keys not in newErrors
-      Object.keys(errorsMap).forEach(k => { if (!newErrors[k]) delete errorsMap[k]; });
+      const newErrors = computeSubmitErrors(updatedProperties, valuesMap, ctx.definitionName, t);
+      // Sync errorsMap in-place
+      Object.keys(errorsMap).forEach(k => { delete errorsMap[k]; });
       Object.assign(errorsMap, newErrors);
       errorsForSubmit = newErrors;
       reconcileFields();
@@ -355,7 +292,7 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
     submissionMessage = errMsg ? `${msg}\n${errMsg}` : msg;
     submissionSuccess = result.success;
     submMsg.update(submissionMessage, submissionSuccess);
-    submitBtn.disabled = !result.success && isApplyDisabledMode ? Object.values(errorsMap).some(Boolean) : false;
+    submitBtn.disabled = isSubmitDisabled(ctx.fieldValidationMode, errorsMap);
     if (!result.success) instance.name = instanceName;
   });
 
@@ -363,12 +300,12 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
     el: container,
     getValues() { return { ...valuesMap }; },
     validate() {
-      const newErrors: Record<string, string> = {};
-      updatedProperties.forEach(f => {
-        if (f.disabled || !vis[f.name]) return;
-        const err = validateField(ctx.definitionName, f, valuesMap[f.name], t);
-        if (err) newErrors[f.name] = err;
-      });
+      const newErrors = computeSubmitErrors(
+        updatedProperties.filter(f => vis[f.name]),
+        valuesMap,
+        ctx.definitionName,
+        t,
+      );
       Object.keys(errorsMap).forEach(k => delete errorsMap[k]);
       Object.assign(errorsMap, newErrors);
       reconcileFields();
