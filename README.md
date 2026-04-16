@@ -432,6 +432,11 @@ Start an example in development mode (packages are rebuilt on change via `pnpm d
 pnpm dev
 ```
 
+Publish:
+
+```bash
+pnpm publish --filter "@formitiva/*" -r
+```
 ---
 
 ## Contributing

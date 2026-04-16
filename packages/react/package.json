@@ -39,7 +39,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@formitiva/core": "^2.1.2"
+    "@formitiva/core": "workspace:^"
   },
   "peerDependencies": {
     "react": ">=17",
