@@ -1,30 +1,19 @@
 import { ref, watch, onUnmounted, type Ref } from "vue";
+import { computeDropdownPosition } from '@formitiva/core';
+import type { DropdownPosition } from '@formitiva/core';
 
 export function useDropdownPosition(
   controlRef: Ref<HTMLElement | null>,
   open: Ref<boolean> | boolean,
   maxHeight = 200
 ) {
-  const pos = ref<{
-    left: number;
-    top: number;
-    width: number;
-  } | null>(null);
+  const pos = ref<DropdownPosition | null>(null);
 
   const openValue = typeof open === 'boolean' ? ref(open) : open;
 
   const update = () => {
     if (!controlRef.value) return;
-    
-    const rect = controlRef.value.getBoundingClientRect();
-    let left = rect.left;
-    let top = rect.bottom;
-    let width = Math.max(80, Math.round(rect.width));
-
-    left = Math.min(left, window.innerWidth - width);
-    top = Math.min(top, window.innerHeight - maxHeight);
-
-    pos.value = { left, top, width };
+    pos.value = computeDropdownPosition(controlRef.value, maxHeight);
   };
 
   let ro: ResizeObserver | null = null;

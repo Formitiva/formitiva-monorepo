@@ -1,11 +1,8 @@
 import { ref, onUnmounted, type Ref } from "vue";
 import { IS_TEST_ENV } from '@formitiva/core';
-
-export type DebouncedCallback = {
-  callback: (...args: unknown[]) => void;
-  cancel: () => void;
-  flush: () => void;
-};
+import type { DebouncedCallback } from '@formitiva/core';
+export { createDebouncedCallback } from '@formitiva/core';
+export type { DebouncedCallback } from '@formitiva/core';
 
 /**
  * useDebouncedCallback
@@ -82,70 +79,6 @@ export function useDebouncedCallback(
       if (trailing && lastArgs.value) {
         invoke(lastArgs.value);
         lastArgs.value = null;
-      }
-    }, wait);
-  };
-
-  return { callback: debounced, cancel, flush };
-}
-
-/**
- * createDebouncedCallback - non-hook variant that returns the same API but
- * doesn't use React hooks. Useful for creating many debounced callbacks
- * programmatically (e.g., driven from a static schema) while handling
- * lifecycle cleanup manually.
- */
-export function createDebouncedCallback(
-  callback: (...args: unknown[]) => unknown,
-  wait = 300,
-  options?: { leading?: boolean; trailing?: boolean }
-): DebouncedCallback {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  let lastArgs: unknown[] | null = null;
-
-  const leading = options?.leading === true;
-  const trailing = options?.trailing !== false; // lodash default
-
-  const invoke = (args: unknown[]) => {
-    callback(...args);
-  };
-
-  const cancel = () => {
-    if (timer) {
-      clearTimeout(timer);
-      timer = undefined;
-    }
-    lastArgs = null;
-  };
-
-  const flush = () => {
-    if (timer && trailing && lastArgs) {
-      clearTimeout(timer);
-      timer = undefined;
-      invoke(lastArgs);
-      lastArgs = null;
-    }
-  };
-
-  const debounced = (...args: unknown[]) => {
-    const isLeadingCall = leading && !timer;
-
-    lastArgs = args;
-
-    if (isLeadingCall) {
-      invoke(args);
-    }
-
-    if (timer) {
-      clearTimeout(timer);
-    }
-
-    timer = setTimeout(() => {
-      timer = undefined;
-
-      if (trailing && lastArgs) {
-        invoke(lastArgs);
-        lastArgs = null;
       }
     }, wait);
   };

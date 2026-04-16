@@ -405,3 +405,35 @@ export function clearTranslationCaches(): void {
   userFailedSet.clear();
   cacheMetadata.clear();
 }
+
+/**
+ * Loads both the common and user translation maps for the given language,
+ * returning empty maps when the language is `'en'` or when loading fails.
+ *
+ * This is the shared, framework-agnostic translation-loading core that each
+ * provider (React, Vue, Angular, Vanilla) wraps with its own
+ * cancellation / reactivity strategy.
+ */
+export interface TranslationMaps {
+  commonMap: TranslationMap;
+  userMap: TranslationMap;
+}
+
+export async function loadTranslationMaps(
+  language: string,
+  localizeName: string,
+): Promise<TranslationMaps> {
+  if (language === 'en') {
+    return { commonMap: {}, userMap: {} };
+  }
+  try {
+    const commonResult = await loadCommonTranslation(language);
+    const userResult = await loadUserTranslation(language, localizeName);
+    return {
+      commonMap: commonResult.success ? commonResult.translations : {},
+      userMap: userResult.success ? userResult.translations : {},
+    };
+  } catch {
+    return { commonMap: {}, userMap: {} };
+  }
+}

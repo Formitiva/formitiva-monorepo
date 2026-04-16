@@ -137,6 +137,7 @@ export {
   getSupportedLanguages,
   loadCommonTranslation,
   loadUserTranslation,
+  loadTranslationMaps,
   clearTranslationCaches,
   createTranslationFunction,
   isDebugMode,
@@ -147,6 +148,7 @@ export type {
   TranslationMap,
   TranslationCache,
   TranslationLoadResult,
+  TranslationMaps,
 } from './utils/translationUtils';
 
 export {
@@ -165,6 +167,16 @@ export type {
 } from './utils/formStateUtils';
 
 export {
+  normalizeUnit,
+  computeUnitValueState,
+  emitUnitValueChange,
+} from './utils/unitValueFieldUtils';
+export type {
+  UnitFactors,
+  UnitValueState,
+} from './utils/unitValueFieldUtils';
+
+export {
   dimensionUnitsMap,
   dimensionUnitDisplayMap,
   dimensionUnitFactorsMap,
@@ -172,6 +184,37 @@ export {
   convertTemperature,
   getUnitFactors,
 } from './utils/unitValueMapper';
+
+export {
+  buildFormStyle,
+  buildFieldStyle,
+} from './utils/styleConfig';
+export type {
+  FormStyle,
+  FieldStyle,
+  StyleMap,
+} from './utils/styleConfig';
+
+export {
+  createDebouncedCallback,
+} from './utils/debouncedCallback';
+export type {
+  DebouncedCallback,
+} from './utils/debouncedCallback';
+
+export {
+  resolveFieldValidation,
+} from './utils/fieldValidatorUtils';
+export type {
+  ValidationTrigger,
+} from './utils/fieldValidatorUtils';
+
+export {
+  computeDropdownPosition,
+} from './utils/dropdownPositionUtils';
+export type {
+  DropdownPosition,
+} from './utils/dropdownPositionUtils';
 
 // ─── Styles ─────────────────────────────────────────────────────────────────
 export { CSS_CLASSES, combineClasses } from './styles/cssClasses';

@@ -1,9 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { validateField } from '@formitiva/core';
+import { resolveFieldValidation } from '@formitiva/core';
 import { FormitivaContextService } from './formitiva-context.service';
-import type { DefinitionPropertyField, FieldValueType } from '@formitiva/core';
-
-export type ValidationTrigger = 'change' | 'blur' | 'sync';
+import type { DefinitionPropertyField, FieldValueType, ValidationTrigger } from '@formitiva/core';
+export type { ValidationTrigger } from '@formitiva/core';
 
 @Injectable()
 export class FieldValidatorService {
@@ -15,20 +14,14 @@ export class FieldValidatorService {
     trigger: ValidationTrigger = 'change',
     externalError?: string | null
   ): string | null {
-    const mode = this.ctx.fieldValidationMode();
-    const t = this.ctx.t();
-    const definitionName = this.ctx.definitionName();
-
-    if (mode === 'onEdit' || mode === 'realTime') {
-      return validateField(definitionName, field, value, t) ?? null;
-    }
-
-    if (mode === 'onBlur') {
-      return trigger === 'blur'
-        ? (validateField(definitionName, field, value, t) ?? null)
-        : (externalError ?? null);
-    }
-
-    return externalError ?? null;
+    return resolveFieldValidation(
+      this.ctx.fieldValidationMode(),
+      trigger,
+      this.ctx.definitionName(),
+      field,
+      value,
+      this.ctx.t(),
+      externalError,
+    );
   }
 }

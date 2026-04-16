@@ -1,29 +1,19 @@
 import React from "react";
+import { computeDropdownPosition } from '@formitiva/core';
+import type { DropdownPosition } from '@formitiva/core';
 
 export function useDropdownPosition(
   controlRef: React.RefObject<HTMLElement | null>,
   open: boolean,
   maxHeight = 200
 ) {
-  const [pos, setPos] = React.useState<{
-    left: number;
-    top: number;
-    width: number;
-  } | null>(null);
+  const [pos, setPos] = React.useState<DropdownPosition | null>(null);
 
   React.useEffect(() => {
     if (!open || !controlRef.current) return;
 
     const update = () => {
-      const rect = controlRef.current!.getBoundingClientRect();
-      let left = rect.left;
-      let top = rect.bottom;
-      let width = Math.max(80, Math.round(rect.width));
-
-      left = Math.min(left, window.innerWidth - width);
-      top = Math.min(top, window.innerHeight - maxHeight);
-
-      setPos({ left, top, width });
+      setPos(computeDropdownPosition(controlRef.current!, maxHeight));
     };
 
     update();

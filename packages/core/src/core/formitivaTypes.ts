@@ -195,8 +195,8 @@ export type FormitivaContextType = {
   definitionName: string;
   language: string;
   theme: string;
-  formStyle: { container?: Record<string, string | number | undefined>; titleStyle?: Record<string, string | number | undefined> };
-  fieldStyle: Record<string, unknown>;
+  formStyle: Record<string, Record<string, string | number | undefined>>;
+  fieldStyle: Record<string, Record<string, string | number | undefined>>;
   t: TranslationFunction;
   fieldValidationMode: FieldValidationMode;
   displayInstanceName: boolean;

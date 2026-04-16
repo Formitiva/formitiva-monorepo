@@ -6,14 +6,15 @@
  * or stored in closures — no React dependency required.
  */
 
-import type { FieldValidationMode, TranslationFunction } from '@formitiva/core';
+import type { FieldValidationMode, TranslationFunction, FormStyle, FieldStyle } from '@formitiva/core';
+import { buildFormStyle, buildFieldStyle } from '@formitiva/core';
 
 export interface FormContext {
   definitionName: string;
   language: string;
   theme: string;
-  formStyle: Record<string, Record<string, unknown>>;
-  fieldStyle: Record<string, Record<string, unknown>>;
+  formStyle: FormStyle;
+  fieldStyle: FieldStyle;
   t: TranslationFunction;
   fieldValidationMode: FieldValidationMode;
   displayInstanceName: boolean;
@@ -28,8 +29,8 @@ export function createDefaultContext(): FormContext {
     definitionName: '',
     language: 'en',
     theme: 'light',
-    formStyle: {},
-    fieldStyle: {},
+    formStyle: buildFormStyle(),
+    fieldStyle: buildFieldStyle(),
     t: (text) => text,
     fieldValidationMode: 'onEdit',
     displayInstanceName: true,

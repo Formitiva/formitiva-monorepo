@@ -2,36 +2,27 @@
  * Vanilla JS utility for calculating dropdown menu position.
  * Replaces the React useDropdownPosition hook.
  */
-
-export interface DropdownPosition {
-  left: number;
-  top: number;
-  width: number;
-}
+import { computeDropdownPosition } from '@formitiva/core';
+export { computeDropdownPosition } from '@formitiva/core';
+export type { DropdownPosition } from '@formitiva/core';
 
 export interface DropdownPositionController {
   /** Re-calculate and return current position from the control element */
-  getPosition(maxHeight?: number): DropdownPosition | null;
+  getPosition(maxHeight?: number): import('@formitiva/core').DropdownPosition | null;
   /** Attach scroll/resize listeners that call the callback with updated position */
-  startTracking(callback: (pos: DropdownPosition | null) => void, maxHeight?: number): () => void;
+  startTracking(callback: (pos: import('@formitiva/core').DropdownPosition | null) => void, maxHeight?: number): () => void;
 }
 
 export function createDropdownPositionController(
   controlEl: HTMLElement | null
 ): DropdownPositionController {
-  const getPosition = (maxHeight = 200): DropdownPosition | null => {
+  const getPosition = (maxHeight = 200) => {
     if (!controlEl) return null;
-    const rect = controlEl.getBoundingClientRect();
-    let left = rect.left;
-    let top = rect.bottom;
-    const width = Math.max(80, Math.round(rect.width));
-    left = Math.min(left, window.innerWidth - width);
-    top = Math.min(top, window.innerHeight - maxHeight);
-    return { left, top, width };
+    return computeDropdownPosition(controlEl, maxHeight);
   };
 
   const startTracking = (
-    callback: (pos: DropdownPosition | null) => void,
+    callback: (pos: import('@formitiva/core').DropdownPosition | null) => void,
     maxHeight = 200
   ): (() => void) => {
     const update = () => callback(getPosition(maxHeight));
