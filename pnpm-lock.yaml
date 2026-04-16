@@ -148,8 +148,8 @@ importers:
   packages/angular:
     dependencies:
       '@formitiva/core':
-        specifier: ^2.1.2
-        version: 2.1.2
+        specifier: workspace:^
+        version: link:../core
       tslib:
         specifier: ^2.3.0
         version: 2.8.1
@@ -200,8 +200,8 @@ importers:
   packages/react:
     dependencies:
       '@formitiva/core':
-        specifier: ^2.1.2
-        version: 2.1.2
+        specifier: workspace:^
+        version: link:../core
     devDependencies:
       '@testing-library/react':
         specifier: ^16.3.2
@@ -237,8 +237,8 @@ importers:
   packages/vanilla:
     dependencies:
       '@formitiva/core':
-        specifier: ^2.1.2
-        version: 2.1.2
+        specifier: workspace:^
+        version: link:../core
     devDependencies:
       '@vitest/coverage-v8':
         specifier: ^4.1.0
@@ -259,8 +259,8 @@ importers:
   packages/vue:
     dependencies:
       '@formitiva/core':
-        specifier: ^2.1.2
-        version: 2.1.2
+        specifier: workspace:^
+        version: link:../core
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^5.0.0
@@ -1323,9 +1323,6 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
-
-  '@formitiva/core@2.1.2':
-    resolution: {integrity: sha512-WsjdudyiGxy4UVj/g7jzkr+ZS6EPxKqIqWpY2kFLMyx6DwMnWv3GDbsDIZWPf1wUzZE9qGDJXWGrub/VAS80UQ==}
 
   '@inquirer/ansi@1.0.2':
     resolution: {integrity: sha512-S8qNSZiYzFd0wAcyG5AXCvUHC5Sr7xpZ9wZ2py9XR88jUz8wooStVx5M6dRzczbBWjic9NP7+rY0Xi7qqK/aMQ==}
@@ -6356,8 +6353,6 @@ snapshots:
 
   '@esbuild/win32-x64@0.25.4':
     optional: true
-
-  '@formitiva/core@2.1.2': {}
 
   '@inquirer/ansi@1.0.2': {}
 
