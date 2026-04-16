@@ -1,6 +1,6 @@
 {
   "name": "@formitiva/angular",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Formitiva Angular adapter — module, components and services",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "angular", "angular-module", "typescript"],
   "repository": {
@@ -37,7 +37,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@formitiva/core": "workspace:*",
+    "@formitiva/core": "^2.1.2",
     "tslib": "^2.3.0"
   },
   "peerDependencies": {

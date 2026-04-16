@@ -1,6 +1,6 @@
 {
   "name": "@formitiva/vanilla",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Formitiva Vanilla JS adapter — no framework dependencies",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "vanilla", "vanilla-js", "typescript", "no-framework"],
   "repository": {
@@ -39,7 +39,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@formitiva/core": "workspace:*"
+    "@formitiva/core": "^2.1.2"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.0",

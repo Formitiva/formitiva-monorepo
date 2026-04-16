@@ -1,6 +1,6 @@
 {
   "name": "@formitiva/vue",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Formitiva Vue 3 adapter — components, composables and registries",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "vue", "vue3", "composables", "typescript"],
   "repository": {
@@ -39,7 +39,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@formitiva/core": "workspace:*"
+    "@formitiva/core": "^2.1.2"
   },
   "peerDependencies": {
     "vue": ">=3.3"

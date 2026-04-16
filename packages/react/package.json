@@ -1,6 +1,6 @@
 {
   "name": "@formitiva/react",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Formitiva React adapter — components, hooks and registries",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "react", "react-form", "hooks", "typescript"],
   "repository": {
@@ -39,7 +39,7 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@formitiva/core": "workspace:*"
+    "@formitiva/core": "^2.1.2"
   },
   "peerDependencies": {
     "react": ">=17",
