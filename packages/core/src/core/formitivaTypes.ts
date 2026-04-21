@@ -111,6 +111,7 @@ export interface FormitivaDefinition {
   properties: DefinitionPropertyField[];
   validatorRef?: string;
   submitterRef?: string;
+  layoutRef?: string;
 }
 
 export interface FormitivaInstance {
@@ -206,4 +207,20 @@ export type FormitivaContextType = {
 export type FormitivaProviderProps = {
   definitionName?: string;
   defaultStyle?: Record<string, unknown>;
+};
+
+// ─── Layout Types ────────────────────────────────────────────────────────
+
+export type LayoutSection = {
+  label: string;
+  name: string;
+  props: string[];
+};
+
+export type LayoutConfig ={
+  name: string;
+  type: 'nav' | 'tab' | 'wizard';
+  displayName: string;
+  sections: LayoutSection[];
+  defaultValue: string;
 };

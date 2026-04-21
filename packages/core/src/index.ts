@@ -19,6 +19,8 @@ export type {
   BaseInputProps,
   FormitivaContextType,
   FormitivaProviderProps,
+  LayoutSection,
+  LayoutConfig,
 } from './core/formitivaTypes';
 
 export {
@@ -101,6 +103,12 @@ export {
   listFieldCustomValidationHandlers,
   listFormValidationHandlers,
 } from './core/registries/validationHandlerRegistry';
+
+// ─── Layout Registry ────────────────────────────────────────────────────
+export {
+  registerLayout,
+  getLayout,
+} from './core/registries/layoutRegistry';
 
 // ─── Validation ─────────────────────────────────────────────────────────────
 export {

@@ -4,6 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "composite": true,
+    "emitDeclarationOnly": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "paths": {
       "@formitiva/core": ["../core/src/index.ts"],

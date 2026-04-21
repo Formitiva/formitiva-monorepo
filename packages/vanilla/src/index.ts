@@ -64,3 +64,11 @@ export {
   createInstanceNameWidget,
   createErrorDiv,
 } from './components/layout/LayoutComponents';
+
+// layout adapter registry
+export {
+  registerLayoutAdapter,
+  getLayoutAdapter,
+  clearLayoutAdapter,
+} from './core/registries/layoutAdapterRegistry';
+export type { VanillaLayoutAdapter, VanillaLayoutAdapterResult } from './core/registries/layoutAdapterRegistry';

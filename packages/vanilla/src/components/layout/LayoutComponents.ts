@@ -31,7 +31,7 @@ function createErrorEl(id: string): HTMLSpanElement {
   span.className = 'formitiva-error';
   span.setAttribute('role', 'alert');
   span.style.cssText = [
-    'color:var(--formitiva-color-error)',
+    'color:var(--formitiva-color-error, #ef4444)',
     'font-size:0.875rem',
     'margin-top:var(--formitiva-space-xs,4px)',
     'display:none',

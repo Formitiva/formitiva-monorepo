@@ -4,23 +4,27 @@ import {
   Input,
   inject,
   signal,
+  computed,
   ChangeDetectorRef,
 } from '@angular/core';
 import type { OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
-import { NgIf, NgFor, NgStyle } from '@angular/common';
+import { NgIf, NgFor, NgStyle, NgComponentOutlet } from '@angular/common';
 import { FormitivaContextService } from '../../services/formitiva-context.service';
 import { FieldRendererComponent } from '../layout/field-renderer.component';
 import { FieldGroupComponent } from '../layout/field-group.component';
 import { InstanceNameComponent } from '../layout/layout-components.component';
 import { SubmissionMessageComponent } from './submission-message.component';
+import { getLayoutAdapter } from '../../core/registries/layout-adapter-registry';
+import { LayoutRenderContextService } from '../../services/layout-render-context.service';
 import {
   initFormState,
   computeFieldChange,
   computeVisibleGroups,
   computeSubmitErrors,
   isSubmitDisabled,
+  getLayout,
 } from '@formitiva/core';
-import type { FieldVisibilityStatus } from '@formitiva/core';
+import type { FieldVisibilityStatus, LayoutConfig } from '@formitiva/core';
 import { submitForm } from '@formitiva/core';
 import type {
   DefinitionPropertyField,
@@ -37,12 +41,13 @@ import type {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    NgIf, NgFor, NgStyle,
+    NgIf, NgFor, NgStyle, NgComponentOutlet,
     FieldRendererComponent,
     FieldGroupComponent,
     InstanceNameComponent,
     SubmissionMessageComponent,
   ],
+  providers: [LayoutRenderContextService],
   template: `
     <div [ngStyle]="ctx.formStyle().container">
       <h2 *ngIf="definition.displayName" [ngStyle]="ctx.formStyle().titleStyle">
@@ -61,36 +66,49 @@ import type {
         [onChange]="setInstanceName"
       ></fv-instance-name>
 
-      <ng-container *ngFor="let group of visibleGroups(); trackBy: trackGroup">
-        <ng-container *ngIf="group.name; else ungrouped">
-          <fv-field-group
-            [groupName]="group.name"
-            [fields]="group.fields"
-            [valuesMap]="valuesMap()"
-            [handleChange]="handleChangeFn"
-            [handleError]="handleErrorFn"
-            [errorsMap]="errors()"
-            [disabledByRef]="disabledByRef()"
-          ></fv-field-group>
-        </ng-container>
-        <ng-template #ungrouped>
-          <fv-field-renderer
-            *ngFor="let field of group.fields; trackBy: trackField"
-            [field]="field"
-            [valuesMap]="valuesMap()"
-            [handleChange]="handleChangeFn"
-            [handleError]="handleErrorFn"
-            [errorsMap]="errors()"
-            [disabledByRef]="disabledByRef()"
-          ></fv-field-renderer>
-        </ng-template>
+      <!-- Layout adapter (pro plugin) -->
+      <ng-container *ngIf="layoutAdapter && activeLayout">
+        <ng-container
+          [ngComponentOutlet]="layoutAdapter"
+          [ngComponentOutletInputs]="getLayoutInputs()"
+        ></ng-container>
       </ng-container>
 
-      <div *ngIf="loadedCount() < totalFields()" style="font-size:0.9em;color:var(--formitiva-text-muted, #666)">
+      <!-- Normal layout (no adapter registered) -->
+      <ng-container *ngIf="!layoutAdapter || !activeLayout">
+        <ng-container *ngFor="let group of visibleGroups(); trackBy: trackGroup">
+          <ng-container *ngIf="group.name; else ungrouped">
+            <fv-field-group
+              [groupName]="group.name"
+              [fields]="group.fields"
+              [valuesMap]="valuesMap()"
+              [handleChange]="handleChangeFn"
+              [handleError]="handleErrorFn"
+              [errorsMap]="errors()"
+              [disabledByRef]="disabledByRef()"
+            ></fv-field-group>
+          </ng-container>
+          <ng-template #ungrouped>
+            <fv-field-renderer
+              *ngFor="let field of group.fields; trackBy: trackField"
+              [field]="field"
+              [valuesMap]="valuesMap()"
+              [handleChange]="handleChangeFn"
+              [handleError]="handleErrorFn"
+              [errorsMap]="errors()"
+              [disabledByRef]="disabledByRef()"
+            ></fv-field-renderer>
+          </ng-template>
+        </ng-container>
+      </ng-container>
+
+      <div *ngIf="(!layoutAdapter || !activeLayout) && loadedCount() < totalFields()" style="font-size:0.9em;color:var(--formitiva-text-muted, #666)">
         {{ ctx.t()('Loading more fields... (' + loadedCount() + '/' + totalFields() + ')') }}
       </div>
 
+      <!-- Submit button: shown when no adapter or no layout active -->
       <button
+        *ngIf="!layoutAdapter || !activeLayout"
         (click)="handleSubmit()"
         [disabled]="isApplyDisabled()"
         class="formitiva-button"
@@ -109,6 +127,7 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
 
   readonly ctx = inject(FormitivaContextService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly layoutCtx = inject(LayoutRenderContextService);
 
   updatedProperties: DefinitionPropertyField[] = [];
   fieldMap: Record<string, DefinitionPropertyField> = {};
@@ -124,6 +143,17 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   instanceName = signal('');
   visibleGroups = signal<Array<{ name: string | undefined; fields: DefinitionPropertyField[] }>>([]);
 
+  // Pro: layout registry
+  activeLayout: LayoutConfig | null = null;
+  readonly activeSection = signal<string>('');
+  readonly layoutAdapter = getLayoutAdapter();
+
+  readonly isWizardLastStep = computed(() => {
+    if (!this.activeLayout || this.activeLayout.type !== 'wizard') return false;
+    const sections = this.activeLayout.sections;
+    return sections[sections.length - 1]?.name === this.activeSection();
+  });
+
   private initDone = false;
   private chunkTimer?: ReturnType<typeof setTimeout>;
   private rafHandle?: number;
@@ -138,13 +168,33 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
     this.submissionMessage.set(null);
     this.submissionSuccess.set(null);
   };
+  readonly setSectionFn = (name: string) => {
+    this.activeSection.set(name);
+    this.updateVisibleGroups();
+    this.cdr.markForCheck();
+  };
+
+  getLayoutInputs(): Record<string, unknown> {
+    return {
+      config: this.activeLayout,
+      activeSection: this.activeSection(),
+      onSectionChange: this.setSectionFn,
+      t: this.ctx.t(),
+    };
+  }
 
   ngOnInit(): void {
+    this.activeLayout = getLayout(this.definition?.layoutRef ?? '');
+    this.activeSection.set(this.activeLayout?.defaultValue ?? '');
     this.init();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['definition'] || changes['instance']) {
+      if (changes['definition']) {
+        this.activeLayout = getLayout(this.definition?.layoutRef ?? '');
+        this.activeSection.set(this.activeLayout?.defaultValue ?? '');
+      }
       this.initDone = false;
       this.loadedCount.set(0);
       this.init();
@@ -158,6 +208,13 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
 
   private init(): void {
     const init = initFormState(this.definition, this.instance, this.ctx.t());
+
+    // Wire up layout context service handlers
+    this.layoutCtx.handleChange = this.handleChangeFn;
+    this.layoutCtx.handleError = this.handleErrorFn;
+    this.layoutCtx.handleSubmit = () => this.handleSubmit();
+    this.layoutCtx.t = this.ctx.t();
+    this.layoutCtx.setSectionFn = this.setSectionFn;
 
     this.rafHandle = requestAnimationFrame(() => {
       this.updatedProperties = init.updatedProperties;
@@ -189,13 +246,39 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   private updateVisibleGroups(): void {
+    // Filter properties to the active layout section (if any)
+    let propsToRender = this.updatedProperties;
+    if (this.activeLayout) {
+      const section = this.activeSection();
+      const sectionProps = this.activeLayout.sections.find((n) => n.name === section)?.props ?? null;
+      if (sectionProps) {
+        propsToRender = this.updatedProperties.filter((p) => sectionProps!.includes(p.name));
+      }
+    }
+
     const groups = computeVisibleGroups(
-      this.updatedProperties,
+      propsToRender,
       this.visibility(),
       this.visibilityRefStatus(),
-      this.loadedCount(),
+      // In layout-adapter mode the section filter already limits props to a
+      // small subset, so skip progressive chunk slicing to avoid an empty
+      // first render while the chunk timer hasn't fired yet.
+      this.layoutAdapter ? undefined : // In layout-adapter mode the section filter already limits props to a
+      // small subset, so skip progressive chunk slicing to avoid an empty
+      // first render while the chunk timer hasn't fired yet.
+      this.layoutAdapter ? undefined : this.loadedCount(),
     );
     this.visibleGroups.set(groups);
+
+    // Sync layout context service for pro layout components
+    if (this.layoutAdapter) {
+      this.layoutCtx.visibleGroups.set(groups);
+      this.layoutCtx.valuesMap.set(this.valuesMap());
+      this.layoutCtx.errors.set(this.errors());
+      this.layoutCtx.disabledByRef.set(this.disabledByRef());
+      this.layoutCtx.isApplyDisabled.set(this.isApplyDisabled());
+      this.layoutCtx.isWizardLastStep.set(this.isWizardLastStep());
+    }
   }
 
   handleChange(name: string, value: FieldValueType): void {

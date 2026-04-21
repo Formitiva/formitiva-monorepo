@@ -9,10 +9,12 @@ import type {
   FormSubmissionHandler,
   FormValidationHandler,
 } from '@formitiva/core';
+import { getLayout } from '@formitiva/core';
 import useFormitivaContext, { provideFormitivaContext } from '../../hooks/useFormitivaContext';
 import FieldRenderer from '../layout/FieldRenderer.vue';
 import FieldGroup from '../layout/FieldGroup.vue';
 import { InstanceName } from '../layout/LayoutComponents';
+import { getLayoutAdapter } from '../../core/registries/layoutAdapterRegistry';
 import {
   initFormState,
   computeFieldChange,
@@ -39,6 +41,16 @@ const props = withDefaults(defineProps<FormitivaRendererProps>(), {
 
 const { properties, displayName } = props.definition;
 const parentContext = useFormitivaContext();
+
+// Layout adapter
+const activeLayout = getLayout(props.definition?.layoutRef ?? '');
+const layoutAdapter = getLayoutAdapter();
+const activeSection = ref<string>(activeLayout?.defaultValue ?? '');
+
+// Reset section when layout changes
+watch(() => activeLayout?.defaultValue, (val) => {
+  activeSection.value = val ?? '';
+}, { immediate: true });
 
 const renderContext = computed(() => ({
   ...parentContext,
@@ -187,8 +199,21 @@ const isApplyDisabled = computed(() =>
   isSubmitDisabled(renderContext.value.fieldValidationMode, errors.value)
 );
 
+// Compute which field names belong to the active layout section
+const activeSectionProps = computed<string[] | null>(() => {
+  if (!activeLayout) return null;
+  return activeLayout.sections.find((n) => n.name === activeSection.value)?.props ?? null;
+});
+
+// Filter updatedProperties to only the current section's fields
+const sectionProperties = computed<DefinitionPropertyField[]>(() => {
+  const propsFilter = activeSectionProps.value;
+  if (!propsFilter) return updatedProperties.value;
+  return updatedProperties.value.filter((p) => propsFilter.includes(p.name));
+});
+
 const groups = computed(() =>
-  computeVisibleGroups(updatedProperties.value, visibility.value, visibilityRefStatus.value)
+  computeVisibleGroups(sectionProperties.value, visibility.value, visibilityRefStatus.value)
 );
 
 // Provide a reactive render context once and keep it in sync with renderContext.
@@ -220,34 +245,78 @@ watchEffect(() => {
       }"
     />
 
-    <template v-for="(group, index) in groups" :key="group.name || `ungrouped-${index}`">
-      <FieldGroup
-        v-if="group.name"
-        :group-name="group.name"
-        :default-open="true"
-        :fields="group.fields"
-        :values-map="valuesMap"
-        :errors-map="errors"
-        :t="t"
-        :handleChange="handleChange"
-        :handleError="handleError"
-        :disabled-by-ref="disabledByRef"
-      />
-      <template v-else>
-        <FieldRenderer
-          v-for="field in group.fields"
-          :key="field.name"
-          :field="field"
+    <!-- Layout adapter (pro plugin) -->
+    <component
+      v-if="layoutAdapter && activeLayout"
+      :is="layoutAdapter"
+      :layout="activeLayout"
+      :model-value="activeSection"
+      @update:model-value="(name: string) => { activeSection = name; }"
+    >
+      <template v-for="(group, index) in groups" :key="group.name || `ungrouped-${index}`">
+        <FieldGroup
+          v-if="group.name"
+          :group-name="group.name"
+          :default-open="true"
+          :fields="group.fields"
           :values-map="valuesMap"
           :errors-map="errors"
+          :t="t"
           :handleChange="handleChange"
           :handleError="handleError"
           :disabled-by-ref="disabledByRef"
         />
+        <template v-else>
+          <FieldRenderer
+            v-for="field in group.fields"
+            :key="field.name"
+            :field="field"
+            :values-map="valuesMap"
+            :errors-map="errors"
+            :handleChange="handleChange"
+            :handleError="handleError"
+            :disabled-by-ref="disabledByRef"
+          />
+        </template>
+      </template>
+      <template #submit>
+        <SubmissionButton :disabled="isApplyDisabled" :t="t" @click="handleSubmit" />
+      </template>
+    </component>
+
+    <!-- Normal layout (no adapter) -->
+    <template v-else>
+      <template v-for="(group, index) in groups" :key="group.name || `ungrouped-${index}`">
+        <FieldGroup
+          v-if="group.name"
+          :group-name="group.name"
+          :default-open="true"
+          :fields="group.fields"
+          :values-map="valuesMap"
+          :errors-map="errors"
+          :t="t"
+          :handleChange="handleChange"
+          :handleError="handleError"
+          :disabled-by-ref="disabledByRef"
+        />
+        <template v-else>
+          <FieldRenderer
+            v-for="field in group.fields"
+            :key="field.name"
+            :field="field"
+            :values-map="valuesMap"
+            :errors-map="errors"
+            :handleChange="handleChange"
+            :handleError="handleError"
+            :disabled-by-ref="disabledByRef"
+          />
+        </template>
       </template>
     </template>
 
-    <SubmissionButton 
+    <!-- Submit button: only rendered when no layout adapter is active -->
+    <SubmissionButton
+      v-if="!layoutAdapter || !activeLayout"
       :disabled="isApplyDisabled" 
       :t="t"
       @click="handleSubmit" 

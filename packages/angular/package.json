@@ -13,13 +13,13 @@
   },
   "homepage": "https://github.com/formitiva/formitiva-monorepo/tree/main/packages/angular#readme",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
+  "module": "./dist/fesm2022/formitiva-angular.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "import": "./dist/fesm2022/formitiva-angular.mjs",
+      "require": "./dist/fesm2022/formitiva-angular.mjs"
     }
   },
   "files": ["dist"],
@@ -28,7 +28,8 @@
     "registry": "https://registry.npmjs.org/"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build:ng": "ng-packagr -p ng-package.json",
+    "build": "pnpm run build:ng",
     "dev": "tsc -p tsconfig.json --watch",
     "clean": "rimraf dist",
     "lint": "tsc -p tsconfig.typecheck.json",
@@ -37,10 +38,10 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@formitiva/core": "workspace:^",
     "tslib": "^2.3.0"
   },
   "peerDependencies": {
+    "@formitiva/core": "workspace:^",
     "@angular/core": ">=18",
     "@angular/common": ">=18",
     "@angular/forms": ">=18",
@@ -55,6 +56,7 @@
     "typescript": "~5.6.3",
     "rimraf": "^5.0.0",
     "vitest": "^4.1.0",
-    "@vitest/coverage-v8": "^4.1.0"
+    "@vitest/coverage-v8": "^4.1.0",
+    "ng-packagr": "^19.0.0"
   }
 }

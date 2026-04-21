@@ -65,3 +65,11 @@ export {
   RowFieldLayout,
   InstanceName,
 } from './components/layout/LayoutComponents';
+
+// Layout adapter registry
+export {
+  registerLayoutAdapter,
+  getLayoutAdapter,
+  clearLayoutAdapter,
+} from './core/registries/layoutAdapterRegistry';
+export type { VueLayoutAdapter } from './core/registries/layoutAdapterRegistry';

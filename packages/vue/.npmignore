@@ -21,6 +21,8 @@ tsconfig*.json
 vitest.config.ts
 vitest.config.js
 vitest.setup.ts
+vite.config.ts
+vite.config.js
 
 # ─── Editor & OS ─────────────────────────────────────────────────────────────
 .vscode/

@@ -62,6 +62,8 @@ export { FieldGroupComponent } from './components/layout/field-group.component';
 export { FormitivaContextService } from './services/formitiva-context.service';
 export { FieldValidatorService } from './services/field-validator.service';
 export type { ValidationTrigger } from './services/field-validator.service';
+export { LayoutRenderContextService } from './services/layout-render-context.service';
+export type { LayoutVisibleGroup } from './services/layout-render-context.service';
 
 // Framework-specific registries
 export {
@@ -81,3 +83,11 @@ export {
   hasPlugin,
 } from './core/registries/plugin-registry';
 export type { FormitivaPlugin } from './core/registries/plugin-registry';
+
+// Layout adapter registry
+export {
+  registerLayoutAdapter,
+  getLayoutAdapter,
+  clearLayoutAdapter,
+} from './core/registries/layout-adapter-registry';
+export type { AngularLayoutAdapter } from './core/registries/layout-adapter-registry';

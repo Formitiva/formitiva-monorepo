@@ -58,3 +58,11 @@ export { default as FormitivaRenderer } from './components/form/FormitivaRendere
 export type { FormitivaRendererProps } from './components/form/FormitivaRenderer';
 export { FormitivaProvider } from './components/form/FormitivaProvider';
 export { StandardFieldLayout } from './components/layout/LayoutComponents';
+
+// Layout adapter registry
+export {
+  registerLayoutAdapter,
+  getLayoutAdapter,
+  clearLayoutAdapter,
+} from './core/registries/layoutAdapterRegistry';
+export type { ReactLayoutAdapterProps, ReactLayoutAdapter } from './core/registries/layoutAdapterRegistry';

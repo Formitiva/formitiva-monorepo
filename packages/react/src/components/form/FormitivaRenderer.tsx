@@ -8,10 +8,12 @@ import type {
   FormSubmissionHandler,
   FormValidationHandler,
 } from '@formitiva/core';
+import { getLayout } from '@formitiva/core';
 import useFormitivaContext, { FormitivaContext } from "../../hooks/useFormitivaContext";
 import { FieldRenderer } from "../layout/FieldRenderer";
 import { FieldGroup } from "../layout/FieldGroup";
 import { InstanceName } from "../layout/LayoutComponents";
+import { getLayoutAdapter } from '../../core/registries/layoutAdapterRegistry';
 import {
   initFormState,
   computeFieldChange,
@@ -56,6 +58,10 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
     definitionName: definition?.name ?? parentContext.definitionName,
   };
   const [ savedLanguage, setSavedLanguage] = React.useState("en");
+
+  // Layout adapter registry
+  const activeLayout = getLayout(definition?.layoutRef ?? '');
+  const LayoutAdapter = getLayoutAdapter();
 
   // Core state
   const [updatedProperties, setUpdatedProperties] = React.useState<
@@ -254,6 +260,63 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
     [errors, renderContext.fieldValidationMode]
   );
 
+  // Render fields �� optionally filtered to the given field names
+  const renderFields = (fieldNames?: string[]) => {
+    const filtered = fieldNames
+      ? updatedProperties.filter((p) => fieldNames.includes(p.name))
+      : updatedProperties;
+    const groups = computeVisibleGroups(filtered, visibility, visibilityRefStatus, loadedCount);
+
+    return (
+      <>
+        {groups.map((group, index) => {
+          if (group.name) {
+            return (
+              <FieldGroup
+                key={group.name}
+                groupName={group.name}
+                defaultOpen={true}
+                fields={group.fields}
+                valuesMap={valuesMap}
+                handleChange={handleChange}
+                handleError={handleError}
+                errorsMap={errors}
+                t={t}
+                disabledByRef={disabledByRef}
+              />
+            );
+          }
+          return (
+            <React.Fragment key={`ungrouped-${index}`}>
+              {group.fields.map((field) => (
+                <FieldRenderer
+                  key={field.name}
+                  field={field}
+                  valuesMap={valuesMap}
+                  handleChange={handleChange}
+                  handleError={handleError}
+                  errorsMap={errors}
+                  disabledByRef={disabledByRef}
+                />
+              ))}
+            </React.Fragment>
+          );
+        })}
+        {loadedCount < updatedProperties.length && (
+          <div style={{ fontSize: '0.9em', color: 'var(--formitiva-text-muted, #666)' }}>
+            {t(`Loading more fields...` + ` (${loadedCount}/${updatedProperties.length})`)}
+          </div>
+        )}
+      </>
+    );
+  };
+
+  const renderSubmit = () => (
+    <button onClick={handleSubmit} disabled={isApplyDisabled} className="formitiva-button" style={{ width: "120px" }}>
+      {t("Submit")}
+    </button>
+  );
+
   return (
     <FormitivaContext.Provider value={renderContext}>
       <div style={formStyle.container}>
@@ -277,61 +340,9 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
           }}
         />
       )}
-        <>
-          {(() => {
-            const groups = computeVisibleGroups(updatedProperties, visibility, visibilityRefStatus, loadedCount);
-
-            return groups.map((group, index) => {
-              if (group.name) {
-                return (
-                  <FieldGroup
-                    key={group.name}
-                    groupName={group.name}
-                    defaultOpen={true}
-                    fields={group.fields}
-                    valuesMap={valuesMap}
-                    handleChange={handleChange}
-                    handleError={handleError}
-                    errorsMap={errors}
-                    t={t}
-                    disabledByRef={disabledByRef}
-                  />
-                );
-              }
-
-              // Render ungrouped fields
-              return (
-                <React.Fragment key={`ungrouped-${index}`}>
-                  {group.fields.map((field) => (
-                    <FieldRenderer
-                      key={field.name}
-                      field={field}
-                      valuesMap={valuesMap}
-                      handleChange={handleChange}
-                      handleError={handleError}
-                      errorsMap={errors}
-                      disabledByRef={disabledByRef}
-                    />
-                  ))}
-                </React.Fragment>
-              );
-            });
-          })()}
-          {loadedCount < updatedProperties.length && (
-            <div
-              style={{
-                fontSize: "0.9em",
-                color: "var(--formitiva-text-muted, #666)",
-              }}
-            >
-              { t(`Loading more fields...` + ` (${loadedCount}/${updatedProperties.length})`) }
-            </div>
-          )}
-        </>
-      {/* <Separator /> */}
-      <button onClick={handleSubmit} disabled={isApplyDisabled} className="formitiva-button" style={{ width: "120px" }}>
-        {t("Submit")}
-      </button>
+      {LayoutAdapter && activeLayout
+        ? <LayoutAdapter layout={activeLayout} renderFields={renderFields} renderSubmit={renderSubmit} t={t} />
+        : <>{renderFields()}{renderSubmit()}</>}
       </div>
     </FormitivaContext.Provider>
   );

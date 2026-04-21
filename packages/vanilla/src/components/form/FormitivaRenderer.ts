@@ -14,12 +14,14 @@ import type {
 import type { FormContext } from '../../context/formitivaContext';
 import { createFieldRenderer, type FieldRendererResult } from '../layout/FieldRenderer';
 import { createFieldGroup, type FieldGroupResult } from '../layout/FieldGroup';
+import { getLayoutAdapter, type VanillaLayoutAdapterResult } from '../../core/registries/layoutAdapterRegistry';
 import {
   initFormState,
   computeFieldChange,
   computeVisibleGroups,
   computeSubmitErrors,
   isSubmitDisabled,
+  getLayout,
 } from '@formitiva/core';
 import type { FieldVisibilityStatus } from '@formitiva/core';
 import { submitForm } from '@formitiva/core';
@@ -114,13 +116,42 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
   const fieldsContainer = document.createElement('div');
   container.appendChild(fieldsContainer);
 
-  // Submit button
+  // Submit button — created here; placed into the layout's submitSlot when a
+  // wizard layout is active, otherwise appended directly to the outer container.
   const submitBtn = document.createElement('button');
   submitBtn.type = 'button';
   submitBtn.className = CSS_CLASSES.button;
   submitBtn.textContent = t('Submit');
   Object.assign(submitBtn.style, { width: '120px' });
-  container.appendChild(submitBtn);
+
+  // Layout adapter
+  const activeLayout = getLayout(definition?.layoutRef ?? '');
+  const layoutAdapter = getLayoutAdapter();
+  let activeSection: string = activeLayout?.defaultValue ?? '';
+  let layoutAdapterResult: VanillaLayoutAdapterResult | null = null;
+
+  // When a layout is active, we mount a layout widget and route field rendering
+  // into its contentEl instead of directly into fieldsContainer.
+  let fieldsMountEl: HTMLElement = fieldsContainer;
+
+  const onSectionChange = (name: string) => {
+    activeSection = name;
+    reconcileFields();
+  };
+
+  if (activeLayout && layoutAdapter) {
+    layoutAdapterResult = layoutAdapter(activeLayout, activeSection, onSectionChange, t);
+    fieldsContainer.appendChild(layoutAdapterResult.el);
+    fieldsMountEl = layoutAdapterResult.contentEl;
+    // If the layout provides a submit slot (e.g. wizard nav row), inject the button there.
+    if (layoutAdapterResult.submitSlot) {
+      layoutAdapterResult.submitSlot.appendChild(submitBtn);
+    } else {
+      container.appendChild(submitBtn);
+    }
+  } else {
+    container.appendChild(submitBtn);
+  }
 
   // Track active entries in DOM order
   const activeEntries: GroupEntry[] = [];
@@ -190,14 +221,27 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
   function reconcileFields() {
     const groups = computeVisibleGroups(updatedProperties, vis, visRefStatus);
 
+    // When a layout is active, only show props belonging to the current section.
+    const sectionProps = activeLayout
+      ? new Set(activeLayout.sections.find(s => s.name === activeSection)?.props ?? [])
+      : null;
+
     // Build wanted list: { key, type, fields? }
     const wanted: Array<{ key: string; type: 'group' | 'field'; groupName?: string; fields?: DefinitionPropertyField[]; field?: DefinitionPropertyField }> = [];
     groups.forEach((group) => {
       if (group.name) {
-        wanted.push({ key: `group:${group.name}`, type: 'group', groupName: group.name, fields: group.fields });
+        // Filter group fields to those in the active section (if a layout is active)
+        const fields = sectionProps
+          ? group.fields.filter(f => sectionProps.has(f.name))
+          : group.fields;
+        if (fields.length > 0) {
+          wanted.push({ key: `group:${group.name}`, type: 'group', groupName: group.name, fields });
+        }
       } else {
         group.fields.forEach(f => {
-          wanted.push({ key: `field:${f.name}`, type: 'field', field: f });
+          if (!sectionProps || sectionProps.has(f.name)) {
+            wanted.push({ key: `field:${f.name}`, type: 'field', field: f });
+          }
         });
       }
     });
@@ -246,11 +290,11 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
       }
       newOrder.push(entry);
 
-      // Ensure correct DOM order
-      const refEl = fieldsContainer.children[idx] as HTMLElement | undefined;
+      // Ensure correct DOM order within the current mount element
+      const refEl = fieldsMountEl.children[idx] as HTMLElement | undefined;
       if (refEl !== entry.el) {
-        if (refEl) fieldsContainer.insertBefore(entry.el, refEl);
-        else fieldsContainer.appendChild(entry.el);
+        if (refEl) fieldsMountEl.insertBefore(entry.el, refEl);
+        else fieldsMountEl.appendChild(entry.el);
       }
     });
 
