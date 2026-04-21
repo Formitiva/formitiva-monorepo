@@ -12,6 +12,8 @@ export interface ReactLayoutAdapterProps {
   renderFields: (fieldNames?: string[]) => React.ReactNode;
   /** Render the submit button (adapter decides when to show it). */
   renderSubmit: () => React.ReactNode;
+  /** Check whether a given set of fields currently has validation errors. */
+  hasErrorsInFields: (fieldNames?: string[]) => boolean;
   t: (key: string) => string;
 }
 

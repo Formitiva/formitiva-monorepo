@@ -12,3 +12,8 @@
 - Add ci.yml
   Add typecheck
 - Fix small issues
+
+## 2.1.3 2026-04-21
+- Fix vue incomplete issue
+- Add layout interface
+- Fix issues

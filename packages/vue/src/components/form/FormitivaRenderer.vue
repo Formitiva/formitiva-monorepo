@@ -195,8 +195,33 @@ const handleSubmit = async () => {
   }
 };
 
+const hasErrorsInFields = (fieldNames?: string[] | null) => {
+  if (!fieldNames?.length) {
+    return false;
+  }
+
+  const fields = updatedProperties.value.filter((field) => fieldNames.includes(field.name));
+  return Object.keys(
+    computeSubmitErrors(
+      fields,
+      valuesMap.value,
+      renderContext.value.definitionName,
+      t.value,
+    ),
+  ).length > 0;
+};
+
 const isApplyDisabled = computed(() =>
-  isSubmitDisabled(renderContext.value.fieldValidationMode, errors.value)
+  activeLayout
+    ? Object.keys(
+        computeSubmitErrors(
+          updatedProperties.value,
+          valuesMap.value,
+          renderContext.value.definitionName,
+          t.value,
+        ),
+      ).length > 0
+    : isSubmitDisabled(renderContext.value.fieldValidationMode, errors.value)
 );
 
 // Compute which field names belong to the active layout section
@@ -204,6 +229,8 @@ const activeSectionProps = computed<string[] | null>(() => {
   if (!activeLayout) return null;
   return activeLayout.sections.find((n) => n.name === activeSection.value)?.props ?? null;
 });
+
+const isNextDisabled = computed(() => hasErrorsInFields(activeSectionProps.value));
 
 // Filter updatedProperties to only the current section's fields
 const sectionProperties = computed<DefinitionPropertyField[]>(() => {
@@ -250,6 +277,7 @@ watchEffect(() => {
       v-if="layoutAdapter && activeLayout"
       :is="layoutAdapter"
       :layout="activeLayout"
+      :next-disabled="isNextDisabled"
       :model-value="activeSection"
       @update:model-value="(name: string) => { activeSection = name; }"
     >

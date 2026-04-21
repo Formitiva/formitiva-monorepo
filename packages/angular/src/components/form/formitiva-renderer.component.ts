@@ -270,15 +270,22 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
     );
     this.visibleGroups.set(groups);
 
-    // Sync layout context service for pro layout components
-    if (this.layoutAdapter) {
-      this.layoutCtx.visibleGroups.set(groups);
-      this.layoutCtx.valuesMap.set(this.valuesMap());
-      this.layoutCtx.errors.set(this.errors());
-      this.layoutCtx.disabledByRef.set(this.disabledByRef());
-      this.layoutCtx.isApplyDisabled.set(this.isApplyDisabled());
-      this.layoutCtx.isWizardLastStep.set(this.isWizardLastStep());
+    this.syncLayoutContext(groups);
+  }
+
+  private syncLayoutContext(
+    groups: Array<{ name: string | undefined; fields: DefinitionPropertyField[] }> = this.visibleGroups(),
+  ): void {
+    if (!this.layoutAdapter) {
+      return;
     }
+
+    this.layoutCtx.visibleGroups.set(groups);
+    this.layoutCtx.valuesMap.set(this.valuesMap());
+    this.layoutCtx.errors.set(this.errors());
+    this.layoutCtx.disabledByRef.set(this.disabledByRef());
+    this.layoutCtx.isApplyDisabled.set(this.isApplyDisabled());
+    this.layoutCtx.isWizardLastStep.set(this.isWizardLastStep());
   }
 
   handleChange(name: string, value: FieldValueType): void {
@@ -312,6 +319,7 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
         delete r[name];
         return r;
       });
+      this.syncLayoutContext();
       return;
     }
     this.errors.update(prev => {
@@ -320,6 +328,7 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
       delete r[name];
       return r;
     });
+    this.syncLayoutContext();
     this.cdr.markForCheck();
   }
 
@@ -342,11 +351,13 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
       if (Object.keys(newErrors).length > 0) {
         this.submissionMessage.set(this.ctx.t()('Please fix validation errors before submitting the form.'));
         this.submissionSuccess.set(false);
+        this.syncLayoutContext();
         this.cdr.markForCheck();
         return;
       }
       this.submissionMessage.set(null);
       this.submissionSuccess.set(null);
+      this.syncLayoutContext();
     }
 
     const result = await submitForm(
@@ -372,6 +383,17 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   isApplyDisabled(): boolean {
+    if (this.activeLayout) {
+      return Object.keys(
+        computeSubmitErrors(
+          this.updatedProperties,
+          this.valuesMap(),
+          this.ctx.definitionName(),
+          this.ctx.t(),
+        ),
+      ).length > 0;
+    }
+
     return isSubmitDisabled(this.ctx.fieldValidationMode(), this.errors());
   }
 

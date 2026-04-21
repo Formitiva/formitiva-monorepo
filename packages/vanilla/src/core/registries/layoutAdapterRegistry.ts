@@ -12,6 +12,8 @@ export interface VanillaLayoutAdapterResult {
   contentEl: HTMLElement;
   /** Optional slot (left of wizard nav row) where the renderer injects the submit button. */
   submitSlot?: HTMLElement;
+  /** Optional hook for wizard adapters to enable/disable the Next button. */
+  setNextDisabled?(disabled: boolean): void;
   isLastStep?(): boolean;
   destroy(): void;
 }

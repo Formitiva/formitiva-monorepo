@@ -255,9 +255,31 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
     }
   };
 
+  const hasErrorsInFields = React.useCallback(
+    (fieldNames?: string[]) => {
+      if (!fieldNames?.length) {
+        return false;
+      }
+
+      const fields = updatedProperties.filter((field) => fieldNames.includes(field.name));
+      return Object.keys(
+        computeSubmitErrors(fields, valuesMap, renderContext.definitionName, t),
+      ).length > 0;
+    },
+    [updatedProperties, valuesMap, renderContext.definitionName, t],
+  );
+
   const isApplyDisabled = React.useMemo(
-    () => isSubmitDisabled(renderContext.fieldValidationMode, errors),
-    [errors, renderContext.fieldValidationMode]
+    () => {
+      if (activeLayout) {
+        return Object.keys(
+          computeSubmitErrors(updatedProperties, valuesMap, renderContext.definitionName, t),
+        ).length > 0;
+      }
+
+      return isSubmitDisabled(renderContext.fieldValidationMode, errors);
+    },
+    [activeLayout, updatedProperties, valuesMap, renderContext.definitionName, t, errors, renderContext.fieldValidationMode]
   );
 
   // Render fields �� optionally filtered to the given field names
@@ -341,7 +363,7 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
         />
       )}
       {LayoutAdapter && activeLayout
-        ? <LayoutAdapter layout={activeLayout} renderFields={renderFields} renderSubmit={renderSubmit} t={t} />
+        ? <LayoutAdapter layout={activeLayout} renderFields={renderFields} renderSubmit={renderSubmit} hasErrorsInFields={hasErrorsInFields} t={t} />
         : <>{renderFields()}{renderSubmit()}</>}
       </div>
     </FormitivaContext.Provider>

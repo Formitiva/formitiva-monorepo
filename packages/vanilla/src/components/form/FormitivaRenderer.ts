@@ -201,6 +201,7 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
       else if (e.result.updateValuesMap) e.result.updateValuesMap(valuesMap);
     });
     updateSubmitBtn();
+    updateNextBtn();
   }
 
   function handleError(name: string, error: ErrorType) {
@@ -212,10 +213,36 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
       delete errorsMap[name];
     }
     updateSubmitBtn();
+    updateNextBtn();
+  }
+
+  function hasErrorsInFields(fieldNames?: string[] | null): boolean {
+    if (!fieldNames?.length) {
+      return false;
+    }
+
+    const fields = updatedProperties.filter((field) => fieldNames.includes(field.name));
+    return Object.keys(computeSubmitErrors(fields, valuesMap, ctx.definitionName, t)).length > 0;
   }
 
   function updateSubmitBtn() {
+    if (activeLayout) {
+      submitBtn.disabled = Object.keys(
+        computeSubmitErrors(updatedProperties, valuesMap, ctx.definitionName, t),
+      ).length > 0;
+      return;
+    }
+
     submitBtn.disabled = isSubmitDisabled(ctx.fieldValidationMode, errorsMap);
+  }
+
+  function updateNextBtn() {
+    if (activeLayout?.type !== 'wizard' || !layoutAdapterResult?.setNextDisabled) {
+      return;
+    }
+
+    const sectionProps = activeLayout.sections.find((section) => section.name === activeSection)?.props ?? [];
+    layoutAdapterResult.setNextDisabled(hasErrorsInFields(sectionProps));
   }
 
   function reconcileFields() {
@@ -300,11 +327,13 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
 
     activeEntries.length = 0;
     newOrder.forEach(e => activeEntries.push(e));
+
+    updateSubmitBtn();
+    updateNextBtn();
   }
 
   // Initial render
   reconcileFields();
-  updateSubmitBtn();
 
   // Submit handler
   submitBtn.addEventListener('click', async () => {
@@ -325,7 +354,8 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
         const msg = t('Please fix validation errors before submitting the form.');
         submissionMessage = msg; submissionSuccess = false;
         submMsg.update(msg, false);
-        submitBtn.disabled = false;
+        updateSubmitBtn();
+        updateNextBtn();
         return;
       }
     }
@@ -336,7 +366,8 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
     submissionMessage = errMsg ? `${msg}\n${errMsg}` : msg;
     submissionSuccess = result.success;
     submMsg.update(submissionMessage, submissionSuccess);
-    submitBtn.disabled = isSubmitDisabled(ctx.fieldValidationMode, errorsMap);
+    updateSubmitBtn();
+    updateNextBtn();
     if (!result.success) instance.name = instanceName;
   });
 
