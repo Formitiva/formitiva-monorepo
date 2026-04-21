@@ -17,7 +17,8 @@
     "@angular/forms": "^19.0.0",
     "@angular/platform-browser": "^19.0.0",
     "@angular/router": "^19.0.0",
-    "@formitiva/angular": "workspace:*",
+    "@formitiva/core": "^2.1.3",
+    "@formitiva/angular": "^2.1.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

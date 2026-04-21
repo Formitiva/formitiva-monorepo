@@ -11,7 +11,6 @@
  * English is the default — no locale file is needed for 'en'.
  */
 import { Component, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { FormitivaComponent } from '@formitiva/angular';
 import type { FormitivaInstance } from '@formitiva/angular';
 
@@ -89,7 +88,7 @@ const preloadedInstance: FormitivaInstance = {
 @Component({
   selector: 'app-translation',
   standalone: true,
-  imports: [FormitivaComponent, FormsModule],
+  imports: [FormitivaComponent],
   template: `
     <div class="page-content">
       <h2>Translation / i18n</h2>
@@ -101,7 +100,7 @@ const preloadedInstance: FormitivaInstance = {
 
       <div class="lang-selector">
         <label for="lang">Language:</label>
-        <select id="lang" [(ngModel)]="language">
+        <select id="lang" [value]="language" (change)="language = ($any($event.target)).value">
           <option value="en">English</option>
           <option value="de">Deutsch</option>
           <option value="fr">Français</option>
