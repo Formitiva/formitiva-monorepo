@@ -23,7 +23,7 @@ const _ctx = useFormitivaContext();
 const t = computed(() => _ctx.t);
 const validate = useFieldValidator(props.field, props.error);
 
-const max = props.field.max ?? 5;
+const max = Math.min(Math.max(props.field.max ?? 5, 1), 10);
 const iconChar = props.field.icon?.trim() || '\u2605';
 
 const hoverIndex = ref<number | null>(null);

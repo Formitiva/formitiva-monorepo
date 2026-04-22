@@ -18,7 +18,17 @@ export function useDropdownPosition(
 
   let ro: ResizeObserver | null = null;
 
+  const cleanup = () => {
+    window.removeEventListener("scroll", update, true);
+    window.removeEventListener("resize", update);
+    ro?.disconnect();
+    ro = null;
+  };
+
   watch([openValue, controlRef], ([isOpen, element]) => {
+    // Always tear down previous listeners before re-evaluating state.
+    cleanup();
+
     if (!isOpen || !element) {
       pos.value = null;
       return;
@@ -34,11 +44,7 @@ export function useDropdownPosition(
     }
   }, { immediate: true });
 
-  onUnmounted(() => {
-    window.removeEventListener("scroll", update, true);
-    window.removeEventListener("resize", update);
-    ro?.disconnect();
-  });
+  onUnmounted(cleanup);
 
   return pos;
 }

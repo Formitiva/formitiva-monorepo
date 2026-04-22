@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { nextTick } from 'vue';
 import useFormitivaContext from "../../../hooks/useFormitivaContext";
 import { isDarkTheme, isDarkColor } from '@formitiva/core';
@@ -160,11 +160,20 @@ const computePosition = () => {
 
 // Retry helper: attempt to compute position, retrying a few times if the tooltip
 // isn't measured yet (teleport may render asynchronously).
+let positionTimer: ReturnType<typeof setTimeout> | null = null;
+
 const ensurePosition = (attempts = 5, delay = 25) => {
   if (computePosition()) return;
   if (attempts <= 0) return;
-  setTimeout(() => ensurePosition(attempts - 1, delay), delay);
+  positionTimer = setTimeout(() => ensurePosition(attempts - 1, delay), delay);
 };
+
+onUnmounted(() => {
+  if (positionTimer !== null) {
+    clearTimeout(positionTimer);
+    positionTimer = null;
+  }
+});
 
 watch(hover, (isHovering) => {
   if (!isHovering || !iconRef.value) {

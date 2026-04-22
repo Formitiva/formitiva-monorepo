@@ -24,7 +24,8 @@ const definition = computed<FormitivaDefinition | null>(() => {
     return typeof props.definitionData === 'string' 
       ? JSON.parse(props.definitionData) 
       : (props.definitionData ?? null);
-  } catch {
+  } catch (e) {
+    console.error('[Formitiva] Failed to parse definitionData:', e);
     return null;
   }
 });

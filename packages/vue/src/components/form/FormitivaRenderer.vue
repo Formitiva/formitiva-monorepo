@@ -174,22 +174,30 @@ const handleSubmit = async () => {
     }
   }
 
-  const result = await submitForm(
-    props.definition,
-    targetInstance.value,
-    valuesMap.value,
-    t.value,
-    errorsForSubmit,
-    props.onSubmit,
-    props.onValidation
-  );
+  try {
+    const result = await submitForm(
+      props.definition,
+      targetInstance.value,
+      valuesMap.value,
+      t.value,
+      errorsForSubmit,
+      props.onSubmit,
+      props.onValidation
+    );
 
-  const msg = typeof result.message === 'string' ? result.message : String(result.message);
-  const errMsg = Object.values(result.errors ?? {}).join("\n");
-  submissionMessage.value = errMsg ? msg + "\n" + errMsg : msg;
-  submissionSuccess.value = result.success;
+    const msg = typeof result.message === 'string' ? result.message : String(result.message);
+    const errMsg = Object.values(result.errors ?? {}).join("\n");
+    submissionMessage.value = errMsg ? msg + "\n" + errMsg : msg;
+    submissionSuccess.value = result.success;
 
-  if (!result.success) {
+    if (!result.success) {
+      targetInstance.value.name = prevName ?? targetInstance.value.name;
+      instanceName.value = prevName ?? "";
+    }
+  } catch (err) {
+    console.error('[Formitiva] Form submission threw an unexpected error:', err);
+    submissionMessage.value = t.value('An unexpected error occurred. Please try again.');
+    submissionSuccess.value = false;
     targetInstance.value.name = prevName ?? targetInstance.value.name;
     instanceName.value = prevName ?? "";
   }

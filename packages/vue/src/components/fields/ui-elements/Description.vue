@@ -28,6 +28,35 @@ const translated = computed(() => {
   return t.value(String(displayText));
 });
 
+/**
+ * Sanitize an HTML string using DOMParser, removing script elements and all
+ * inline event-handler / javascript: / data: attributes before rendering with
+ * v-html.  This prevents XSS while still allowing safe rich-text markup.
+ */
+function sanitizeHtml(html: string): string {
+  if (typeof DOMParser === 'undefined') return '';
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  // Remove dangerous elements wholesale
+  doc.querySelectorAll('script, style, iframe, object, embed, form, base').forEach(el => el.remove());
+  // Strip dangerous attributes from every remaining element
+  doc.querySelectorAll('*').forEach(el => {
+    Array.from(el.attributes).forEach(attr => {
+      const name = attr.name.toLowerCase();
+      const value = attr.value.toLowerCase().replace(/\s+/g, '');
+      if (
+        name.startsWith('on') ||
+        (name === 'href' && (value.startsWith('javascript:') || value.startsWith('data:'))) ||
+        (name === 'src'  && (value.startsWith('javascript:') || value.startsWith('data:text/html')))
+      ) {
+        el.removeAttribute(attr.name);
+      }
+    });
+  });
+  return doc.body.innerHTML;
+}
+
+const sanitizedHtml = computed(() => sanitizeHtml(translated.value));
+
 const lines = computed<string[]>(() => {
   if (allowHtml.value) return [];
   const raw = translated.value.split(/\r\n|\r|\n/);
@@ -39,7 +68,7 @@ const alignStyle = computed(() => ({ textAlign: align.value }));
 
 <template>
   <div :class="CSS_CLASSES.description" v-if="allowHtml">
-    <div :style="alignStyle" v-html="translated"></div>
+    <div :style="alignStyle" v-html="sanitizedHtml"></div>
   </div>
   <div :class="CSS_CLASSES.description" v-else>
     <div :style="alignStyle">

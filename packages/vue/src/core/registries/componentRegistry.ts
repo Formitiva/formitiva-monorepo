@@ -176,7 +176,7 @@ export function registerComponentInternal(
     debounceConfig ?? { wait: 200 };
 
   if (IS_TEST_ENV) {
-    // Regster component directly in test env
+    // Register component directly in test env
     registry.register(type, typedComponent)
   } else {
     // Wrap with debounce HOC

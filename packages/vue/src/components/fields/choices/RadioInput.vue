@@ -46,12 +46,6 @@ const updateError = (next: string | null) => {
 watch(() => props.value, (newValue) => {
   const safeValue = newValue != null ? String(newValue) : "";
   const err = validate(safeValue, "sync");
-
-  if (err && props.field.options.length > 0) {
-    const firstValue = String(props.field.options[0].value);
-    emit('change', firstValue);
-  }
-
   updateError(err);
 }, { immediate: true });
 
@@ -128,12 +122,6 @@ const labelStyle = computed<CSSProperties>(() => ({
         :key="String(opt.value)"
         :class="combineClasses(CSS_CLASSES.label)"
         :style="labelStyle"
-        @mousedown.prevent
-        @click="() => {
-          if (String(value ?? '') !== String(opt.value)) {
-            handleChange({ target: { value: String(opt.value) } } as any);
-          }
-        }"
       >
         <input
           :id="`${field.name}-${opt.value}`"
