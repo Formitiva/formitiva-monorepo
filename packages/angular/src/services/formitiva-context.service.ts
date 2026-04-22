@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, type OnDestroy } from '@angular/core';
 import type { FieldValidationMode, TranslationFunction, FieldValueType } from '@formitiva/core';
 import {
   loadTranslationMaps,
@@ -13,7 +13,7 @@ import {
 export type { FormStyle, FieldStyle };
 
 @Injectable()
-export class FormitivaContextService {
+export class FormitivaContextService implements OnDestroy {
   readonly definitionName = signal<string>('');
   readonly language = signal<string>('en');
   readonly theme = signal<string>('light');
@@ -67,5 +67,9 @@ export class FormitivaContextService {
     if (ac.signal.aborted) return;
     this.commonMap.set(commonMap);
     this.userMap.set(userMap);
+  }
+
+  ngOnDestroy(): void {
+    this.abortController?.abort();
   }
 }

@@ -1,10 +1,12 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
+  ElementRef,
   Input,
   inject,
 } from '@angular/core';
-import type { OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import type { AfterViewInit, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { NgIf, NgStyle } from '@angular/common';
 import { FormitivaContextService } from '../../services/formitiva-context.service';
 import { FormitivaRendererComponent } from './formitiva-renderer.component';
@@ -19,8 +21,13 @@ import type {
   FormValidationHandler,
 } from '@formitiva/core';
 
-registerBaseComponents();
-ensureBuiltinFieldTypeValidatorsRegistered();
+let _formitivaInitialized = false;
+function ensureFormitivaInitialized(): void {
+  if (_formitivaInitialized) return;
+  _formitivaInitialized = true;
+  registerBaseComponents();
+  ensureBuiltinFieldTypeValidatorsRegistered();
+}
 
 @Component({
   selector: 'fv-formitiva',
@@ -46,7 +53,7 @@ ensureBuiltinFieldTypeValidatorsRegistered();
     </div>
   `,
 })
-export class FormitivaComponent implements OnInit, OnChanges, OnDestroy {
+export class FormitivaComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   @Input() definitionData?: string | Record<string, unknown> | FormitivaDefinition;
   @Input() instance?: FormitivaInstance;
   @Input() language?: string;
@@ -59,6 +66,8 @@ export class FormitivaComponent implements OnInit, OnChanges, OnDestroy {
   @Input() onValidation?: FormValidationHandler;
 
   readonly ctx = inject(FormitivaContextService);
+  private readonly elRef = inject(ElementRef);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   definition: FormitivaDefinition | null = null;
   resolvedInstance: FormitivaInstance | null = null;
@@ -69,16 +78,24 @@ export class FormitivaComponent implements OnInit, OnChanges, OnDestroy {
   private detectedTheme: string | null = null;
 
   ngOnInit(): void {
+    ensureFormitivaInitialized();
     this.parseDefinition();
     this.resolveInstance();
     this.configureContext();
+  }
+
+  ngAfterViewInit(): void {
     this.setupThemeObserver();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['definitionData']) this.parseDefinition();
     if (changes['instance'] || changes['definitionData']) this.resolveInstance();
-    this.configureContext();
+    // Only reconfigure when relevant inputs actually changed
+    if (changes['language'] || changes['theme'] || changes['fieldValidationMode'] ||
+        changes['displayInstanceName'] || changes['style'] || changes['definitionData']) {
+      this.configureContext();
+    }
     if (changes['theme']) {
       this.resolvedTheme = this.theme ?? this.detectedTheme ?? 'light';
     }
@@ -108,7 +125,7 @@ export class FormitivaComponent implements OnInit, OnChanges, OnDestroy {
 
   private configureContext(): void {
     this.resolvedTheme = this.theme ?? this.detectedTheme ?? 'light';
-    this.wrapperStyle = this.style ? { height: '100%' } : null;
+    this.wrapperStyle = this.style ?? null;
 
     this.ctx.configure({
       definitionName: this.definition?.name ?? '',
@@ -123,10 +140,13 @@ export class FormitivaComponent implements OnInit, OnChanges, OnDestroy {
 
   private setupThemeObserver(): void {
     if (typeof document === 'undefined') return;
-    const el = document.querySelector('[data-formitiva-theme]') as Element | null;
-    if (!el) return;
-    this.detectedTheme = el.getAttribute('data-formitiva-theme');
-    this.resolvedTheme = this.theme ?? this.detectedTheme ?? 'light';
+    // Observe the component's own host element for data-formitiva-theme attribute changes
+    const el = this.elRef.nativeElement as HTMLElement;
+    const themeEl = el.querySelector('[data-formitiva-theme]') as Element | null ?? el;
+    this.detectedTheme = themeEl.getAttribute('data-formitiva-theme');
+    if (this.detectedTheme) {
+      this.resolvedTheme = this.theme ?? this.detectedTheme;
+    }
     this.mo = new MutationObserver(mutations => {
       for (const m of mutations) {
         if (m.type === 'attributes' && m.attributeName === 'data-formitiva-theme') {
@@ -134,10 +154,11 @@ export class FormitivaComponent implements OnInit, OnChanges, OnDestroy {
           if (!this.theme) {
             this.resolvedTheme = this.detectedTheme ?? 'light';
             this.ctx.configure({ theme: this.resolvedTheme });
+            this.cdr.markForCheck();
           }
         }
       }
     });
-    this.mo.observe(el, { attributes: true, attributeFilter: ['data-formitiva-theme'] });
+    this.mo.observe(themeEl, { attributes: true, attributeFilter: ['data-formitiva-theme'] });
   }
 }

@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import type { DefinitionPropertyField, FieldValueType, ErrorType } from '@formitiva/core';
+import type { DefinitionPropertyField, FieldValueType, ErrorType, TranslationFunction } from '@formitiva/core';
 
 export interface LayoutVisibleGroup {
   name: string | undefined;
@@ -22,10 +22,11 @@ export class LayoutRenderContextService {
   readonly disabledByRef = signal<Record<string, boolean>>({});
   readonly isApplyDisabled = signal(false);
   readonly isWizardLastStep = signal(false);
+  /** Reactive translation function — updated by FormitivaRendererComponent whenever language changes. */
+  readonly t = signal<TranslationFunction>((k) => k);
 
   handleChange: (name: string, value: FieldValueType) => void = () => {};
   handleError: (name: string, error: ErrorType) => void = () => {};
   handleSubmit: () => void = () => {};
   setSectionFn: (name: string) => void = () => {};
-  t: (key: string) => string = (k) => k;
 }

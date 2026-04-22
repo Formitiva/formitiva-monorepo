@@ -10,7 +10,9 @@ import {
   EventEmitter,
   inject,
   signal,
+  DestroyRef,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import type { OnChanges, SimpleChanges, OnDestroy, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { FormitivaContextService } from '../../../services/formitiva-context.service';
@@ -27,12 +29,14 @@ export abstract class BaseFieldComponent<TValue = FieldValueType>
   @Input() value!: TValue;
   @Input() disabled = false;
   @Input() error: string | null = null; // external error from form state
-  @Output() onChange = new EventEmitter<TValue>();
-  @Output() onError = new EventEmitter<string | null>();
+  /** Emits the new value whenever the field's value changes. */
+  @Output() valueChange = new EventEmitter<TValue>();
+  /** Emits the validation error (or null when valid). */
+  @Output() errorChange = new EventEmitter<string | null>();
 
   // Accept React-style callback props via Inputs when parent passes functions
-  @Input('onChange') onChangeFn?: (value: TValue) => void;
-  @Input('onError') onErrorFn?: (error: string | null) => void;
+  @Input() onChangeFn?: (value: TValue) => void;
+  @Input() onErrorFn?: (error: string | null) => void;
 
   // Additional inputs used by container components (e.g., buttons)
   @Input() valuesMap?: Record<string, FieldValueType | unknown>;
@@ -65,13 +69,13 @@ export abstract class BaseFieldComponent<TValue = FieldValueType>
   protected updateError(err: string | null): void {
     if (err !== this.errorSig()) {
       this.errorSig.set(err);
-      this.onError.emit(err);
+      this.errorChange.emit(err);
       if (typeof this.onErrorFn === 'function') this.onErrorFn(err);
     }
   }
 
   protected emitChange(value: TValue): void {
-    this.onChange.emit(value);
+    this.valueChange.emit(value);
     if (typeof this.onChangeFn === 'function') this.onChangeFn(value);
     if (typeof this.handleChangeFn === 'function' && this.field && this.field.name) {
       this.handleChangeFn(this.field.name, value as unknown as FieldValueType | unknown);
@@ -79,7 +83,7 @@ export abstract class BaseFieldComponent<TValue = FieldValueType>
   }
 
   protected emitError(err: string | null): void {
-    this.onError.emit(err);
+    this.errorChange.emit(err);
     if (typeof this.onErrorFn === 'function') this.onErrorFn(err);
     if (typeof this.handleErrorFn === 'function' && this.field && this.field.name) {
       this.handleErrorFn(this.field.name, err as ErrorType);
@@ -100,10 +104,10 @@ export abstract class ReactiveStringFieldComponent
   protected readonly control = new FormControl('');
   private lastEmittedValue: string | null = null;
   private lastControlValue: string | null = null;
-  private sub?: { unsubscribe(): void };
+  private readonly destroyRef = inject(DestroyRef);
 
   override ngOnInit(): void {
-    this.sub = this.control.valueChanges.subscribe((v: string | null) => {
+    this.control.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((v: string | null) => {
       const val = String(v ?? '');
       if (val === this.lastControlValue) {
         return;
@@ -129,9 +133,7 @@ export abstract class ReactiveStringFieldComponent
     }
   }
 
-  override ngOnDestroy(): void {
-    this.sub?.unsubscribe();
-  }
+  override ngOnDestroy(): void {}
 
   onBlur(): void {
     this.updateError(this.doValidate(this.control.value as string | number, 'blur'));

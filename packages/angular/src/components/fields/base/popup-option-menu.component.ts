@@ -9,7 +9,11 @@ import {
   ViewChild,
   HostListener,
   ChangeDetectorRef,
+  Renderer2,
+  PLATFORM_ID,
+  inject,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import type { OnChanges, SimpleChanges, AfterViewInit, OnDestroy } from '@angular/core';
 import { NgIf, NgFor, NgStyle } from '@angular/common';
 
@@ -28,11 +32,14 @@ export type PopupOptionMenuPosition = { x: number; y: number };
     <div
       *ngIf="visible"
       #menuEl
+      role="listbox"
+      [attr.id]="menuId || null"
       [ngStyle]="menuStyle"
       (mousedown)="$event.stopPropagation()"
     >
       <div
-        *ngFor="let opt of options"
+        *ngFor="let opt of options; trackBy: trackByLabel"
+        role="option"
         data-popup-menu="item"
         [ngStyle]="itemStyle"
         (mousedown)="onSelect(opt)"
@@ -43,6 +50,7 @@ export type PopupOptionMenuPosition = { x: number; y: number };
 export class PopupOptionMenuComponent<T extends PopupOption> implements OnChanges, AfterViewInit, OnDestroy {
   @Input() pos: PopupOptionMenuPosition | null = null;
   @Input() options: T[] = [];
+  @Input() menuId?: string;
   @Output() closed = new EventEmitter<void>();
   @Output() optionClicked = new EventEmitter<T>();
 
@@ -50,7 +58,9 @@ export class PopupOptionMenuComponent<T extends PopupOption> implements OnChange
 
   private attachedToBody = false;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly renderer = inject(Renderer2);
+  private readonly platformId = inject(PLATFORM_ID);
 
   private adjustedTop = 0;
   private adjustedLeft = 0;
@@ -104,8 +114,10 @@ export class PopupOptionMenuComponent<T extends PopupOption> implements OnChange
       this.adjustedTop = this.pos.y;
       this.adjustedLeft = this.pos.x;
       this.ready = false;
-      // adjust after next render cycle
-      setTimeout(() => this.adjustPosition(), 0);
+      // adjust after next render cycle (browser only)
+      if (isPlatformBrowser(this.platformId)) {
+        setTimeout(() => this.adjustPosition(), 0);
+      }
     }
   }
 
@@ -116,7 +128,7 @@ export class PopupOptionMenuComponent<T extends PopupOption> implements OnChange
 
     // Move menu element to document.body to avoid being clipped by transformed parents
     if (!this.attachedToBody && el.parentElement !== document.body) {
-      document.body.appendChild(el);
+      this.renderer.appendChild(document.body, el);
       this.attachedToBody = true;
     }
 
@@ -192,14 +204,20 @@ export class PopupOptionMenuComponent<T extends PopupOption> implements OnChange
     // noop — actual DOM relocation happens in adjustPosition
   }
 
+  trackByLabel(_: number, opt: T): string {
+    return opt.label;
+  }
+
   ngOnDestroy(): void {
     // If the menu element was moved to body, remove it to avoid orphan nodes
-    try {
-      if (this.attachedToBody && this.menuEl && this.menuEl.nativeElement.parentElement === document.body) {
-        document.body.removeChild(this.menuEl.nativeElement);
+    if (isPlatformBrowser(this.platformId)) {
+      try {
+        if (this.attachedToBody && this.menuEl && this.menuEl.nativeElement.parentElement === document.body) {
+          this.renderer.removeChild(document.body, this.menuEl.nativeElement);
+        }
+      } catch (_) {
+        // ignore
       }
-    } catch (_) {
-      // ignore
     }
   }
 }

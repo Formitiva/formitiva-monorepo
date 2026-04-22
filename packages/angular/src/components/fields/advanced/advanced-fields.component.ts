@@ -194,7 +194,6 @@ export class ColorInputComponent extends BaseFieldComponent<string> implements O
 
   handleInput(e: Event): void {
     const v = normalizeHexColor((e.target as HTMLInputElement).value);
-    this.value = v as unknown as string;
     this.updateError(this.doValidate(v, 'change'));
     this.emitChange(v);
   }
@@ -202,7 +201,6 @@ export class ColorInputComponent extends BaseFieldComponent<string> implements O
   handlePresetChange(e: Event): void {
     const raw = (e.target as HTMLSelectElement).value;
     const v = normalizeHexColor(raw);
-    this.value = v as unknown as string;
     this.emitChange(v);
     this.updateError(this.doValidate(v, 'change'));
   }
@@ -228,28 +226,7 @@ export class ColorInputComponent extends BaseFieldComponent<string> implements O
   template: `
     <fv-standard-field-layout [field]="field" [error]="errorSig()">
       <div style="display:flex;align-items:center;gap:8px;width:100%">
-        <input
-          [id]="field.name + '-range'"
-          type="range"
-          [value]="displayValue"
-          (input)="handleChange($event)"
-          (blur)="handleBlur($event)"
-          [min]="field.min ?? 0"
-          [max]="field.max ?? 100"
-          step="1.0"
-          style="padding:0;flex:1"
-        />
-        <input
-          [id]="field.name + '-number'"
-          type="number"
-          [value]="displayValue"
-          (input)="handleChange($event)"
-          (blur)="handleBlur($event)"
-          [min]="field.min ?? 0"
-          [max]="field.max ?? 100"
-          style="width:5em"
-          [class]="inputClass"
-        />
+        <input\n          [id]="field.name"\n          type="range"\n          [value]="displayValue"\n          (input)="handleChange($event)"\n          (blur)="handleBlur($event)"\n          [min]="field.min ?? 0"\n          [max]="field.max ?? 100"\n          [step]="field.step ?? 1"\n          style="padding:0;flex:1"\n        />\n        <input\n          [id]="field.name + '-number'"\n          type="number"\n          [value]="displayValue"\n          (input)="handleChange($event)"\n          (blur)="handleBlur($event)"\n          [min]="field.min ?? 0"\n          [max]="field.max ?? 100"\n          [attr.aria-label]="ctx.t()(field.displayName)"\n          style="width:5em"\n          [class]="inputClass"\n        />
       </div>
     </fv-standard-field-layout>
   `,
@@ -341,11 +318,11 @@ export class RatingInputComponent extends BaseFieldComponent<number> implements 
         break;
       case 'ArrowRight': case 'ArrowUp':
         e.preventDefault();
-        (e.currentTarget as HTMLElement).nextElementSibling?.querySelector<HTMLElement>('[tabindex="0"]')?.focus();
+        ((e.currentTarget as HTMLElement).nextElementSibling as HTMLElement | null)?.focus();
         break;
       case 'ArrowLeft': case 'ArrowDown':
         e.preventDefault();
-        (e.currentTarget as HTMLElement).previousElementSibling?.querySelector<HTMLElement>('[tabindex="0"]')?.focus();
+        ((e.currentTarget as HTMLElement).previousElementSibling as HTMLElement | null)?.focus();
         break;
     }
   }
@@ -367,7 +344,11 @@ export class RatingInputComponent extends BaseFieldComponent<number> implements 
         (drop)="onDrop($event)"
         [style.border-color]="isDragging ? 'var(--formitiva-color-primary, #007bff)' : 'var(--formitiva-border-color, #ccc)'"
         style="width:100%;max-width:100%;box-sizing:border-box;overflow:hidden;border:2px dashed;border-radius:var(--formitiva-border-radius,4px);padding:16px;text-align:center;cursor:pointer"
+        role="button"
+        tabindex="0"
+        [attr.aria-label]="ctx.t()('Upload file')"
         (click)="fileInput.click()"
+        (keydown)="onDropZoneKeyDown($event, fileInput)"
       >
         <input
           #fileInput
@@ -411,6 +392,13 @@ export class FileInputComponent extends BaseFieldComponent<File | File[] | null>
   onDragOver(e: DragEvent): void {
     e.preventDefault();
     this.isDragging = true;
+  }
+
+  onDropZoneKeyDown(e: KeyboardEvent, fileInput: HTMLInputElement): void {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      fileInput.click();
+    }
   }
 
   onDrop(e: DragEvent): void {
@@ -516,11 +504,6 @@ export class UnitValueInputComponent extends ReactiveStringFieldComponent
     } catch {
       this.selectedUnit = String(this.field?.defaultUnit ?? '');
     }
-    // Debug: log runtime unit-related state for troubleshooting
-    try {
-      // eslint-disable-next-line no-console
-      console.log('[fv-unit] ngOnInit', { name: this.field?.name, fieldDefaultUnit: this.field?.defaultUnit, value: this.value, selectedUnit: this.selectedUnit, availableUnits: this.availableUnits });
-    } catch {}
   }
 
   get currentUnit(): string {
@@ -575,20 +558,10 @@ export class UnitValueInputComponent extends ReactiveStringFieldComponent
       super.ngOnChanges(changes);
       try { this.selectedUnit = this.currentUnit; } catch { this.selectedUnit = String(this.field.defaultUnit ?? ''); }
     }
-    // Debug: log value and unit state after change handling
-    try {
-      // eslint-disable-next-line no-console
-      console.log('[fv-unit] ngOnChanges', { name: this.field?.name, changedKeys: Object.keys(changes), fieldDefaultUnit: this.field?.defaultUnit, value: this.value, selectedUnit: this.selectedUnit, availableUnits: this.availableUnits });
-    } catch {}
   }
 
   handleUnitChange(e: Event): void {
     const newUnit = (e.target as HTMLSelectElement).value;
-    // Debug: user changed the unit select
-    try {
-      // eslint-disable-next-line no-console
-      console.log('[fv-unit] handleUnitChange', { name: this.field?.name, newUnit, priorValue: this.value });
-    } catch {}
     const v = this.value as unknown as [string | number, string] | undefined;
     const newVal: [string | number, string] = [v?.[0] ?? '', newUnit];
     this.emitChange(newVal as unknown as string | number);

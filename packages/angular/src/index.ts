@@ -54,6 +54,9 @@ export {
 export {
   StandardFieldLayoutComponent,
   InstanceNameComponent,
+  ErrorDivComponent,
+  ColumnFieldLayoutComponent,
+  RowFieldLayoutComponent,
 } from './components/layout/layout-components.component';
 export { FieldRendererComponent } from './components/layout/field-renderer.component';
 export { FieldGroupComponent } from './components/layout/field-group.component';

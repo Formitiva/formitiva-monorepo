@@ -148,6 +148,7 @@ export class SwitchInputComponent extends BaseFieldComponent<boolean> implements
             [checked]="String(value) === String(opt.value)"
             (change)="handleChange($event)"
             (blur)="handleBlur($event)"
+            [attr.aria-describedby]="errorSig() ? field.name + '-error' : null"
           />
           <span>{{ ctx.t()(opt.label) }}</span>
         </label>
@@ -164,9 +165,6 @@ export class RadioInputComponent extends BaseFieldComponent<string> implements O
   override ngOnChanges(_: SimpleChanges): void {
     const safeVal = this.value != null ? String(this.value) : '';
     const err = this.doValidate(safeVal, 'sync');
-    if (err && this.field.options && this.field.options.length > 0) {
-      this.emitChange(String(this.field.options[0].value));
-    }
     this.updateError(err);
   }
 
@@ -197,11 +195,13 @@ export class RadioInputComponent extends BaseFieldComponent<string> implements O
         (click)="handleControlClick(controlEl)"
         (blur)="handleBlur()"
         tabindex="0"
+        role="combobox"
         style="height:var(--formitiva-input-height, 2.5em);display:flex;align-items:center;
                width:100%;max-width:100%;min-width:0;box-sizing:border-box;padding:0 0.75em;cursor:pointer;position:relative;
                border:1px solid var(--formitiva-border-color, #ccc);border-radius:var(--formitiva-border-radius, 4px);
                background:var(--formitiva-input-bg, transparent)"
         [attr.aria-expanded]="menuOpen"
+        [attr.aria-controls]="field.name + '-listbox'"
         aria-haspopup="listbox"
       >
         <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ selectedLabel }}</span>
@@ -211,6 +211,7 @@ export class RadioInputComponent extends BaseFieldComponent<string> implements O
         *ngIf="menuOpen"
         [pos]="popupPos"
         [options]="menuOptions"
+        [menuId]="field.name + '-listbox'"
         (optionClicked)="handleOptionClick($event)"
         (closed)="menuOpen = false"
       ></fv-popup-option-menu>
@@ -232,11 +233,7 @@ export class DropdownInputComponent extends BaseFieldComponent<string> implement
 
   override ngOnChanges(_: SimpleChanges): void {
     const safeVal = String(this.value ?? '');
-    let err = this.doValidate(safeVal, 'sync');
-    if (err && this.field.options && this.field.options.length > 0) {
-      this.emitChange(String(this.field.options[0].value));
-      err = null;
-    }
+    const err = this.doValidate(safeVal, 'sync');
     this.updateError(err);
   }
 
@@ -271,11 +268,13 @@ export class DropdownInputComponent extends BaseFieldComponent<string> implement
         #controlEl
         (click)="handleControlClick(controlEl)"
         tabindex="0"
+        role="combobox"
         style="min-height:var(--formitiva-input-height, 2.5em);display:flex;flex-wrap:wrap;align-items:center;
                width:100%;max-width:100%;min-width:0;box-sizing:border-box;padding:4px;cursor:pointer;gap:4px;
                border:1px solid var(--formitiva-border-color, #ccc);border-radius:var(--formitiva-border-radius, 4px);
                background:var(--formitiva-input-bg, transparent)"
         [attr.aria-expanded]="menuOpen"
+        [attr.aria-controls]="field.name + '-listbox'"
         aria-haspopup="listbox"
       >
         <span *ngIf="selectedValues.length === 0" style="flex:1;min-width:0;opacity:0.5;padding:0 4px">
@@ -293,6 +292,7 @@ export class DropdownInputComponent extends BaseFieldComponent<string> implement
         *ngIf="menuOpen"
         [pos]="popupPos"
         [options]="menuOptions"
+        [menuId]="field.name + '-listbox'"
         (optionClicked)="toggleOption($event)"
         (closed)="menuOpen = false"
       ></fv-popup-option-menu>

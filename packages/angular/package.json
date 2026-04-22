@@ -18,8 +18,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/fesm2022/formitiva-angular.mjs",
-      "require": "./dist/fesm2022/formitiva-angular.mjs"
+      "import": "./dist/fesm2022/formitiva-angular.mjs"
     }
   },
   "files": ["dist"],

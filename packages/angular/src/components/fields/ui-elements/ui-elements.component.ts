@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
 } from '@angular/core';
 import type { SimpleChanges } from '@angular/core';
 import { NgIf, NgFor, NgStyle } from '@angular/common';
@@ -97,7 +98,7 @@ export class ButtonComponent extends BaseFieldComponent<string | undefined> {
     this.isProcessing = true;
     this.buttonError = null;
     const t = this.ctx.t();
-    const emit = this.onError.emit.bind(this.onError);
+    const emit = this.errorChange.emit.bind(this.errorChange);
     const result = handler(
       this.ctx.valuesMap() as Record<string, FieldValueType>,
       (_name, v) => this.emitChange(v as string),
@@ -134,6 +135,7 @@ export class ButtonComponent extends BaseFieldComponent<string | undefined> {
           <p *ngFor="let line of translatedLines" style="margin:0 0 0.25em">{{ line }}</p>
         </ng-container>
       </ng-container>
+      <!-- Angular's [innerHTML] binding sanitizes HTML by default (strips scripts/handlers) -->
       <div *ngIf="isHtml" [innerHTML]="translatedLines[0]"></div>
     </div>
   `,

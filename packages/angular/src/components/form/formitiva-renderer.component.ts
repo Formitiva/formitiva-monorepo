@@ -6,7 +6,9 @@ import {
   signal,
   computed,
   ChangeDetectorRef,
+  PLATFORM_ID,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import type { OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { NgIf, NgFor, NgStyle, NgComponentOutlet } from '@angular/common';
 import { FormitivaContextService } from '../../services/formitiva-context.service';
@@ -70,7 +72,7 @@ import type {
       <ng-container *ngIf="layoutAdapter && activeLayout">
         <ng-container
           [ngComponentOutlet]="layoutAdapter"
-          [ngComponentOutletInputs]="getLayoutInputs()"
+          [ngComponentOutletInputs]="layoutInputs()"
         ></ng-container>
       </ng-container>
 
@@ -103,7 +105,7 @@ import type {
       </ng-container>
 
       <div *ngIf="(!layoutAdapter || !activeLayout) && loadedCount() < totalFields()" style="font-size:0.9em;color:var(--formitiva-text-muted, #666)">
-        {{ ctx.t()('Loading more fields... (' + loadedCount() + '/' + totalFields() + ')') }}
+        {{ ctx.t()('Loading more fields...') + ' (' + loadedCount() + '/' + totalFields() + ')' }}
       </div>
 
       <!-- Submit button: shown when no adapter or no layout active -->
@@ -112,7 +114,6 @@ import type {
         (click)="handleSubmit()"
         [disabled]="isApplyDisabled()"
         class="formitiva-button"
-        style="width:120px"
       >{{ ctx.t()('Submit') }}</button>
     </div>
   `,
@@ -128,6 +129,28 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   readonly ctx = inject(FormitivaContextService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly layoutCtx = inject(LayoutRenderContextService);
+  private readonly platformId = inject(PLATFORM_ID);
+
+  readonly isApplyDisabled = computed(() => {
+    if (this.activeLayout) {
+      return Object.keys(
+        computeSubmitErrors(
+          this.updatedProperties,
+          this.valuesMap(),
+          this.ctx.definitionName(),
+          this.ctx.t(),
+        ),
+      ).length > 0;
+    }
+    return isSubmitDisabled(this.ctx.fieldValidationMode(), this.errors());
+  });
+
+  readonly layoutInputs = computed(() => ({
+    config: this.activeLayout,
+    activeSection: this.activeSection(),
+    onSectionChange: this.setSectionFn,
+    t: this.ctx.t(),
+  }));
 
   updatedProperties: DefinitionPropertyField[] = [];
   fieldMap: Record<string, DefinitionPropertyField> = {};
@@ -174,15 +197,6 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
     this.cdr.markForCheck();
   };
 
-  getLayoutInputs(): Record<string, unknown> {
-    return {
-      config: this.activeLayout,
-      activeSection: this.activeSection(),
-      onSectionChange: this.setSectionFn,
-      t: this.ctx.t(),
-    };
-  }
-
   ngOnInit(): void {
     this.activeLayout = getLayout(this.definition?.layoutRef ?? '');
     this.activeSection.set(this.activeLayout?.defaultValue ?? '');
@@ -203,7 +217,7 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
 
   ngOnDestroy(): void {
     if (this.chunkTimer) clearTimeout(this.chunkTimer);
-    if (this.rafHandle) cancelAnimationFrame(this.rafHandle);
+    if (this.rafHandle && isPlatformBrowser(this.platformId)) cancelAnimationFrame(this.rafHandle);
   }
 
   private init(): void {
@@ -213,11 +227,14 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
     this.layoutCtx.handleChange = this.handleChangeFn;
     this.layoutCtx.handleError = this.handleErrorFn;
     this.layoutCtx.handleSubmit = () => this.handleSubmit();
-    this.layoutCtx.t = this.ctx.t();
     this.layoutCtx.setSectionFn = this.setSectionFn;
+    // Keep t signal current so layout adapters always read the latest translation function.
+    this.layoutCtx.t.set(this.ctx.t());
+    // Note: layoutCtx.t is a computed getter sourced from ctx.t() — always current.
 
-    this.rafHandle = requestAnimationFrame(() => {
-      this.updatedProperties = init.updatedProperties;
+    this.rafHandle = isPlatformBrowser(this.platformId)
+      ? requestAnimationFrame(() => {
+          this.updatedProperties = init.updatedProperties;
       this.fieldMap = init.nameToField;
       this.valuesMap.set(init.valuesMap);
       this.visibility.set(init.visibility);
@@ -231,8 +248,25 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
       this.disabledByRef.set(init.disabledByRef);
 
       this.updateVisibleGroups();
-      this.cdr.markForCheck();
-    });
+          this.cdr.markForCheck();
+        })
+      : (Promise.resolve().then(() => {
+          this.updatedProperties = init.updatedProperties;
+          this.fieldMap = init.nameToField;
+          this.valuesMap.set(init.valuesMap);
+          this.visibility.set(init.visibility);
+          this.totalFields.set(init.updatedProperties.length);
+          this.instanceName.set(this.instance.name ?? '');
+          this.targetInstance = this.instance;
+          this.initDone = true;
+          this.scheduleChunk();
+
+          this.visibilityRefStatus.set(init.visibilityRefStatus);
+          this.disabledByRef.set(init.disabledByRef);
+
+          this.updateVisibleGroups();
+          this.cdr.markForCheck();
+        }), undefined);
   }
 
   private scheduleChunk(): void {
@@ -261,11 +295,7 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
       this.visibility(),
       this.visibilityRefStatus(),
       // In layout-adapter mode the section filter already limits props to a
-      // small subset, so skip progressive chunk slicing to avoid an empty
-      // first render while the chunk timer hasn't fired yet.
-      this.layoutAdapter ? undefined : // In layout-adapter mode the section filter already limits props to a
-      // small subset, so skip progressive chunk slicing to avoid an empty
-      // first render while the chunk timer hasn't fired yet.
+      // small subset, so skip progressive chunk slicing.
       this.layoutAdapter ? undefined : this.loadedCount(),
     );
     this.visibleGroups.set(groups);
@@ -380,21 +410,6 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
       this.instanceName.set(prevName ?? '');
     }
     this.cdr.markForCheck();
-  }
-
-  isApplyDisabled(): boolean {
-    if (this.activeLayout) {
-      return Object.keys(
-        computeSubmitErrors(
-          this.updatedProperties,
-          this.valuesMap(),
-          this.ctx.definitionName(),
-          this.ctx.t(),
-        ),
-      ).length > 0;
-    }
-
-    return isSubmitDisabled(this.ctx.fieldValidationMode(), this.errors());
   }
 
   trackGroup(_: number, g: { name: string | undefined }): string {

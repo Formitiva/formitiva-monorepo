@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { FormitivaComponent } from './components/form/formitiva.component';
+import { FormitivaRendererComponent } from './components/form/formitiva-renderer.component';
+import { SubmissionMessageComponent } from './components/form/submission-message.component';
 import {
   StandardFieldLayoutComponent,
   InstanceNameComponent,
@@ -20,6 +22,8 @@ import { FieldGroupComponent } from './components/layout/field-group.component';
 @NgModule({
   imports: [
     FormitivaComponent,
+    FormitivaRendererComponent,
+    SubmissionMessageComponent,
     StandardFieldLayoutComponent,
     InstanceNameComponent,
     FieldRendererComponent,
@@ -27,6 +31,8 @@ import { FieldGroupComponent } from './components/layout/field-group.component';
   ],
   exports: [
     FormitivaComponent,
+    FormitivaRendererComponent,
+    SubmissionMessageComponent,
     StandardFieldLayoutComponent,
     InstanceNameComponent,
     FieldRendererComponent,
