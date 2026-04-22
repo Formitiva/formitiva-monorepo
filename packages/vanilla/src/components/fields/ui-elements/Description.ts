@@ -26,11 +26,19 @@ export default function createDescription(
   el.className = CSS_CLASSES.description;
   el.style.textAlign = textAlign as string;
 
+  function renderSafeHtml(html: string, container: HTMLElement): void {
+    // Parse via DOMParser so only valid HTML nodes are inserted — no script execution.
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const frag = document.createDocumentFragment();
+    doc.body.childNodes.forEach(node => frag.appendChild(document.importNode(node, true)));
+    container.appendChild(frag);
+  }
+
   function render() {
     el.innerHTML = '';
     const translated = translate(displayText);
     if (allowHtml) {
-      el.innerHTML = translated;
+      renderSafeHtml(translated, el);
     } else {
       const lines = translated.split(/\r\n|\r|\n/);
       lines.forEach(line => {

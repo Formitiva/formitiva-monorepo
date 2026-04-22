@@ -28,8 +28,11 @@ export function createDropdownPositionController(
     const update = () => callback(getPosition(maxHeight));
     update();
 
-    window.addEventListener('scroll', update, true);
-    window.addEventListener('resize', update);
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    window.addEventListener('scroll', update, { capture: true, passive: true, signal });
+    window.addEventListener('resize', update, { signal });
 
     let ro: ResizeObserver | null = null;
     if (controlEl && typeof ResizeObserver !== 'undefined') {
@@ -38,8 +41,7 @@ export function createDropdownPositionController(
     }
 
     return () => {
-      window.removeEventListener('scroll', update, true);
-      window.removeEventListener('resize', update);
+      controller.abort();
       ro?.disconnect();
     };
   };

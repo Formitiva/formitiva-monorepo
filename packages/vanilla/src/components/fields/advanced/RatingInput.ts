@@ -18,7 +18,8 @@ export default function createRatingInput(
   const validate = (v: FieldValueType, trigger?: ValidationTrigger) =>
     createFieldValidator(ctx, field, errRef.current)(v, trigger);
 
-  const max = (field as { max?: number }).max ?? 5;
+  const rawMax = (field as { max?: number }).max ?? 5;
+  const max = Math.min(Math.max(rawMax, 1), 10);
   const iconChar = ((field as { icon?: string }).icon?.trim()) || '\u2605';
   let rating = Math.min(Math.max(Number(initialValue ?? 0), 0), max);
   let hoverIdx = -1;

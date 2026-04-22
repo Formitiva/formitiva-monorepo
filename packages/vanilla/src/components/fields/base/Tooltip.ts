@@ -97,6 +97,8 @@ export function createTooltip(
   });
   tip.textContent = ctx.t(content);
 
+  let removeTimeout: ReturnType<typeof setTimeout> | null = null;
+
   const getPopupRoot = () => document.getElementById('popup-root') ?? document.body;
 
   function updateTipCssVars() {
@@ -149,7 +151,7 @@ export function createTooltip(
     icon.removeAttribute('aria-describedby');
     // Remove after transition
     const delay = animation ? 120 : 0;
-    setTimeout(() => { tip.remove(); }, delay);
+    removeTimeout = setTimeout(() => { tip.remove(); removeTimeout = null; }, delay);
   }
 
   icon.addEventListener('mouseenter', showTip);
@@ -160,6 +162,7 @@ export function createTooltip(
   return {
     el: icon,
     destroy() {
+      if (removeTimeout !== null) { clearTimeout(removeTimeout); removeTimeout = null; }
       icon.removeEventListener('mouseenter', showTip);
       icon.removeEventListener('mouseleave', hideTip);
       icon.removeEventListener('focus', showTip);

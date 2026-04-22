@@ -74,7 +74,7 @@ export default function createFileInput(
   Object.assign(fileList.style, { marginTop: '8px', marginLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '200px', overflowY: 'auto' });
 
   function renderFileList() {
-    fileList.innerHTML = '';
+    const fragment = document.createDocumentFragment();
     const files = Array.isArray(currentValue) ? currentValue : currentValue ? [currentValue] : [];
     files.forEach((file, index) => {
       const row = document.createElement('div');
@@ -116,8 +116,9 @@ export default function createFileInput(
       });
       row.appendChild(nameInput);
       row.appendChild(removeBtn);
-      fileList.appendChild(row);
+      fragment.appendChild(row);
     });
+    fileList.replaceChildren(fragment);
   }
 
   function handleFiles(newFiles: File[]) {

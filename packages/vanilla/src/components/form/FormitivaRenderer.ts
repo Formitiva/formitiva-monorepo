@@ -177,10 +177,12 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
       if (cName === name) return;
       const cEntry = activeEntries.find(e => e.type === 'field' && e.name === cName);
       if (cEntry && cEntry.type === 'field') {
+        const targetField = nameToField[cName];
+        if (!targetField) return;
         (cEntry.result as FieldRendererResult).update(
           changed.newValues[cName],
           errorsMap[cName] ?? null,
-          Boolean(nameToField[cName]?.disabled),
+          Boolean(targetField.disabled),
         );
       }
     });

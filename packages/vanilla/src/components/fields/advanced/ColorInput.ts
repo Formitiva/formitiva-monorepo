@@ -17,7 +17,11 @@ const PREDEF_COLORS = [
 const HEX_RE = /^#([0-9A-F]{3}){1,2}$/i;
 
 function normalize(c?: string): string {
-  if (!c || !HEX_RE.test(c)) return '#000000';
+  if (!c) return '#000000';
+  if (!HEX_RE.test(c)) {
+    // Invalid hex — fall back silently to black; callers should rely on validation for user feedback.
+    return '#000000';
+  }
   if (c.length === 4) return '#' + c.slice(1).split('').map(x => x + x).join('');
   return c.toLowerCase();
 }

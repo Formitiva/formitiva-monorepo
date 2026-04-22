@@ -38,56 +38,61 @@ let registeredBaseComponents = false;
  * Register built-in component types. Called once by FormitivaModule.
  * Imports are deferred to avoid circular dependencies.
  */
-export function registerBaseComponents(): void {
-  if (registeredBaseComponents) return;
+export function registerBaseComponents(): Promise<void> {
+  if (registeredBaseComponents) return Promise.resolve();
   registeredBaseComponents = true;
 
   // Grouped component files — one import per group to register all types in that group
-  import('../../components/fields/text-numeric/text-numeric-fields.component').then(m => {
-    registerBuiltinComponent('string', m.TextInputComponent);
-    registerBuiltinComponent('text', m.TextInputComponent);
-    registerBuiltinComponent('int', m.IntegerInputComponent);
-    registerBuiltinComponent('float', m.FloatInputComponent);
-    registerBuiltinComponent('multiline', m.MultilineTextInputComponent);
-    registerBuiltinComponent('int-array', m.IntegerArrayInputComponent);
-    registerBuiltinComponent('float-array', m.FloatArrayInputComponent);
-    registerBuiltinComponent('stepper', m.NumericStepperInputComponent);
-    registerBuiltinComponent('password', m.PasswordInputComponent);
-  });
+  const pending = [
+    import('../../components/fields/text-numeric/text-numeric-fields.component').then(m => {
+      registerBuiltinComponent('string', m.TextInputComponent);
+      registerBuiltinComponent('text', m.TextInputComponent);
+      registerBuiltinComponent('int', m.IntegerInputComponent);
+      registerBuiltinComponent('float', m.FloatInputComponent);
+      registerBuiltinComponent('multiline', m.MultilineTextInputComponent);
+      registerBuiltinComponent('int-array', m.IntegerArrayInputComponent);
+      registerBuiltinComponent('float-array', m.FloatArrayInputComponent);
+      registerBuiltinComponent('stepper', m.NumericStepperInputComponent);
+      registerBuiltinComponent('password', m.PasswordInputComponent);
+    }),
 
-  import('../../components/fields/choices/choice-fields.component').then(m => {
-    registerBuiltinComponent('checkbox', m.CheckboxInputComponent);
-    registerBuiltinComponent('switch', m.SwitchInputComponent);
-    registerBuiltinComponent('radio', m.RadioInputComponent);
-    registerBuiltinComponent('dropdown', m.DropdownInputComponent);
-    registerBuiltinComponent('multi-selection', m.MultiSelectionComponent);
-  });
+    import('../../components/fields/choices/choice-fields.component').then(m => {
+      registerBuiltinComponent('checkbox', m.CheckboxInputComponent);
+      registerBuiltinComponent('switch', m.SwitchInputComponent);
+      registerBuiltinComponent('radio', m.RadioInputComponent);
+      registerBuiltinComponent('dropdown', m.DropdownInputComponent);
+      registerBuiltinComponent('multi-selection', m.MultiSelectionComponent);
+    }),
 
-  import('../../components/fields/date-time/date-time-fields.component').then(m => {
-    registerBuiltinComponent('date', m.DateInputComponent);
-    registerBuiltinComponent('time', m.TimeInputComponent);
-  });
+    import('../../components/fields/date-time/date-time-fields.component').then(m => {
+      registerBuiltinComponent('date', m.DateInputComponent);
+      registerBuiltinComponent('time', m.TimeInputComponent);
+    }),
 
-  import('../../components/fields/advanced/advanced-fields.component').then(m => {
-    registerBuiltinComponent('email', m.EmailInputComponent);
-    registerBuiltinComponent('phone', m.PhoneInputComponent);
-    registerBuiltinComponent('url', m.UrlInputComponent);
-    registerBuiltinComponent('color', m.ColorInputComponent);
-    registerBuiltinComponent('slider', m.SliderInputComponent);
-    registerBuiltinComponent('rating', m.RatingInputComponent);
-    registerBuiltinComponent('file', m.FileInputComponent);
-    registerBuiltinComponent('unit', m.UnitValueInputComponent);
-  });
+    import('../../components/fields/advanced/advanced-fields.component').then(m => {
+      registerBuiltinComponent('email', m.EmailInputComponent);
+      registerBuiltinComponent('phone', m.PhoneInputComponent);
+      registerBuiltinComponent('url', m.UrlInputComponent);
+      registerBuiltinComponent('color', m.ColorInputComponent);
+      registerBuiltinComponent('slider', m.SliderInputComponent);
+      registerBuiltinComponent('rating', m.RatingInputComponent);
+      registerBuiltinComponent('file', m.FileInputComponent);
+      registerBuiltinComponent('unit', m.UnitValueInputComponent);
+    }),
 
-  import('../../components/fields/ui-elements/ui-elements.component').then(m => {
-    registerBuiltinComponent('button', m.ButtonComponent);
-    registerBuiltinComponent('description', m.DescriptionComponent);
-    registerBuiltinComponent('image', m.ImageDisplayComponent);
-    registerBuiltinComponent('separator', m.SeparatorComponent);
-  });
+    import('../../components/fields/ui-elements/ui-elements.component').then(m => {
+      registerBuiltinComponent('button', m.ButtonComponent);
+      registerBuiltinComponent('description', m.DescriptionComponent);
+      registerBuiltinComponent('image', m.ImageDisplayComponent);
+      registerBuiltinComponent('separator', m.SeparatorComponent);
+    }),
+  ];
+
+  return Promise.all(pending).then(() => undefined);
 }
 
 function registerBuiltinComponent(type: string, component: Type<unknown>): void {
+  if (!component) return; // guard for test environments where dynamic imports are mocked
   builtinComponentTypes.add(type);
   registry.register(type, component);
 }

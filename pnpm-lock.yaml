@@ -116,11 +116,11 @@ importers:
   examples/vanilla:
     dependencies:
       '@formitiva/core':
-        specifier: ^2.1.3
-        version: 2.1.3
+        specifier: workspace:^
+        version: link:../../packages/core
       '@formitiva/vanilla':
-        specifier: ^2.1.3
-        version: 2.1.3(@formitiva/core@2.1.3)
+        specifier: workspace:^
+        version: link:../../packages/vanilla
     devDependencies:
       typescript:
         specifier: ~5.6.3
@@ -1344,11 +1344,6 @@ packages:
 
   '@formitiva/core@2.1.3':
     resolution: {integrity: sha512-1QP35kGqOTsR8bDay7M805s6R857QHqcIKO8EZ5bi67haRGmstkRdQsposx9scbmSl/b8Fz1DWtXGQ1hMtbAxQ==}
-
-  '@formitiva/vanilla@2.1.3':
-    resolution: {integrity: sha512-x5Og9xcW1NeFdpjMsvCTSuAZb1pwvLk6VNLhU2DpWdrDC3BtyxpataFP9GNFnMgv4/qhkRTHmdYp50oevVz3SA==}
-    peerDependencies:
-      '@formitiva/core': ^2.1.3
 
   '@formitiva/vue@2.1.3':
     resolution: {integrity: sha512-eKtMfmmpgmbs/nf+hoNjNkwcAMxKGt6mVHMq0csJrNaPuTo96q7kb3NZBZTMdhwYt0okgYx7YP1Zb1rWdYIt1Q==}
@@ -6475,10 +6470,6 @@ snapshots:
     optional: true
 
   '@formitiva/core@2.1.3': {}
-
-  '@formitiva/vanilla@2.1.3(@formitiva/core@2.1.3)':
-    dependencies:
-      '@formitiva/core': 2.1.3
 
   '@formitiva/vue@2.1.3(@formitiva/core@2.1.3)(vue@3.5.30(typescript@5.6.3))':
     dependencies:

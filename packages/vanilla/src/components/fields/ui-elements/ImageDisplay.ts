@@ -58,7 +58,8 @@ export default function createImageDisplay(
       const localPath = [...parts, `${base}_${ctx.language}${ext}`].join('/');
       fetch(localPath, { method: 'HEAD', signal: controller.signal })
         .then(res => { if (!controller.signal.aborted) img.src = res.ok ? localPath : url; })
-        .catch(() => { if (!controller.signal.aborted) img.src = url; });
+          .catch(() => { if (!controller.signal.aborted) img.src = url; })
+          .finally(() => { if (abortCtrl === controller) abortCtrl = null; });
     } else {
       img.src = url;
     }

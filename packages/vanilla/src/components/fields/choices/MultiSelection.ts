@@ -68,6 +68,7 @@ export default function createMultiSelection(
     popupEl?.remove();
     popupEl = null;
     control.setAttribute('aria-expanded', 'false');
+    control.removeAttribute('aria-controls');
   }
 
   function openPopup() {
@@ -78,7 +79,9 @@ export default function createMultiSelection(
     let root = document.getElementById('popup-root');
     if (!root) { root = document.createElement('div'); root.id = 'popup-root'; document.body.appendChild(root); }
 
+    const popupId = `${field.name}-popup`;
     const popup = document.createElement('div');
+    popup.id = popupId;
     popup.setAttribute('role', 'listbox');
     popup.setAttribute('aria-multiselectable', 'true');
     Object.assign(popup.style, {
@@ -88,6 +91,7 @@ export default function createMultiSelection(
       boxShadow: 'var(--formitiva-shadow, 0 2px 8px rgba(0,0,0,0.15))', pointerEvents: 'auto',
     });
     popupEl = popup;
+    control.setAttribute('aria-controls', popupId);
 
     options.forEach((opt) => {
       const row = document.createElement('label');

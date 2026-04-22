@@ -1,4 +1,51 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterAll } from 'vitest';
+
+// Mock all dynamically-imported Angular component modules so that the
+// dynamic import() calls inside registerBaseComponents() resolve immediately
+// with empty objects instead of loading real Angular code. Without these mocks
+// the promises settle after the Vitest environment is torn down, causing
+// EnvironmentTeardownError in CI.
+// NOTE: vi.mock() is hoisted — factories must be inline expressions, not variable refs.
+// Each factory returns the exact named exports that registerBaseComponents() accesses,
+// using plain stub constructors so Vitest does not throw on named-export validation.
+vi.mock('../../components/fields/text-numeric/text-numeric-fields.component', () => ({
+  TextInputComponent: class {},
+  IntegerInputComponent: class {},
+  FloatInputComponent: class {},
+  MultilineTextInputComponent: class {},
+  IntegerArrayInputComponent: class {},
+  FloatArrayInputComponent: class {},
+  NumericStepperInputComponent: class {},
+  PasswordInputComponent: class {},
+}));
+vi.mock('../../components/fields/choices/choice-fields.component', () => ({
+  CheckboxInputComponent: class {},
+  SwitchInputComponent: class {},
+  RadioInputComponent: class {},
+  DropdownInputComponent: class {},
+  MultiSelectionComponent: class {},
+}));
+vi.mock('../../components/fields/date-time/date-time-fields.component', () => ({
+  DateInputComponent: class {},
+  TimeInputComponent: class {},
+}));
+vi.mock('../../components/fields/advanced/advanced-fields.component', () => ({
+  EmailInputComponent: class {},
+  PhoneInputComponent: class {},
+  UrlInputComponent: class {},
+  ColorInputComponent: class {},
+  SliderInputComponent: class {},
+  RatingInputComponent: class {},
+  FileInputComponent: class {},
+  UnitValueInputComponent: class {},
+}));
+vi.mock('../../components/fields/ui-elements/ui-elements.component', () => ({
+  ButtonComponent: class {},
+  DescriptionComponent: class {},
+  ImageDisplayComponent: class {},
+  SeparatorComponent: class {},
+}));
+
 import {
   DEBOUNCE_CONFIG,
   isBuiltinComponentType,
@@ -97,14 +144,20 @@ describe('registerComponent / getComponent / hasComponent', () => {
 
 // ── registerBaseComponents ─────────────────────────────────────────────────────
 describe('registerBaseComponents', () => {
-  it('does not throw when called', () => {
-    expect(() => registerBaseComponents()).not.toThrow();
+  // Await the returned promise in afterAll so all dynamic import() chains
+  // fully settle before Vitest tears down the environment, avoiding
+  // EnvironmentTeardownError in CI.
+  afterAll(async () => {
+    await registerBaseComponents();
   });
 
-  it('is idempotent — repeated calls do not throw', () => {
-    expect(() => {
-      registerBaseComponents();
-      registerBaseComponents();
-    }).not.toThrow();
+  it('does not throw and returns a Promise', async () => {
+    await expect(registerBaseComponents()).resolves.toBeUndefined();
+  });
+
+  it('is idempotent — repeated calls do not throw', async () => {
+    await expect(
+      Promise.all([registerBaseComponents(), registerBaseComponents()]),
+    ).resolves.toBeDefined();
   });
 });

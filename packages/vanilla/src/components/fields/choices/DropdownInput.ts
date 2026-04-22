@@ -90,6 +90,7 @@ export default function createDropdownInput(
     popupEl?.remove();
     popupEl = null;
     control.setAttribute('aria-expanded', 'false');
+    control.removeAttribute('aria-controls');
   }
 
   function openPopup() {
@@ -112,6 +113,8 @@ export default function createDropdownInput(
     }
 
     const popup = document.createElement('div');
+    const popupId = `${field.name}-popup`;
+    popup.id = popupId;
     popup.setAttribute('role', 'listbox');
     popup.dataset.formitivaTheme = ctx.theme ?? 'light';
     Object.assign(popup.style, {
@@ -122,6 +125,7 @@ export default function createDropdownInput(
       color: 'var(--formitiva-text-color, #000)', fontSize: 'var(--formitiva-popup-font-size, 0.875rem)',
     });
     popupEl = popup;
+    control.setAttribute('aria-controls', popupId);
 
     let activeIdx = options.findIndex(o => String(o.value) === currentValue);
     if (activeIdx < 0) activeIdx = 0;
@@ -153,6 +157,7 @@ export default function createDropdownInput(
 
     popup.addEventListener('keydown', (e) => {
       const len = options.length;
+      if (len === 0) return;
       switch (e.key) {
         case 'ArrowDown': e.preventDefault(); activeIdx = (activeIdx + 1) % len; setActive(activeIdx); break;
         case 'ArrowUp': e.preventDefault(); activeIdx = (activeIdx - 1 + len) % len; setActive(activeIdx); break;
@@ -169,11 +174,15 @@ export default function createDropdownInput(
     requestAnimationFrame(() => { setActive(activeIdx); });
 
     function posUpdate() {
-      if (!control.isConnected) { closePopup(); return; }
-      const r = control.getBoundingClientRect();
-      popup.style.top = `${Math.min(r.bottom, window.innerHeight - 200)}px`;
-      popup.style.left = `${Math.min(r.left, window.innerWidth - Math.max(80, r.width))}px`;
-      popup.style.width = `${Math.max(80, r.width)}px`;
+      try {
+        if (!control.isConnected) { closePopup(); return; }
+        const r = control.getBoundingClientRect();
+        popup.style.top = `${Math.min(r.bottom, window.innerHeight - 200)}px`;
+        popup.style.left = `${Math.min(r.left, window.innerWidth - Math.max(80, r.width))}px`;
+        popup.style.width = `${Math.max(80, r.width)}px`;
+      } catch {
+        closePopup();
+      }
     }
 
     window.addEventListener('scroll', posUpdate, true);

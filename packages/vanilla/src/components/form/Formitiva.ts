@@ -64,7 +64,8 @@ export class Formitiva {
       this.definition = typeof props.definitionData === 'string'
         ? JSON.parse(props.definitionData)
         : (props.definitionData ?? null) as FormitivaDefinition | null;
-    } catch {
+    } catch (err) {
+      console.error('Formitiva: Invalid form definition JSON:', err instanceof Error ? err.message : String(err));
       this.definition = null;
     }
   }

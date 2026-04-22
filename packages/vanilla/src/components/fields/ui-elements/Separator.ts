@@ -13,11 +13,14 @@ export default function createSeparator(
   _disabled: boolean
 ): FieldWidget {
   const f = field as { color?: string; thickness?: number; margin?: string | number; label?: string };
-  const color = f.color ?? (isDarkTheme(ctx.theme) ? '#444444' : '#CCCCCC');
+  const defaultColor = isDarkTheme(ctx.theme) ? '#444444' : '#CCCCCC';
+  const color = f.color ?? defaultColor;
   const thickness = f.thickness ?? 1;
   const margin = f.margin != null ? (typeof f.margin === 'number' ? `${f.margin}px` : f.margin) : '8px 0';
 
   const el = document.createElement('div');
+  // Expose theme-sensitive default as a CSS custom property for stylesheet overrides
+  el.style.setProperty('--formitiva-separator-color', defaultColor);
   Object.assign(el.style, { width: 'auto', height: '0', borderTop: `${thickness}px solid ${color}`, margin });
 
   return { el, update() {}, destroy() {} };
