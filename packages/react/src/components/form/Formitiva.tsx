@@ -5,12 +5,13 @@ import { FormitivaProvider } from "./FormitivaProvider";
 import { createInstanceFromDefinition } from '@formitiva/core';
 import type { FormitivaDefinition, FormitivaProps } from '@formitiva/core';
 
-function useNearestFormitivaTheme(ref?: React.RefObject<HTMLElement>) {
+function useNearestFormitivaTheme(ref: React.RefObject<HTMLElement | null>) {
   const [theme, setTheme] = React.useState<string | null>(null);
   React.useEffect(() => {
-    const startEl = ref?.current ?? document.querySelector('[data-formitiva-theme]');
-    if (!startEl) return;
-    const themedNode = (startEl as Element).closest('[data-formitiva-theme]') as Element | null;
+    if (!ref.current) return;
+    // Walk up from the ref element to find the nearest ancestor that carries
+    // a [data-formitiva-theme] attribute (set by the consumer's app wrapper).
+    const themedNode = ref.current.closest('[data-formitiva-theme]') as Element | null;
     if (!themedNode) return;
     const read = () => setTheme(themedNode.getAttribute('data-formitiva-theme'));
     read();
@@ -52,6 +53,10 @@ const Formitiva: React.FC<FormitivaProps> = ({
   onSubmit = undefined,
   onValidation = undefined,
 }) => {
+    // Wrapper ref used by useNearestFormitivaTheme to walk up the DOM tree
+    // and detect a consumer-applied [data-formitiva-theme] ancestor.
+    const wrapperRef = React.useRef<HTMLDivElement>(null);
+    const detectedTheme = useNearestFormitivaTheme(wrapperRef);
     const definition = React.useMemo<FormitivaDefinition | null>(() => {
       try {
         return typeof definitionData === 'string' ? JSON.parse(definitionData) : (definitionData ?? null);
@@ -61,7 +66,6 @@ const Formitiva: React.FC<FormitivaProps> = ({
     }, [definitionData]);
     const inputStyle = { fontSize: "inherit", fontFamily: "inherit", ...style };
     
-    const detectedTheme = useNearestFormitivaTheme();
     const inputTheme = theme ?? detectedTheme ?? 'light';
 
     const inputLanguage = language ?? 'en';
@@ -100,24 +104,28 @@ const Formitiva: React.FC<FormitivaProps> = ({
     }
 
     return (
-      <FormitivaProvider
-        definitionName={definition.name}
-        defaultStyle={inputStyle}
-        defaultLanguage={inputLanguage}
-        defaultTheme={inputTheme}
-        defaultLocalizeName={definition.localization || ""}
-        className={className}
-        defaultFieldValidationMode={validationMode}
-        defaultDisplayInstanceName={displayInstanceName}
-      >
-        <FormitivaRenderer
-          definition={definition}
-          instance={resolvedInstance}
-          onSubmit={onSubmit}
-          onValidation={onValidation}
-        />
-      </FormitivaProvider>
+      <div ref={wrapperRef} style={{ display: 'contents' }}>
+        <FormitivaProvider
+          definitionName={definition.name}
+          defaultStyle={inputStyle}
+          defaultLanguage={inputLanguage}
+          defaultTheme={inputTheme}
+          defaultLocalizeName={definition.localization || ""}
+          className={className}
+          defaultFieldValidationMode={validationMode}
+          defaultDisplayInstanceName={displayInstanceName}
+        >
+          <FormitivaRenderer
+            definition={definition}
+            instance={resolvedInstance}
+            onSubmit={onSubmit}
+            onValidation={onValidation}
+          />
+        </FormitivaProvider>
+      </div>
     );
 };
+
+Formitiva.displayName = 'Formitiva';
 
 export default Formitiva;

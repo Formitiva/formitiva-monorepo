@@ -18,12 +18,10 @@ export interface FieldRendererProps {
  */
 export const FieldRenderer = React.memo<FieldRendererProps>(
   ({ field, valuesMap, handleChange, handleError, errorsMap, disabledByRef }) => {
-    const Component = getComponent(field.type) as JSX.ElementType | undefined;
+    const Component = getComponent(field.type) as React.ElementType | undefined;
     const value = valuesMap[field.name];
     const fieldError = errorsMap ? errorsMap[field.name] ?? null : undefined;
     const isDisabled = Boolean(field.disabled) || Boolean(disabledByRef?.[field.name]);
-
-    const stableValue = React.useMemo(() => value, [value]);
 
     const onChange = React.useCallback(
       (v: FieldValueType) => handleChange(field.name, v),
@@ -64,7 +62,7 @@ export const FieldRenderer = React.memo<FieldRendererProps>(
       >
         <Component
           field={field}
-          value={stableValue}
+          value={value}
           disabled={isDisabled}
           onChange={onChange}
           onError={onError}

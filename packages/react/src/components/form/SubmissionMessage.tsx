@@ -1,16 +1,18 @@
+import * as React from "react";
+import useFormitivaContext from "../../hooks/useFormitivaContext";
+
 export interface SubmissionMessageProps {
   message: string | null;
   success: boolean | null;
   onDismiss: () => void;
-  t: (s: string) => string;
 }
 
 export const SubmissionMessage: React.FC<SubmissionMessageProps> = ({
   message,
   success,
   onDismiss,
-  t,
 }) => {
+  const { t } = useFormitivaContext();
   if (!message) return null;
 
   return (

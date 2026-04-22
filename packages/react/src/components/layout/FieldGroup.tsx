@@ -24,7 +24,14 @@ export const FieldGroup = React.memo<FieldGroupProps>(
 
     return (
       <fieldset className="formitiva-group">
-        <legend onClick={onToggle} className="formitiva-group_legend">
+        <legend
+          onClick={onToggle}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onToggle(); } }}
+          tabIndex={0}
+          role="button"
+          aria-expanded={isOpen}
+          className="formitiva-group_legend"
+        >
           <span>{t(groupName)}</span>
           <span className="formitiva-group_legend_arrow">{isOpen ? "\u25BC" : "\u25B6"}</span>
         </legend>

@@ -8,6 +8,9 @@ import type {
 import useFormitivaContext from "../../../hooks/useFormitivaContext";
 import { isDarkTheme } from '@formitiva/core';
 import { useFieldValidator } from "../../../hooks/useFieldValidator";
+import { useDropdownPosition } from "../../../hooks/useDropdownPosition";
+import { styleFrom } from "../../../utils/styleFrom";
+import type { DropdownPosition } from '@formitiva/core';
 
 type DropdownField = DefinitionPropertyField & {
   options: NonNullable<DefinitionPropertyField['options']>;
@@ -36,12 +39,14 @@ const DropdownInput: React.FC<DropdownInputProps> = ({
   const { t, theme, formStyle, fieldStyle } = useFormitivaContext();
   const controlRef = React.useRef<HTMLDivElement>(null);
   const onErrorRef = React.useRef<DropdownInputProps["onError"] | undefined>(onError);
+  const onChangeRef = React.useRef<DropdownInputProps["onChange"] | undefined>(onChange);
   const [menuOpen, setMenuOpen] = React.useState(false);
-  const [popupPos, setPopupPos] = React.useState<{ x: number; y: number } | null>(null);
 
-  React.useEffect(() => {
-    onErrorRef.current = onError;
-  }, [onError]);
+  React.useEffect(() => { onErrorRef.current = onError; }, [onError]);
+  React.useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
+
+  // Scroll/resize-aware popup position via the shared hook
+  const dropPos = useDropdownPosition(controlRef, menuOpen);
 
   const validate = useFieldValidator(field, externalError);
   
@@ -52,8 +57,10 @@ const DropdownInput: React.FC<DropdownInputProps> = ({
     const safeVal = String(value ?? "");
     let err = validate(safeVal, "sync");
     if (err && field.options.length > 0) {
+      // Auto-correct to first valid option. Use onChangeRef so this effect
+      // does NOT re-run when the parent re-creates the onChange callback.
       const first = String(field.options[0].value);
-      onChange?.(first);
+      onChangeRef.current?.(first);
       err = null;
     }
     if (err !== prevErrorRef.current) {
@@ -61,12 +68,11 @@ const DropdownInput: React.FC<DropdownInputProps> = ({
       setError(err);
       onErrorRef.current?.(err ?? null);
     }
-  }, [value, validate, onChange, field.options]);
+  // onChange intentionally omitted — we use onChangeRef to avoid the loop
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, validate, field.options]);
 
   const handleControlClick = () => {
-    if (!controlRef.current) return;
-    const rect = controlRef.current.getBoundingClientRect();
-    setPopupPos({ x: rect.left, y: rect.bottom });
     setMenuOpen((prev) => !prev);
   };
 
@@ -94,14 +100,6 @@ const DropdownInput: React.FC<DropdownInputProps> = ({
     const opt = field.options.find(o => String(o.value) === String(value));
     return opt ? t(opt.label) : "";
   }, [field.options, value, t]);
-
-  const styleFrom = (source: unknown, section?: string, key?: string): React.CSSProperties => {
-    if (!section) return {};
-    const src = source as Record<string, unknown> | undefined;
-    const sec = src?.[section] as Record<string, unknown> | undefined;
-    const val = key && sec ? (sec[key] as React.CSSProperties | undefined) : undefined;
-    return (val ?? {}) as React.CSSProperties;
-  };
 
   const mergedControlStyle = React.useMemo<React.CSSProperties>(() => ({
     height: "var(--formitiva-input-height, 2.5em)",
@@ -157,9 +155,9 @@ const DropdownInput: React.FC<DropdownInputProps> = ({
         </div>
       </StandardFieldLayout>
 
-      {menuOpen && popupPos && (
+      {menuOpen && dropPos && (
         <DropdownPopup
-          position={popupPos}
+          position={dropPos}
           options={field.options}
           selectedValue={String(value)}
           onSelect={handleOptionClick}
@@ -174,7 +172,7 @@ const DropdownInput: React.FC<DropdownInputProps> = ({
 };
 
 interface PopupProps {
-  position: { x: number; y: number };
+  position: DropdownPosition;
   options: NonNullable<DefinitionPropertyField['options']>;
   selectedValue: string;
   onSelect: (v: string) => void;
@@ -222,18 +220,6 @@ const DropdownPopup: React.FC<PopupProps> = ({
       );
     }
   }, [controlRef]);
-
-  const styleFrom = (
-    source: unknown,
-    section?: string,
-    key?: string
-  ): React.CSSProperties => {
-    if (!section) return {} as React.CSSProperties;
-    const src = source as Record<string, unknown> | undefined;
-    const sec = src?.[section] as Record<string, unknown> | undefined;
-    const val = key && sec ? (sec[key] as React.CSSProperties | undefined) : undefined;
-    return (val ?? {}) as React.CSSProperties;
-  };
 
   const mergedPopupStyles = React.useMemo<React.CSSProperties>(() => ({
     maxHeight: 200,
@@ -292,52 +278,6 @@ const DropdownPopup: React.FC<PopupProps> = ({
     }
   }, [activeIndex]);
 
-  const baseWidth = 250;
-  const maxHeight = 200;
-
-  const [livePos, setLivePos] = React.useState<{ left: number; top: number } | null>(null);
-  const [popupWidth, setPopupWidth] = React.useState<number | null>(null);
-
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const updatePosition = () => {
-      let left = position.x;
-      let top = position.y;
-      let w = baseWidth;
-
-      const ctrl = controlRef?.current;
-      if (ctrl) {
-        const rect = ctrl.getBoundingClientRect();
-        left = rect.left;
-        top = rect.bottom;
-        w = Math.max(80, Math.round(rect.width));
-      }
-
-      left = Math.min(left, window.innerWidth - w);
-      top = Math.min(top, window.innerHeight - maxHeight);
-      setLivePos({ left, top });
-      setPopupWidth(w);
-    };
-
-    updatePosition();
-    window.addEventListener("scroll", updatePosition, true);
-    window.addEventListener("resize", updatePosition);
-
-    let ro: ResizeObserver | null = null;
-    const observed = controlRef?.current;
-    if (typeof ResizeObserver !== "undefined" && observed) {
-      ro = new ResizeObserver(() => updatePosition());
-      ro.observe(observed as Element);
-    }
-
-    return () => {
-      window.removeEventListener("scroll", updatePosition, true);
-      window.removeEventListener("resize", updatePosition);
-      if (ro && observed) ro.unobserve(observed);
-    };
-  }, [controlRef, position.x, position.y]);
-
   if (typeof window === "undefined") return null;
 
   let root = document.getElementById("popup-root");
@@ -354,9 +294,9 @@ const DropdownPopup: React.FC<PopupProps> = ({
       aria-activedescendant={activeIndex >= 0 ? `opt-${activeIndex}` : undefined}
       style={{
         position: "fixed",
-        top: livePos ? livePos.top : position.y,
-        left: livePos ? livePos.left : position.x,
-        width: popupWidth ?? baseWidth,
+        top: position.top,
+        left: position.left,
+        width: position.width,
         ...mergedPopupStyles,
       }}
       data-formitiva-theme={theme ?? 'light'}

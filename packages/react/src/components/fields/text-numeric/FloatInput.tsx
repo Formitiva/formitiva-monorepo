@@ -34,6 +34,8 @@ const FloatInput: React.FC<FloatInputProps> = ({
       <input
         id={field.name}
         type="text"
+        inputMode="decimal"
+        pattern="[+-]?[0-9]*[.,]?[0-9]*"
         ref={inputRef}
         // IMPORTANT:
         // This input is intentionally UNCONTROLLED for typing performance.

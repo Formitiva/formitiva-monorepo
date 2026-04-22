@@ -55,7 +55,7 @@ export { useUnitValueField } from './hooks/useUnitValueField';
 // Components
 export { default as Formitiva } from './components/form/Formitiva';
 export { default as FormitivaRenderer } from './components/form/FormitivaRenderer';
-export type { FormitivaRendererProps } from './components/form/FormitivaRenderer';
+export type { FormitivaRendererProps, FormitivaRendererHandle } from './components/form/FormitivaRenderer';
 export { FormitivaProvider } from './components/form/FormitivaProvider';
 export { StandardFieldLayout } from './components/layout/LayoutComponents';
 

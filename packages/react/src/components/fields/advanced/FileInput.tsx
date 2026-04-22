@@ -42,10 +42,6 @@ const FileInput: React.FC<FileInputProps> = ({ field, value, onChange, onError, 
 
   React.useEffect(() => {
     const err = validate(value ?? [], "sync");
-    // Call onChange for initial validation so consumers/tests receive the
-    // current validation state on mount. This mirrors previous behavior and
-    // keeps test expectations stable.
-    onChange?.(value);
     updateError(err);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, validate, updateError]);
@@ -147,7 +143,7 @@ const FileInput: React.FC<FileInputProps> = ({ field, value, onChange, onError, 
       }}>
         {files.map((file, index) => (
           <div
-            key={`${file.name}-${index}`}
+            key={`${file.name}-${file.size}-${file.lastModified}`}
             style={{ 
               display: 'flex',
               gap: '8px',

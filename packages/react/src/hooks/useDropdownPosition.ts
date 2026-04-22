@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 import { computeDropdownPosition } from '@formitiva/core';
 import type { DropdownPosition } from '@formitiva/core';
 

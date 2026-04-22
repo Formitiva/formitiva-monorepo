@@ -3,10 +3,13 @@ import * as ReactDOM from "react-dom";
 
 import type { DefinitionPropertyField } from '@formitiva/core';
 import type { BaseInputProps } from '@formitiva/core';
+import type { DropdownPosition } from '@formitiva/core';
 import useFormitivaContext from "../../../hooks/useFormitivaContext";
 import { StandardFieldLayout } from "../../layout/LayoutComponents";
 import { isDarkTheme } from '@formitiva/core';
 import { useFieldValidator } from "../../../hooks/useFieldValidator";
+import { useDropdownPosition } from "../../../hooks/useDropdownPosition";
+import { styleFrom } from "../../../utils/styleFrom";
 
 export type OptionsField = DefinitionPropertyField & {
   options: NonNullable<DefinitionPropertyField["options"]>;
@@ -32,23 +35,11 @@ const MultiSelect: React.FC<MultiSelectionProps> = ({
     onErrorRef.current = onError;
   }, [onError]);
   const { t, theme, formStyle, fieldStyle } = useFormitivaContext();
-  const styleFrom = (
-    source: unknown,
-    section?: string,
-    key?: string
-  ): React.CSSProperties => {
-    if (!section) return {};
-    const src = source as Record<string, unknown> | undefined;
-    const sec = src?.[section] as Record<string, unknown> | undefined;
-    const val = key && sec ? (sec[key] as React.CSSProperties | undefined) : undefined;
-    return (val ?? {}) as React.CSSProperties;
-  };
   const controlRef = React.useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = React.useState(false);
-  const [popupPos, setPopupPos] = React.useState<{
-    x: number;
-    y: number;
-  } | null>(null);
+
+  // Scroll/resize-aware popup position via the shared hook
+  const dropPos = useDropdownPosition(controlRef, menuOpen);
 
   const options = React.useMemo(
     () => field.options.map((o) => ({ value: o.value, label: t(o.label) })),
@@ -77,9 +68,6 @@ const MultiSelect: React.FC<MultiSelectionProps> = ({
 
   // Toggle menu open/close
   const handleControlClick = () => {
-    if (!controlRef.current) return;
-    const rect = controlRef.current.getBoundingClientRect();
-    setPopupPos({ x: rect.left, y: rect.bottom });
     setMenuOpen((prev) => !prev);
   };
 
@@ -211,9 +199,9 @@ const MultiSelect: React.FC<MultiSelectionProps> = ({
         </div>
       </StandardFieldLayout>
 
-      {menuOpen && popupPos && (
+      {menuOpen && dropPos && (
         <MultiSelectionPopup
-          position={popupPos}
+          position={dropPos}
           options={options}
           selectedValues={selectedValues}
           onToggleOption={toggleOption}
@@ -230,7 +218,7 @@ const MultiSelect: React.FC<MultiSelectionProps> = ({
 // POPUP COMPONENT
 // ---------------------------
 interface PopupProps {
-  position: { x: number; y: number };
+  position: DropdownPosition;
   options: NonNullable<DefinitionPropertyField["options"]>;
   selectedValues: string[];
   onToggleOption: (v: string) => void;
@@ -276,19 +264,6 @@ const MultiSelectionPopup: React.FC<PopupProps> = ({
       );
     }
   }, [controlRef]);
-
-  const styleFrom = (
-    source: unknown,
-    section?: string,
-    key?: string
-  ): React.CSSProperties => {
-    if (!section) return {} as React.CSSProperties;
-    const src = source as Record<string, unknown> | undefined;
-    const sec = src?.[section] as Record<string, unknown> | undefined;
-    const val =
-      key && sec ? (sec[key] as React.CSSProperties | undefined) : undefined;
-    return (val ?? {}) as React.CSSProperties;
-  };
 
   const mergedPopupStyles = React.useMemo<React.CSSProperties>(
     () => ({
@@ -361,63 +336,6 @@ const MultiSelectionPopup: React.FC<PopupProps> = ({
     }
   }, [activeIndex]);
 
-  // -----------------------
-  // PORTAL CONTAINER
-  // -----------------------
-  // compute live position so popup follows the control when the page/form scrolls
-  const baseWidth = 250;
-  const maxHeight = 200;
-
-  const [livePos, setLivePos] = React.useState<{
-    left: number;
-    top: number;
-  } | null>(null);
-  const [popupWidth, setPopupWidth] = React.useState<number | null>(null);
-
-  React.useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const updatePosition = () => {
-      let left = position.x;
-      let top = position.y;
-      let w = baseWidth;
-
-      const ctrl = controlRef?.current;
-      if (ctrl) {
-        const rect = ctrl.getBoundingClientRect();
-        left = rect.left;
-        top = rect.bottom;
-        // match popup width to control width (but not smaller than a minimum)
-        w = Math.max(80, Math.round(rect.width));
-      }
-
-      left = Math.min(left, window.innerWidth - w);
-      top = Math.min(top, window.innerHeight - maxHeight);
-      setLivePos({ left, top });
-      setPopupWidth(w);
-    };
-
-    updatePosition();
-    // update on scroll (capture to catch scrolls from ancestors) and resize
-    window.addEventListener("scroll", updatePosition, true);
-    window.addEventListener("resize", updatePosition);
-
-    // observe control resize if available
-    let ro: ResizeObserver | null = null;
-    const observed = controlRef?.current;
-    if (typeof ResizeObserver !== "undefined" && observed) {
-      ro = new ResizeObserver(() => updatePosition());
-      ro.observe(observed as Element);
-    }
-
-    return () => {
-      window.removeEventListener("scroll", updatePosition, true);
-      window.removeEventListener("resize", updatePosition);
-      if (ro && observed) ro.unobserve(observed);
-    };
-    // re-run if controlRef or position prop changes
-  }, [controlRef, position.x, position.y]);
-
   if (typeof window === "undefined") return null;
 
   let root = document.getElementById("popup-root");
@@ -436,9 +354,9 @@ const MultiSelectionPopup: React.FC<PopupProps> = ({
       }
       style={{
         position: "fixed",
-        top: livePos ? livePos.top : position.y,
-        left: livePos ? livePos.left : position.x,
-        width: popupWidth ?? baseWidth,
+        top: position.top,
+        left: position.left,
+        width: position.width,
         // spread the static popup styles
         ...mergedPopupStyles,
       }}

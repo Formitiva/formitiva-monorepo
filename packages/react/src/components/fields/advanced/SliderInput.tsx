@@ -74,7 +74,7 @@ const SliderInput: React.FC<SliderInputProps> = ({ field, value, onChange, onErr
           onBlur={handleBlur}
           min={min}
           max={max}
-          step="1.0"
+          step={field.step ?? 1}
           style={{
             padding: 0,
             flex: 1,

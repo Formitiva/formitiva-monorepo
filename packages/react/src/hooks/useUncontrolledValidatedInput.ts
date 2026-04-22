@@ -160,8 +160,16 @@ export function useUncontrolledValidatedInput<
     [disabled, validate, value, normalizedCount, normalizeValueToArray]
   );
 
+  // Guard: native addEventListener and React's synthetic onBlur can both fire
+  // for the same user blur event. Deduplicate by resetting after the current
+  // microtask queue drains.
+  const blurFiredRef = React.useRef(false);
+
   // Backward-compatible blur handler (first input)
   const handleBlur = React.useCallback(() => {
+    if (blurFiredRef.current) return;
+    blurFiredRef.current = true;
+    queueMicrotask(() => { blurFiredRef.current = false; });
     emitBlurAtIndex(0);
   }, [emitBlurAtIndex]);
 

@@ -14,8 +14,15 @@ import { ensureBuiltinFieldTypeValidatorsRegistered } from '@formitiva/core';
 // Import CSS variables if needed
 import '@formitiva/core/styles/formitiva.css';
 
-registerBaseComponents();
-ensureBuiltinFieldTypeValidatorsRegistered();
+// Guard prevents double-registration in HMR and test environments that
+// re-import modules multiple times.
+let _formitivaInitialized = false;
+function ensureFormitivaInitialized() {
+  if (_formitivaInitialized) return;
+  _formitivaInitialized = true;
+  registerBaseComponents();
+  ensureBuiltinFieldTypeValidatorsRegistered();
+}
 
 export type ReactFormitivaProviderProps = FormitivaProviderProps & {
   children?: React.ReactNode;
@@ -51,6 +58,7 @@ export const FormitivaProvider = ({
   className = 'formitiva-container',
   defaultDisplayInstanceName = true
 }: ReactFormitivaProviderProps) => {
+  ensureFormitivaInitialized();
   const providerDefinitionName = definitionName;
   const localizeName = defaultLocalizeName;
   const theme = defaultTheme;
@@ -84,14 +92,10 @@ export const FormitivaProvider = ({
   const fieldStyle = React.useMemo(() => buildFieldStyle(stableDefaultStyle), [stableDefaultStyle]);
 
   // Memoize the underlying translation function so `t` is stable and cheap to call
-  const translationFn = React.useMemo(
+  // translationFn is already stable (useMemo); use it directly as `t`.
+  const t = React.useMemo(
     () => createTranslationFunction(language, commonMapState, userMapState),
     [language, commonMapState, userMapState]
-  );
-
-  const t = React.useCallback(
-    (defaultText: string, ...args: unknown[]) => translationFn(defaultText, ...args),
-    [translationFn]
   );
 
   const contextValue = React.useMemo(
@@ -125,3 +129,5 @@ export const FormitivaProvider = ({
     </FormitivaContext.Provider>
   );
 };
+
+FormitivaProvider.displayName = 'FormitivaProvider';

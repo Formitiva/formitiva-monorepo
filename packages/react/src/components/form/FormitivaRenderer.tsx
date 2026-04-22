@@ -25,6 +25,17 @@ import type { FieldVisibilityStatus } from '@formitiva/core';
 import { submitForm } from '@formitiva/core';
 import { SubmissionMessage } from "./SubmissionMessage";
 
+export interface FormitivaRendererHandle {
+  /** Re-initialize the form to its original state from the current instance. */
+  reset: () => void;
+  /** Programmatically trigger form submission. */
+  submit: () => void;
+  /** Return the current field values map. */
+  getValues: () => Record<string, FieldValueType>;
+  /** Merge a partial values map into the current form state. */
+  setValues: (values: Record<string, FieldValueType>) => void;
+}
+
 export interface FormitivaRendererProps {
   definition: FormitivaDefinition;
   instance: FormitivaInstance;
@@ -42,22 +53,24 @@ export interface FormitivaRendererProps {
  * @param {number} [props.chunkSize=50] - Number of fields to render per chunk for performance
  * @param {number} [props.chunkDelay=50] - Delay in ms between rendering chunks
  */
-const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
+const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRendererProps>(function FormitivaRenderer({
   definition,
   instance,
   onSubmit = undefined,
   onValidation = undefined,
   chunkSize = 50,
   chunkDelay = 50,
-}) => {
+}, ref) {
   const { properties, displayName } = definition;
   const parentContext = useFormitivaContext();
   const { t, formStyle, language, displayInstanceName } = parentContext;
-  const renderContext = {
+  const renderContext = React.useMemo(() => ({
     ...parentContext,
     definitionName: definition?.name ?? parentContext.definitionName,
-  };
-  const [ savedLanguage, setSavedLanguage] = React.useState("en");
+  }), [parentContext, definition?.name]);
+  // Track the previous language in a ref to avoid an extra render cycle on
+  // language change (using state would trigger an additional re-render).
+  const savedLanguageRef = React.useRef(language ?? "en");
 
   // Layout adapter registry
   const activeLayout = getLayout(definition?.layoutRef ?? '');
@@ -94,6 +107,9 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
   React.useEffect(() => {
     const init = initFormState(definition, instance, t);
     const raf = requestAnimationFrame(() => {
+      // Reset progressive-loading counters so the new form starts from scratch
+      setLoadedCount(0);
+      setInitDone(false);
       setUpdatedProperties(init.updatedProperties);
       setFieldMap(init.nameToField);
       setValuesMap(init.valuesMap);
@@ -116,6 +132,11 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
     }, chunkDelay);
     return () => clearTimeout(timer);
   }, [initDone, loadedCount, updatedProperties.length, chunkSize, chunkDelay]);
+
+  // Keep a ref to the latest visibility map so handleChange doesn't need
+  // visibility in its dependency array (avoiding cascading re-renders).
+  const visibilityRef = React.useRef(visibility);
+  React.useEffect(() => { visibilityRef.current = visibility; }, [visibility]);
 
   /*
    * handleChange
@@ -146,9 +167,9 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
           fieldMap,
           updatedProperties,
           valuesMap: prevValues,
-          visibility,
+          visibility: visibilityRef.current,
         }, t);
-        if (changed.newVisibility !== visibility) {
+        if (changed.newVisibility !== visibilityRef.current) {
           setVisibility(changed.newVisibility);
         }
         setVisibilityRefStatus(changed.newVisRefStatus);
@@ -156,22 +177,21 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
         return changed.newValues;
       });
     },
-    [fieldMap, updatedProperties, visibility, t]
+    [fieldMap, updatedProperties, t]
   );
 
-  // Sync language changes: update savedLanguage and clear messages
-  // Use RAF to avoid cascading renders.
+  // Sync language changes: update savedLanguageRef and clear messages
   React.useEffect(() => {
     let raf = 0;
     raf = requestAnimationFrame(() => {
-      if (language !== savedLanguage) {
-        setSavedLanguage(language || "en");
+      if (language !== savedLanguageRef.current) {
+        savedLanguageRef.current = language ?? "en";
         setSubmissionMessage(null);
         setSubmissionSuccess(null);
       }
     });
     return () => cancelAnimationFrame(raf);
-  }, [language, savedLanguage]);
+  }, [language]);
 
   // When the active instance changes (selection switched), clear submission messages
   // and sync the editable instance name and ref. Use RAF to avoid cascading renders.
@@ -221,10 +241,12 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
     });
   }, [fieldMap]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = React.useCallback(async () => {
     suppressClearOnNextInstanceUpdate.current = true;
     const prevName = targetInstanceRef.current?.name;
-    targetInstanceRef.current.name = instanceName;
+    // Snapshot the intended name before mutating
+    const nextName = instanceName;
+    targetInstanceRef.current.name = nextName;
 
     let errorsForSubmit = errors;
 
@@ -250,10 +272,11 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
     setSubmissionSuccess(result.success);
 
     if (!result.success) {
+      // Roll back: restore instance name atomically via the ref
       targetInstanceRef.current.name = prevName ?? targetInstanceRef.current.name;
       setInstanceName(prevName ?? "");
     }
-  };
+  }, [definition, instanceName, errors, updatedProperties, valuesMap, renderContext.fieldValidationMode, renderContext.definitionName, t, onSubmit, onValidation]);
 
   const hasErrorsInFields = React.useCallback(
     (fieldNames?: string[]) => {
@@ -269,21 +292,29 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
     [updatedProperties, valuesMap, renderContext.definitionName, t],
   );
 
+  // Memoize submit-error computation separately so it only re-runs when data
+  // actually changes, not on every field keypress.
+  const submitErrors = React.useMemo(
+    () => activeLayout
+      ? computeSubmitErrors(updatedProperties, valuesMap, renderContext.definitionName, t)
+      : null,
+    [activeLayout, updatedProperties, valuesMap, renderContext.definitionName, t]
+  );
+
   const isApplyDisabled = React.useMemo(
     () => {
       if (activeLayout) {
-        return Object.keys(
-          computeSubmitErrors(updatedProperties, valuesMap, renderContext.definitionName, t),
-        ).length > 0;
+        return Object.keys(submitErrors ?? {}).length > 0;
       }
-
       return isSubmitDisabled(renderContext.fieldValidationMode, errors);
     },
-    [activeLayout, updatedProperties, valuesMap, renderContext.definitionName, t, errors, renderContext.fieldValidationMode]
+    [activeLayout, submitErrors, renderContext.fieldValidationMode, errors]
   );
 
-  // Render fields �� optionally filtered to the given field names
-  const renderFields = (fieldNames?: string[]) => {
+  // Render fields — optionally filtered to the given field names.
+  // Wrapped in useCallback so the LayoutAdapter (memoized) only re-renders
+  // when the fields or handlers actually change.
+  const renderFields = React.useCallback((fieldNames?: string[]) => {
     const filtered = fieldNames
       ? updatedProperties.filter((p) => fieldNames.includes(p.name))
       : updatedProperties;
@@ -331,13 +362,37 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
         )}
       </>
     );
-  };
+  }, [updatedProperties, visibility, visibilityRefStatus, loadedCount, valuesMap, handleChange, handleError, errors, t, disabledByRef]);
 
-  const renderSubmit = () => (
-    <button onClick={handleSubmit} disabled={isApplyDisabled} className="formitiva-button" style={{ width: "120px" }}>
+  const renderSubmit = React.useCallback(() => (
+    <button onClick={handleSubmit} disabled={isApplyDisabled} className="formitiva-button">
       {t("Submit")}
     </button>
-  );
+  ), [handleSubmit, isApplyDisabled, t]);
+
+  // Expose imperative methods via forwardRef
+  React.useImperativeHandle(ref, () => ({
+    reset: () => {
+      const init = initFormState(definition, instance, t);
+      setUpdatedProperties(init.updatedProperties);
+      setFieldMap(init.nameToField);
+      setValuesMap(init.valuesMap);
+      setVisibility(init.visibility);
+      setVisibilityRefStatus(init.visibilityRefStatus);
+      setDisabledByRef(init.disabledByRef);
+      setErrors({});
+      setSubmissionMessage(null);
+      setSubmissionSuccess(null);
+      setLoadedCount(0);
+      setInitDone(true);
+      setInstanceName(instance.name ?? "");
+    },
+    submit: () => { void handleSubmit(); },
+    getValues: () => valuesMap,
+    setValues: (incoming) => {
+      setValuesMap((prev) => ({ ...prev, ...incoming }));
+    },
+  }), [definition, instance, t, handleSubmit, valuesMap]);
 
   return (
     <FormitivaContext.Provider value={renderContext}>
@@ -348,7 +403,6 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
         message={submissionMessage}
         success={submissionSuccess}
         onDismiss={() => { setSubmissionMessage(null); setSubmissionSuccess(null); }}
-        t={t}
       />
       {displayInstanceName && instance && (
         <InstanceName
@@ -368,6 +422,8 @@ const FormitivaRenderer: React.FC<FormitivaRendererProps> = ({
       </div>
     </FormitivaContext.Provider>
   );
-};
+});
+
+FormitivaRenderer.displayName = 'FormitivaRenderer';
 
 export default FormitivaRenderer;

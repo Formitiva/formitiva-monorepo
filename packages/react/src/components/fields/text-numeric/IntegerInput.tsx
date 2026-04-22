@@ -32,6 +32,8 @@ const IntegerInput: React.FC<IntegerInputProps> = ({
       <input
         id={field.name}
         type="text"
+        inputMode="numeric"
+        pattern="[+-]?[0-9]*"
         // Uncontrolled input for typing performance
         defaultValue={String(value ?? "")}
         ref={inputRef}
