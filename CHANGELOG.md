@@ -17,3 +17,7 @@
 - Fix vue incomplete issue
 - Add layout interface
 - Fix issues
+
+## 2.1.4 2026-04-23
+- Fix issues
+- Optimization for all packages

@@ -1,6 +1,6 @@
 {
   "name": "@formitiva/angular",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "Formitiva Angular adapter — module, components and services",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "angular", "angular-module", "typescript"],
   "repository": {
