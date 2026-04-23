@@ -83,6 +83,8 @@ const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRen
   const [fieldMap, setFieldMap] = React.useState<
     Record<string, DefinitionPropertyField>
   >({});
+  const [computedRefFields, setComputedRefFields] = React.useState<DefinitionPropertyField[]>([]);
+  const [visibilityRefFields, setVisibilityRefFields] = React.useState<DefinitionPropertyField[]>([]);
   const [valuesMap, setValuesMap] = React.useState<Record<string, FieldValueType>>(
     {}
   );
@@ -112,6 +114,8 @@ const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRen
       setInitDone(false);
       setUpdatedProperties(init.updatedProperties);
       setFieldMap(init.nameToField);
+      setComputedRefFields(init.computedRefFields);
+      setVisibilityRefFields(init.visibilityRefFields);
       setValuesMap(init.valuesMap);
       setVisibility(init.visibility);
       setVisibilityRefStatus(init.visibilityRefStatus);
@@ -168,6 +172,8 @@ const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRen
           updatedProperties,
           valuesMap: prevValues,
           visibility: visibilityRef.current,
+          computedRefFields,
+          visibilityRefFields,
         }, t);
         if (changed.newVisibility !== visibilityRef.current) {
           setVisibility(changed.newVisibility);
@@ -177,7 +183,7 @@ const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRen
         return changed.newValues;
       });
     },
-    [fieldMap, updatedProperties, t]
+    [fieldMap, updatedProperties, computedRefFields, visibilityRefFields, t]
   );
 
   // Sync language changes: update savedLanguageRef and clear messages
@@ -225,7 +231,8 @@ const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRen
     if (fieldMap[name]?.disabled) {
       setErrors((prev) => {
         if (!(name in prev)) return prev;
-        const rest = Object.fromEntries(Object.entries(prev).filter(([k]) => k !== name)) as Record<string, string>;
+        const rest = { ...prev };
+        delete rest[name];
         return rest;
       });
       return;
@@ -236,7 +243,8 @@ const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRen
         return { ...prev, [name]: String(error) };
       }
       // remove key
-      const rest = Object.fromEntries(Object.entries(prev).filter(([k]) => k !== name)) as Record<string, string>;
+      const rest = { ...prev };
+      delete rest[name];
       return rest;
     });
   }, [fieldMap]);
@@ -294,21 +302,9 @@ const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRen
 
   // Memoize submit-error computation separately so it only re-runs when data
   // actually changes, not on every field keypress.
-  const submitErrors = React.useMemo(
-    () => activeLayout
-      ? computeSubmitErrors(updatedProperties, valuesMap, renderContext.definitionName, t)
-      : null,
-    [activeLayout, updatedProperties, valuesMap, renderContext.definitionName, t]
-  );
-
   const isApplyDisabled = React.useMemo(
-    () => {
-      if (activeLayout) {
-        return Object.keys(submitErrors ?? {}).length > 0;
-      }
-      return isSubmitDisabled(renderContext.fieldValidationMode, errors);
-    },
-    [activeLayout, submitErrors, renderContext.fieldValidationMode, errors]
+    () => isSubmitDisabled(renderContext.fieldValidationMode, errors),
+    [renderContext.fieldValidationMode, errors]
   );
 
   // Render fields — optionally filtered to the given field names.
@@ -376,6 +372,8 @@ const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRen
       const init = initFormState(definition, instance, t);
       setUpdatedProperties(init.updatedProperties);
       setFieldMap(init.nameToField);
+      setComputedRefFields(init.computedRefFields);
+      setVisibilityRefFields(init.visibilityRefFields);
       setValuesMap(init.valuesMap);
       setVisibility(init.visibility);
       setVisibilityRefStatus(init.visibilityRefStatus);

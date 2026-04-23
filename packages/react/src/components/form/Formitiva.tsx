@@ -16,13 +16,7 @@ function useNearestFormitivaTheme(ref: React.RefObject<HTMLElement | null>) {
     const read = () => setTheme(themedNode.getAttribute('data-formitiva-theme'));
     read();
 
-    const mo = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        if (m.type === 'attributes' && (m as MutationRecord).attributeName === 'data-formitiva-theme') {
-          read();
-        }
-      }
-    });
+    const mo = new MutationObserver(read);
     mo.observe(themedNode, { attributes: true, attributeFilter: ['data-formitiva-theme'] });
     return () => mo.disconnect();
   }, [ref]);

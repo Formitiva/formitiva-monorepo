@@ -35,6 +35,10 @@ export interface FieldMapResult {
   nameToField: Record<string, DefinitionPropertyField>;
   /** Same fields as `nameToField` values (order matches original `properties`). */
   updatedProperties: DefinitionPropertyField[];
+  /** Pre-filtered subset of `updatedProperties` that declare a `computedRef`. */
+  computedRefFields: DefinitionPropertyField[];
+  /** Pre-filtered subset of `updatedProperties` that declare a `visibilityRef`. */
+  visibilityRefFields: DefinitionPropertyField[];
 }
 
 /**
@@ -63,9 +67,12 @@ export function buildFieldMap(properties: DefinitionPropertyField[]): FieldMapRe
   });
 
   renameDuplicatedGroups(properties, nameToField);
+  const updatedProperties = Object.values(nameToField) as DefinitionPropertyField[];
   return {
     nameToField,
-    updatedProperties: Object.values(nameToField) as DefinitionPropertyField[],
+    updatedProperties,
+    computedRefFields: updatedProperties.filter(f => f.computedRef),
+    visibilityRefFields: updatedProperties.filter(f => f.visibilityRef),
   };
 }
 
@@ -74,6 +81,10 @@ export function buildFieldMap(properties: DefinitionPropertyField[]): FieldMapRe
 export interface FormStateInit {
   nameToField: Record<string, DefinitionPropertyField>;
   updatedProperties: DefinitionPropertyField[];
+  /** Pre-filtered subset of `updatedProperties` that declare a `computedRef`. */
+  computedRefFields: DefinitionPropertyField[];
+  /** Pre-filtered subset of `updatedProperties` that declare a `visibilityRef`. */
+  visibilityRefFields: DefinitionPropertyField[];
   valuesMap: Record<string, FieldValueType>;
   visibility: Record<string, boolean>;
   visibilityRefStatus: Record<string, FieldVisibilityStatus>;
@@ -92,7 +103,7 @@ export function initFormState(
   t: TranslationFunction,
 ): FormStateInit {
   const { properties } = definition;
-  const { nameToField, updatedProperties } = buildFieldMap(properties);
+  const { nameToField, updatedProperties, computedRefFields, visibilityRefFields } = buildFieldMap(properties);
 
   // Default values (unit fields use a [value, unit] tuple)
   const valuesMap: Record<string, FieldValueType> = {};
@@ -111,8 +122,8 @@ export function initFormState(
     if (nameToField[key] !== undefined) valuesMap[key] = instance.values[key];
   });
 
-  // Apply computed value handlers before computing visibility
-  const initComputed = applyComputedRefs(updatedProperties, valuesMap, t);
+  // Apply computed value handlers before computing visibility (pre-filtered list)
+  const initComputed = applyComputedRefs(computedRefFields, valuesMap, t);
   Object.assign(valuesMap, initComputed);
 
   // Initial visibility
@@ -120,13 +131,13 @@ export function initFormState(
   updatedProperties.forEach(f => { vis[f.name] = false; });
   const visibility = updateVisibilityMap(updatedProperties, valuesMap, vis, nameToField);
 
-  // Visibility-ref status
-  const visibilityRefStatus = applyVisibilityRefs(updatedProperties, valuesMap, t);
+  // Visibility-ref status (pre-filtered list)
+  const visibilityRefStatus = applyVisibilityRefs(visibilityRefFields, valuesMap, t);
   const disabledByRef = Object.fromEntries(
     Object.entries(visibilityRefStatus).map(([n, s]) => [n, s === 'disable']),
   );
 
-  return { nameToField, updatedProperties, valuesMap, visibility, visibilityRefStatus, disabledByRef };
+  return { nameToField, updatedProperties, computedRefFields, visibilityRefFields, valuesMap, visibility, visibilityRefStatus, disabledByRef };
 }
 
 // ─── computeFieldChange ──────────────────────────────────────────────────────
@@ -158,28 +169,34 @@ export function computeFieldChange(
     updatedProperties: DefinitionPropertyField[];
     valuesMap: Record<string, FieldValueType>;
     visibility: Record<string, boolean>;
+    /** Pre-filtered fields with computedRef — avoids iterating all fields on every change. */
+    computedRefFields?: DefinitionPropertyField[];
+    /** Pre-filtered fields with visibilityRef — avoids iterating all fields on every change. */
+    visibilityRefFields?: DefinitionPropertyField[];
   },
   t: TranslationFunction,
 ): FieldChangeResult {
-  const { fieldMap, updatedProperties, valuesMap, visibility } = state;
+  const { fieldMap, updatedProperties, valuesMap, visibility, computedRefFields, visibilityRefFields } = state;
 
-  // 1. Update values + propagate computed refs
+  // 1. Update values + propagate computed refs (use pre-filtered list when available)
   const baseValues = { ...valuesMap, [name]: value };
-  const computedVals = applyComputedRefs(updatedProperties, baseValues, t);
+  const computedVals = applyComputedRefs(computedRefFields ?? updatedProperties, baseValues, t);
   const newValues = Object.keys(computedVals).length > 0 ? { ...baseValues, ...computedVals } : baseValues;
 
-  // 2. Update visibility when this field drives conditional show/hide
+  // 2. Update visibility when this field drives conditional show/hide.
+  //    `hasChildren` is non-empty whenever any other field lists `name` as a
+  //    parent (buildFieldMap inverts parents→children), so the separate
+  //    isParentToOthers O(n) scan is redundant and removed.
   const field = fieldMap[name];
   const hasChildren = field?.children && Object.keys(field.children).length > 0;
-  const isParentToOthers = Object.values(fieldMap).some(f => f.parents && name in f.parents);
 
   let newVisibility = visibility;
-  if (hasChildren || isParentToOthers) {
+  if (hasChildren) {
     newVisibility = updateVisibilityBasedOnSelection({ ...visibility }, fieldMap, newValues, name, value);
   }
 
-  // 3. Re-apply visibilityRef handlers
-  const newVisRefStatus = applyVisibilityRefs(updatedProperties, newValues, t);
+  // 3. Re-apply visibilityRef handlers (use pre-filtered list when available)
+  const newVisRefStatus = applyVisibilityRefs(visibilityRefFields ?? updatedProperties, newValues, t);
   const newDisabledByRef = Object.fromEntries(
     Object.entries(newVisRefStatus).map(([n, s]) => [n, s === 'disable']),
   );

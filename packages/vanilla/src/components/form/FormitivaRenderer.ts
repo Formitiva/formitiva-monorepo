@@ -63,7 +63,7 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
 
   // ── Init all form state via shared core utility ──────────────────────────
   const init = initFormState(definition, instance, t);
-  const { nameToField, updatedProperties } = init;
+  const { nameToField, updatedProperties, computedRefFields, visibilityRefFields } = init;
   const valuesMap: Record<string, FieldValueType> = init.valuesMap;
   const vis: Record<string, boolean> = init.visibility;
   const visRefStatus: Record<string, FieldVisibilityStatus> = init.visibilityRefStatus;
@@ -166,6 +166,8 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
       updatedProperties,
       valuesMap: { ...valuesMap },
       visibility: { ...vis },
+      computedRefFields,
+      visibilityRefFields,
     }, t);
 
     Object.assign(valuesMap, changed.newValues);
@@ -228,13 +230,6 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
   }
 
   function updateSubmitBtn() {
-    if (activeLayout) {
-      submitBtn.disabled = Object.keys(
-        computeSubmitErrors(updatedProperties, valuesMap, ctx.definitionName, t),
-      ).length > 0;
-      return;
-    }
-
     submitBtn.disabled = isSubmitDisabled(ctx.fieldValidationMode, errorsMap);
   }
 

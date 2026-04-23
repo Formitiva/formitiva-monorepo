@@ -34,11 +34,12 @@ const hideChildrenRecursively = (
   const parentField = fieldMap[parentName];
   if (!parentField?.children) return;
 
-  const allChildren = Object.values(parentField.children).flat();
-  for (const childName of allChildren) {
-    if (typeof childName === 'string' && childName in visibility) {
-      visibility[childName] = false;
-      hideChildrenRecursively(childName, fieldMap, visibility);
+  for (const childrenList of Object.values(parentField.children)) {
+    for (const childName of childrenList) {
+      if (typeof childName === 'string' && childName in visibility) {
+        visibility[childName] = false;
+        hideChildrenRecursively(childName, fieldMap, visibility);
+      }
     }
   }
 };

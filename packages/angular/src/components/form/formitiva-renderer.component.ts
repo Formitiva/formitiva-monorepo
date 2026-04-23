@@ -131,19 +131,9 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   private readonly layoutCtx = inject(LayoutRenderContextService);
   private readonly platformId = inject(PLATFORM_ID);
 
-  readonly isApplyDisabled = computed(() => {
-    if (this.activeLayout) {
-      return Object.keys(
-        computeSubmitErrors(
-          this.updatedProperties,
-          this.valuesMap(),
-          this.ctx.definitionName(),
-          this.ctx.t(),
-        ),
-      ).length > 0;
-    }
-    return isSubmitDisabled(this.ctx.fieldValidationMode(), this.errors());
-  });
+  readonly isApplyDisabled = computed(() =>
+    isSubmitDisabled(this.ctx.fieldValidationMode(), this.errors())
+  );
 
   readonly layoutInputs = computed(() => ({
     config: this.activeLayout,
@@ -153,6 +143,8 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   }));
 
   updatedProperties: DefinitionPropertyField[] = [];
+  computedRefFields: DefinitionPropertyField[] = [];
+  visibilityRefFields: DefinitionPropertyField[] = [];
   fieldMap: Record<string, DefinitionPropertyField> = {};
   valuesMap = signal<Record<string, FieldValueType>>({});
   visibility = signal<Record<string, boolean>>({});
@@ -235,6 +227,8 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
     this.rafHandle = isPlatformBrowser(this.platformId)
       ? requestAnimationFrame(() => {
           this.updatedProperties = init.updatedProperties;
+          this.computedRefFields = init.computedRefFields;
+          this.visibilityRefFields = init.visibilityRefFields;
       this.fieldMap = init.nameToField;
       this.valuesMap.set(init.valuesMap);
       this.visibility.set(init.visibility);
@@ -252,6 +246,8 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
         })
       : (Promise.resolve().then(() => {
           this.updatedProperties = init.updatedProperties;
+          this.computedRefFields = init.computedRefFields;
+          this.visibilityRefFields = init.visibilityRefFields;
           this.fieldMap = init.nameToField;
           this.valuesMap.set(init.valuesMap);
           this.visibility.set(init.visibility);
@@ -329,6 +325,8 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
       updatedProperties: this.updatedProperties,
       valuesMap: this.valuesMap(),
       visibility: this.visibility(),
+      computedRefFields: this.computedRefFields,
+      visibilityRefFields: this.visibilityRefFields,
     }, this.ctx.t());
 
     this.valuesMap.set(changed.newValues);
@@ -337,7 +335,10 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
     this.visibilityRefStatus.set(changed.newVisRefStatus);
     this.disabledByRef.set(changed.newDisabledByRef);
 
-    this.updateVisibleGroups();
+    if (changed.visibilityChanged) {
+      this.updateVisibleGroups();
+    }
+    this.syncLayoutContext();
     this.cdr.markForCheck();
   }
 

@@ -66,16 +66,6 @@ export const userTranslationCache: TranslationCache = new Map<
 >();
 export const userFailedSet = new Set<string>();
 
-// Cache metadata
-const cacheMetadata = new Map<
-  string,
-  {
-    loadedAt: Date;
-    size: number;
-    source: "common" | "user";
-  }
->();
-
 /**
  * Enhanced common translation loader with better error handling
  */
@@ -144,11 +134,6 @@ export const loadCommonTranslation = async (
   if (result.success) {
     // Cache successful results
     commonTranslationCache.set(normalizedLang, result.translations);
-    cacheMetadata.set(normalizedLang, {
-      loadedAt: new Date(),
-      size: Object.keys(result.translations).length,
-      source: "common",
-    });
   }
 
   return result;
@@ -202,11 +187,6 @@ export const loadUserTranslation = async (
       if (response.status === 404) {
         // 404 is not a failure, just no translations available
         userTranslationCache.set(key, {});
-        cacheMetadata.set(key, {
-          loadedAt: new Date(),
-          size: 0,
-          source: "user",
-        });
 
         return {
           success: true,
@@ -277,11 +257,6 @@ export const loadUserTranslation = async (
 
     // Cache successful result
     userTranslationCache.set(key, userTranslations);
-    cacheMetadata.set(key, {
-      loadedAt: new Date(),
-      size: Object.keys(userTranslations).length,
-      source: "user",
-    });
 
     return {
       success: true,
@@ -403,7 +378,6 @@ export function clearTranslationCaches(): void {
   commonTranslationCache.clear();
   userTranslationCache.clear();
   userFailedSet.clear();
-  cacheMetadata.clear();
 }
 
 /**

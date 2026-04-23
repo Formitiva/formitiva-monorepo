@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, watchEffect, reactive } from 'vue';
+import { ref, computed, watch, watchEffect, reactive, onUnmounted } from 'vue';
 import type { DefinitionPropertyField, FormitivaContextType } from '@formitiva/core';
 import type {
   FieldValueType,
@@ -39,7 +39,7 @@ const props = withDefaults(defineProps<FormitivaRendererProps>(), {
   onValidation: undefined,
 });
 
-const { properties, displayName } = props.definition;
+const { displayName } = props.definition;
 const parentContext = useFormitivaContext();
 
 // Layout adapter
@@ -65,6 +65,8 @@ const displayInstanceName = computed(() => renderContext.value.displayInstanceNa
 
 const updatedProperties = ref<DefinitionPropertyField[]>([]);
 const fieldMap = ref<Record<string, DefinitionPropertyField>>({});
+const computedRefFields = ref<DefinitionPropertyField[]>([]);
+const visibilityRefFields = ref<DefinitionPropertyField[]>([]);
 const valuesMap = ref<Record<string, FieldValueType>>({});
 const visibility = ref<Record<string, boolean>>({});
 const visibilityRefStatus = ref<Record<string, FieldVisibilityStatus>>({});
@@ -76,20 +78,45 @@ const instanceName = ref<string>(props.instance.name || '');
 const targetInstance = ref<FormitivaInstance>(props.instance);
 const suppressClearOnNextInstanceUpdate = ref(false);
 
-// Initialize all state synchronously so fields are visible on first render
+// Progressive rendering state
+const loadedCount = ref(0);
+const initDone = ref(false);
+const chunkSize = 50;
+const chunkDelay = 50;
+let chunkTimer: ReturnType<typeof setTimeout> | undefined;
+
+const scheduleChunk = () => {
+  if (!initDone.value || loadedCount.value >= updatedProperties.value.length) return;
+  chunkTimer = setTimeout(() => {
+    loadedCount.value = Math.min(loadedCount.value + chunkSize, updatedProperties.value.length);
+    scheduleChunk();
+  }, chunkDelay);
+};
+
+onUnmounted(() => {
+  if (chunkTimer) clearTimeout(chunkTimer);
+});
+
+// Initialize all state so fields are visible on first render
 const initialize = () => {
+  if (chunkTimer) { clearTimeout(chunkTimer); chunkTimer = undefined; }
   const init = initFormState(props.definition, props.instance, t.value);
   targetInstance.value = props.instance;
   updatedProperties.value = init.updatedProperties;
   fieldMap.value = init.nameToField;
+  computedRefFields.value = init.computedRefFields;
+  visibilityRefFields.value = init.visibilityRefFields;
   valuesMap.value = init.valuesMap;
   visibility.value = init.visibility;
   visibilityRefStatus.value = init.visibilityRefStatus;
   disabledByRef.value = init.disabledByRef;
   instanceName.value = props.instance.name;
+  loadedCount.value = 0;
+  initDone.value = true;
+  scheduleChunk();
 };
 
-watch([() => properties, () => props.instance, () => props.definition], initialize, { immediate: true });
+watch([() => props.definition, () => props.instance], initialize, { immediate: true });
 
 // Handle field change
 const handleChange = (name: string, value: FieldValueType) => {
@@ -104,6 +131,8 @@ const handleChange = (name: string, value: FieldValueType) => {
     updatedProperties: updatedProperties.value,
     valuesMap: valuesMap.value,
     visibility: visibility.value,
+    computedRefFields: computedRefFields.value,
+    visibilityRefFields: visibilityRefFields.value,
   }, t.value);
 
   valuesMap.value = changed.newValues;
@@ -220,16 +249,7 @@ const hasErrorsInFields = (fieldNames?: string[] | null) => {
 };
 
 const isApplyDisabled = computed(() =>
-  activeLayout
-    ? Object.keys(
-        computeSubmitErrors(
-          updatedProperties.value,
-          valuesMap.value,
-          renderContext.value.definitionName,
-          t.value,
-        ),
-      ).length > 0
-    : isSubmitDisabled(renderContext.value.fieldValidationMode, errors.value)
+  isSubmitDisabled(renderContext.value.fieldValidationMode, errors.value)
 );
 
 // Compute which field names belong to the active layout section
@@ -248,7 +268,12 @@ const sectionProperties = computed<DefinitionPropertyField[]>(() => {
 });
 
 const groups = computed(() =>
-  computeVisibleGroups(sectionProperties.value, visibility.value, visibilityRefStatus.value)
+  computeVisibleGroups(
+    sectionProperties.value,
+    visibility.value,
+    visibilityRefStatus.value,
+    layoutAdapter && activeLayout ? undefined : loadedCount.value,
+  )
 );
 
 // Provide a reactive render context once and keep it in sync with renderContext.
@@ -351,6 +376,12 @@ watchEffect(() => {
     </template>
 
     <!-- Submit button: only rendered when no layout adapter is active -->
+    <div
+      v-if="(!layoutAdapter || !activeLayout) && loadedCount < updatedProperties.length"
+      style="font-size:0.9em;color:var(--formitiva-text-muted, #666)"
+    >
+      {{ t(`Loading more fields... (${loadedCount}/${updatedProperties.length})`) }}
+    </div>
     <SubmissionButton
       v-if="!layoutAdapter || !activeLayout"
       :disabled="isApplyDisabled" 

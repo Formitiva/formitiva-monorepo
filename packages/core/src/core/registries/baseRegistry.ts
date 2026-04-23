@@ -1,10 +1,12 @@
 export class BaseRegistry<T> {
   private map: Record<string, T> = {};
+  private _size = 0;
 
   register(name: string, value: T): void {
     if (!name || typeof name !== 'string') {
       throw new Error('Registry key must be a non-empty string');
     }
+    if (!(name in this.map)) this._size++;
     this.map[name] = value;
   }
 
@@ -31,12 +33,13 @@ export class BaseRegistry<T> {
   }
 
   size(): number {
-    return Object.keys(this.map).length;
+    return this._size;
   }
 
   unregister(name: string): boolean {
     if (name in this.map) {
       delete this.map[name];
+      this._size--;
       return true;
     }
     return false;
@@ -44,6 +47,7 @@ export class BaseRegistry<T> {
 
   clear(): void {
     this.map = {};
+    this._size = 0;
   }
 
   registerAll(entries: Record<string, T> | [string, T][]): void {
