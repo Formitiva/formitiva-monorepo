@@ -361,9 +361,14 @@ const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRen
   }, [updatedProperties, visibility, visibilityRefStatus, loadedCount, valuesMap, handleChange, handleError, errors, t, disabledByRef]);
 
   const renderSubmit = React.useCallback(() => (
-    <button onClick={handleSubmit} disabled={isApplyDisabled} className="formitiva-button">
-      {t("Submit")}
-    </button>
+    <>
+      <hr style={{ border: 'none', borderTop: '1px solid var(--formitiva-border-color, #e5e7eb)', margin: '1rem 0' }} />
+      <div style={{ display: 'flex-start', justifyContent: 'center' }}>
+        <button onClick={handleSubmit} disabled={isApplyDisabled} className="formitiva-button formitiva-submit-button">
+          {t("Submit")}
+        </button>
+      </div>
+    </>
   ), [handleSubmit, isApplyDisabled, t]);
 
   // Expose imperative methods via forwardRef

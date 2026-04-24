@@ -83,7 +83,6 @@ const definition = {
       <fv-formitiva
         [definitionData]="definition"
         [onSubmit]="handleSubmit"
-        theme="material-dark"
         [displayInstanceName]="false"
       ></fv-formitiva>
 
@@ -98,7 +97,6 @@ export class HomeComponent {
   lastSubmission = signal('');
 
   handleSubmit: FormSubmissionHandler = (_def, _instanceName, values, _t) => {
-    console.log('Form submitted with values:', values);
     this.lastSubmission.set(JSON.stringify(values, null, 2));
     return undefined; // no errors → form submitted successfully
   };

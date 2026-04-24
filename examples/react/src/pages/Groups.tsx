@@ -54,7 +54,6 @@ export default function Groups() {
       <Formitiva
         definitionData={definition}
         instance={preloadedInstance}
-        theme="material"
       />
     </div>
   );

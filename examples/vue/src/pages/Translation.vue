@@ -54,7 +54,6 @@ const language = ref('en');
       :definition-data="definition"
       :instance="preloadedInstance"
       :language="language"
-      theme="material"
     />
   </div>
 </template>

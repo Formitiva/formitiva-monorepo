@@ -109,12 +109,14 @@ import type {
       </div>
 
       <!-- Submit button: shown when no adapter or no layout active -->
-      <button
-        *ngIf="!layoutAdapter || !activeLayout"
-        (click)="handleSubmit()"
-        [disabled]="isApplyDisabled()"
-        class="formitiva-button"
-      >{{ ctx.t()('Submit') }}</button>
+      <ng-container *ngIf="!layoutAdapter || !activeLayout">
+        <hr style="border: none; border-top: 1px solid var(--formitiva-border-color, #e5e7eb); margin: 1rem 0" />
+        <div style="display:flex-start; justify-content:center">
+          <button (click)="handleSubmit()" [disabled]="isApplyDisabled()" class="formitiva-button formitiva-submit-button">
+            {{ ctx.t()('Submit') }}
+          </button>
+        </div>
+      </ng-container>
     </div>
   `,
 })
@@ -157,6 +159,7 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   totalFields = signal(0);
   instanceName = signal('');
   visibleGroups = signal<Array<{ name: string | undefined; fields: DefinitionPropertyField[] }>>([]);
+  
 
   // Pro: layout registry
   activeLayout: LayoutConfig | null = null;
@@ -241,6 +244,8 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
       this.visibilityRefStatus.set(init.visibilityRefStatus);
       this.disabledByRef.set(init.disabledByRef);
 
+      
+
       this.updateVisibleGroups();
           this.cdr.markForCheck();
         })
@@ -260,6 +265,8 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
           this.visibilityRefStatus.set(init.visibilityRefStatus);
           this.disabledByRef.set(init.disabledByRef);
 
+          
+
           this.updateVisibleGroups();
           this.cdr.markForCheck();
         }), undefined);
@@ -274,6 +281,8 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
       this.scheduleChunk();
     }, this.chunkDelay);
   }
+
+  
 
   private updateVisibleGroups(): void {
     // Filter properties to the active layout section (if any)

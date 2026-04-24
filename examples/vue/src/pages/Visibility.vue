@@ -112,7 +112,6 @@ const initialInstance = {
     <Formitiva
       :definition-data="definition"
       :instance="initialInstance"
-      theme="material"
     />
   </div>
 </template>

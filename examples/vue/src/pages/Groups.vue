@@ -49,7 +49,6 @@ const preloadedInstance: FormitivaInstance = {
     <Formitiva
       :definition-data="definition"
       :instance="preloadedInstance"
-      theme="material"
     />
   </div>
 </template>

@@ -124,5 +124,6 @@ export class AppComponent {
     { path: 'component',         label: 'Component',              description: 'Custom Point2D field component via plugin' },
     { path: 'visibility',     label: 'Visibility Handler',     description: 'Show/hide/disable fields via registered handlers' },
     { path: 'computed-values', label: 'Computed Values',        description: 'Derive field values from other fields (e.g. total = qty × price)' },
+    { path: 'themes',          label: 'Theme Demo',             description: 'Preview and switch themes' },
   ];
 }

@@ -30,7 +30,6 @@ export default function Home() {
   const [lastSubmission, setLastSubmission] = useState('');
 
   const handleSubmit: FormSubmissionHandler = (_def, _instanceName, values, _t) => {
-    console.log('Form submitted with values:', values);
     setLastSubmission(JSON.stringify(values, null, 2));
     return undefined; // no errors → form submitted successfully
   };
@@ -46,7 +45,6 @@ export default function Home() {
       <Formitiva
         definitionData={definition}
         onSubmit={handleSubmit}
-        theme="material-dark"
         displayInstanceName={false}
       />
 

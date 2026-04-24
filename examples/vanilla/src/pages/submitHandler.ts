@@ -57,7 +57,6 @@ export default async function render(container: HTMLElement) {
   const form = new Formitiva({
     definitionData: definition,
     instance: initialInstance,
-    theme: 'material',
   });
 
   container.innerHTML = `

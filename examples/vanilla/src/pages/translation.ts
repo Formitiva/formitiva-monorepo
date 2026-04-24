@@ -60,7 +60,6 @@ export default async function render(container: HTMLElement) {
       definitionData: definition,
       instance: preloadedInstance,
       language,
-      theme: 'material',
     });
     await currentForm.mount(formContainer);
   }

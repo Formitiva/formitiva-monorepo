@@ -120,9 +120,8 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
   // wizard layout is active, otherwise appended directly to the outer container.
   const submitBtn = document.createElement('button');
   submitBtn.type = 'button';
-  submitBtn.className = CSS_CLASSES.button;
+  submitBtn.className = `${CSS_CLASSES.button} formitiva-submit-button`;
   submitBtn.textContent = t('Submit');
-  Object.assign(submitBtn.style, { width: '120px' });
 
   // Layout adapter
   const activeLayout = getLayout(definition?.layoutRef ?? '');
@@ -139,6 +138,16 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
     reconcileFields();
   };
 
+  const hr = document.createElement('hr');
+  hr.style.border = 'none';
+  hr.style.borderTop = '1px solid var(--formitiva-border-color, #e5e7eb)';
+  hr.style.margin = '1rem 0';
+
+  const submitWrapper = document.createElement('div');
+  submitWrapper.style.display = 'flex';
+  submitWrapper.style.justifyContent = 'center';
+  submitWrapper.appendChild(submitBtn);
+
   if (activeLayout && layoutAdapter) {
     layoutAdapterResult = layoutAdapter(activeLayout, activeSection, onSectionChange, t);
     fieldsContainer.appendChild(layoutAdapterResult.el);
@@ -147,10 +156,12 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
     if (layoutAdapterResult.submitSlot) {
       layoutAdapterResult.submitSlot.appendChild(submitBtn);
     } else {
-      container.appendChild(submitBtn);
+      container.appendChild(hr);
+      container.appendChild(submitWrapper);
     }
   } else {
-    container.appendChild(submitBtn);
+    container.appendChild(hr);
+    container.appendChild(submitWrapper);
   }
 
   // Track active entries in DOM order

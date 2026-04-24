@@ -131,7 +131,6 @@ export default function Visibility() {
       <Formitiva
         definitionData={definition}
         instance={initialInstance}
-        theme="material"
       />
     </div>
   );

@@ -163,7 +163,6 @@ const initialInstance = {
       <fv-formitiva
         [definitionData]="definition"
         [instance]="initialInstance"
-        theme="material"
       ></fv-formitiva>
 
       @if (lastSubmission()) {

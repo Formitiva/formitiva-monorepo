@@ -139,7 +139,6 @@ const definition = {
 
       <fv-formitiva
         [definitionData]="definition"
-        theme="material"
         [displayInstanceName]="false"
       ></fv-formitiva>
     </div>

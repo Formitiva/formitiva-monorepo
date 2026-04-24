@@ -71,7 +71,6 @@ onUnmounted(() => { _onSubmitted = null; });
     <Formitiva
       :definition-data="definition"
       :instance="instance"
-      theme="material"
     />
 
     <div v-if="serialised" class="result-box success">{{ serialised }}</div>

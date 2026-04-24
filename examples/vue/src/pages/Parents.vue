@@ -39,7 +39,6 @@ const definition = {
 
     <Formitiva
       :definition-data="definition"
-      theme="material"
       :display-instance-name="false"
     />
   </div>

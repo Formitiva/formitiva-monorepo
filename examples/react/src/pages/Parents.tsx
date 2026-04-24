@@ -45,7 +45,6 @@ export default function Parents() {
 
       <Formitiva
         definitionData={definition}
-        theme="material"
         displayInstanceName={false}
       />
     </div>

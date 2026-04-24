@@ -41,7 +41,6 @@ const handleSubmit: FormSubmissionHandler = (_def, _instanceName, values, _t) =>
     <Formitiva
       :definition-data="definition"
       :on-submit="handleSubmit"
-      theme="material-dark"
       :display-instance-name="false"
     />
 

@@ -40,7 +40,6 @@ export default async function render(container: HTMLElement) {
 
   const form = new Formitiva({
     definitionData: definition,
-    theme: 'material',
     displayInstanceName: false,
     fieldValidationMode: 'onSubmission',
     onSubmit: (_def, _instanceName, values, _t) => {

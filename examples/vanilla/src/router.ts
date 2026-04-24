@@ -7,6 +7,7 @@ type NavigateCallback = (path: string, render: PageRenderer) => void | Promise<v
 
 const pages: Record<string, () => Promise<{ default: PageRenderer }>> = {
   'basic':            () => import('./pages/home'),
+  'themes':           () => import('./pages/themes'),
   'groups':           () => import('./pages/groups'),
   'parents':          () => import('./pages/parents'),
   'validation':       () => import('./pages/validation'),

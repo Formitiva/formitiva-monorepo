@@ -29,7 +29,6 @@ const definition = {
 export default async function render(container: HTMLElement) {
   const form = new Formitiva({
     definitionData: definition,
-    theme: 'material',
     displayInstanceName: false,
   });
 

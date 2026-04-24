@@ -64,7 +64,6 @@ export default function Validation() {
       <Formitiva
         definitionData={definition}
         onSubmit={handleSubmit}
-        theme="material"
         displayInstanceName={false}
         fieldValidationMode="onSubmission"
       />

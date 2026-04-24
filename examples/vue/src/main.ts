@@ -16,6 +16,7 @@ const router = createRouter({
     { path: '/component',       component: () => import('./pages/Component.vue') },
     { path: '/visibility',     component: () => import('./pages/Visibility.vue') },
     { path: '/computed-values', component: () => import('./pages/ComputedValues.vue') },
+    { path: '/themes', component: () => import('./pages/Themes.vue') },
   ],
 });
 

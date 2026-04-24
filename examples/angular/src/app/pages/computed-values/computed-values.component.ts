@@ -14,17 +14,19 @@ import type { FormitivaPlugin, ComputedValueHandler } from '@formitiva/angular';
 
 // ── Handler definitions ───────────────────────────────────────────────────────
 
-const calcTotalHandler: ComputedValueHandler = (_fieldName, valuesMap) => {
+/**
+ * Single handler that computes both `total` and `finalPrice` in one shot.
+ * Returning a map ensures `finalPrice` always uses the freshly-computed `total`,
+ * not the stale value from the previous render cycle.
+ */
+const calcPricesHandler: ComputedValueHandler = (_fieldName, valuesMap) => {
   const qty = Number(valuesMap['quantity'] ?? 0);
   const price = Number(valuesMap['unitPrice'] ?? 0);
-  return Math.round(qty * price * 100) / 100;
-};
-
-const calcFinalPriceHandler: ComputedValueHandler = (_fieldName, valuesMap) => {
-  const total = Number(valuesMap['total'] ?? 0);
+  const total = Math.round(qty * price * 100) / 100;
   const discount = Number(valuesMap['discountPct'] ?? 0);
   const multiplier = Math.max(0, Math.min(100, discount));
-  return Math.round(total * (1 - multiplier / 100) * 100) / 100;
+  const finalPrice = Math.round(total * (1 - multiplier / 100) * 100) / 100;
+  return { total, finalPrice };
 };
 
 // ── Plugin definition ─────────────────────────────────────────────────────────
@@ -34,8 +36,7 @@ const ComputedPlugin: FormitivaPlugin = {
   version: '1.0.0',
   description: 'Registers computed value handlers that derive field values from other fields.',
   computedHandlers: {
-    'demo:calcTotal': calcTotalHandler,
-    'demo:calcFinalPrice': calcFinalPriceHandler,
+    'demo:calcPrices': calcPricesHandler,
   },
 };
 
@@ -71,7 +72,7 @@ const definition = {
       displayName: 'Total ($)',
       defaultValue: 10,
       disabled: true,
-      computedRef: 'demo:calcTotal',
+      computedRef: 'demo:calcPrices',
     },
     {
       type: 'float',
@@ -87,7 +88,7 @@ const definition = {
       displayName: 'Final Price ($)',
       defaultValue: 10,
       disabled: true,
-      computedRef: 'demo:calcFinalPrice',
+      computedRef: 'demo:calcPrices',
     },
   ],
 };
@@ -122,15 +123,14 @@ const initialInstance = {
           <tr><th>Field</th><th>computedRef</th><th>Formula</th></tr>
         </thead>
         <tbody>
-          <tr><td><strong>total</strong></td><td><code>demo:calcTotal</code></td><td>quantity × unitPrice</td></tr>
-          <tr><td><strong>finalPrice</strong></td><td><code>demo:calcFinalPrice</code></td><td>total × (1 − discount / 100)</td></tr>
+          <tr><td><strong>total</strong></td><td><code>demo:calcPrices</code></td><td>quantity × unitPrice</td></tr>
+          <tr><td><strong>finalPrice</strong></td><td><code>demo:calcPrices</code></td><td>total × (1 − discount / 100)</td></tr>
         </tbody>
       </table>
 
       <fv-formitiva
         [definitionData]="definition"
         [instance]="initialInstance"
-        theme="material"
       ></fv-formitiva>
     </div>
   `,

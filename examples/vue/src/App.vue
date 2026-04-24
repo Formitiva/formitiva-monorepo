@@ -3,6 +3,7 @@ import { RouterLink, RouterView } from 'vue-router';
 
 const navItems = [
   { path: '/basic',            label: 'Basic / Quick Start',   description: 'Contact form with inline submit' },
+  { path: '/themes',           label: 'Theme Demo',            description: 'Preview and switch themes' },
   { path: '/groups',           label: 'Field Groups',           description: 'Organize fields into collapsible groups' },
   { path: '/parents',          label: 'Conditional Fields',     description: 'Show/hide fields based on other values' },
   { path: '/validation',       label: 'Form Validation',        description: 'Cross-field validation handler via plugin' },

@@ -61,4 +61,9 @@ export const routes: Routes = [
         (m) => m.ComputedValuesComponent
       ),
   },
+  {
+    path: 'themes',
+    loadComponent: () =>
+      import('./pages/themes/themes.component').then((m) => m.ThemesComponent),
+  },
 ];

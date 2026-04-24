@@ -120,7 +120,6 @@ const initialInstance = {
       <fv-formitiva
         [definitionData]="definition"
         [instance]="initialInstance"
-        theme="material"
       ></fv-formitiva>
     </div>
   `,

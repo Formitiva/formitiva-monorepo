@@ -78,7 +78,6 @@ export default function SubmitHandler() {
       <Formitiva
         definitionData={definition}
         instance={instance}
-        theme="material"
       />
 
       {serialised && (

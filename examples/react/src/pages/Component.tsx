@@ -127,7 +127,6 @@ export default function ComponentDemo() {
       <Formitiva
         definitionData={definition}
         instance={initialInstance}
-        theme="material"
       />
 
       {lastSubmission && (

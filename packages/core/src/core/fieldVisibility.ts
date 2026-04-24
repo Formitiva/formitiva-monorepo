@@ -142,10 +142,18 @@ export const applyVisibilityRefs = (
 
 /**
  * Apply computedRef handlers for all fields that declare one.
- * Returns a map of field name → computed FieldValueType for each field whose
- * registered handler was found and invoked and returned a non-undefined value.
- * Call after any value change and merge results back into the values map so
- * dependent fields always show up-to-date derived values.
+ *
+ * Behaviour:
+ * - Each unique `computedRef` handler is called **at most once** per pass, even
+ *   if multiple fields share the same handler name.
+ * - A **progressive working copy** of the values map is maintained so that
+ *   computed values produced earlier in the pass are visible to handlers that
+ *   run later (fixes stale-read when one computed field depends on another).
+ * - If a handler returns a plain `Record<string, FieldValueType>` map, **all**
+ *   entries are merged into the result (and the working copy) immediately,
+ *   enabling a single handler to update multiple fields atomically.
+ * - If a handler returns a scalar `FieldValueType`, it is stored under the
+ *   triggering field's own name (backward-compatible).
  */
 export const applyComputedRefs = (
   fields: DefinitionPropertyField[],
@@ -153,16 +161,44 @@ export const applyComputedRefs = (
   t: TranslationFunction,
 ): Record<string, FieldValueType> => {
   const result: Record<string, FieldValueType> = {};
+  // Progressive working copy: starts from the original values and accumulates
+  // computed results so later handlers see freshly-computed values.
+  const workingValues: Record<string, FieldValueType> = { ...values };
+  // Track which handler names have already been called to avoid duplicate work
+  // when multiple fields share the same computedRef.
+  const calledRefs = new Set<string>();
+
   for (const field of fields) {
-    if (field.computedRef) {
-      const handler = getComputedValueHandler(field.computedRef);
-      if (handler) {
-        const computed = handler(field.name, values, t);
-        if (computed !== undefined) {
-          result[field.name] = computed;
-        }
+    if (!field.computedRef) continue;
+    if (calledRefs.has(field.computedRef)) continue; // already handled by a previous field
+
+    const handler = getComputedValueHandler(field.computedRef);
+    if (!handler) continue;
+
+    calledRefs.add(field.computedRef);
+    const computed = handler(field.name, workingValues, t);
+
+    if (computed === undefined) continue;
+
+    // Detect a map return: plain object, not null, not an Array, not a File.
+    if (
+      computed !== null &&
+      typeof computed === 'object' &&
+      !Array.isArray(computed) &&
+      !(computed instanceof File)
+    ) {
+      // Multi-field result — merge every entry
+      const map = computed as Record<string, FieldValueType>;
+      for (const [k, v] of Object.entries(map)) {
+        result[k] = v;
+        workingValues[k] = v; // feed forward
       }
+    } else {
+      // Single-field result — store under the triggering field's name
+      result[field.name] = computed as FieldValueType;
+      workingValues[field.name] = computed as FieldValueType; // feed forward
     }
   }
+
   return result;
 };

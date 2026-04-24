@@ -181,7 +181,6 @@ export default async function render(container: HTMLElement) {
   const form = new Formitiva({
     definitionData: definition,
     instance: preloadedInstance,
-    theme: 'material',
   });
 
   await form.mount(formContainer);

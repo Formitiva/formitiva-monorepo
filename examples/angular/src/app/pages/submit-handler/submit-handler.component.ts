@@ -109,11 +109,10 @@ const initialInstance: FormitivaInstance = {
         Formitiva invokes the handler on submit; the serialised instance is shown below.
       </p>
 
-      <fv-formitiva
-        [definitionData]="definition"
-        [instance]="instance()"
-        theme="material"
-      ></fv-formitiva>
+        <fv-formitiva
+          [definitionData]="definition"
+          [instance]="instance()"
+        ></fv-formitiva>
 
       @if (serialised()) {
         <div class="result-box success">{{ serialised() }}</div>

@@ -137,7 +137,6 @@ const preloadedInstance: FormitivaInstance = {
       <fv-formitiva
         [definitionData]="definition"
         [instance]="instance"
-        theme="material"
       ></fv-formitiva>
     </div>
   `,

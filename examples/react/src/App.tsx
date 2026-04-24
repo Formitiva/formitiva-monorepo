@@ -1,5 +1,6 @@
 import { NavLink, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
+import Themes from './pages/Themes';
 import Groups from './pages/Groups';
 import Parents from './pages/Parents';
 import Validation from './pages/Validation';
@@ -11,6 +12,7 @@ import ComputedValues from './pages/ComputedValues';
 
 const navItems = [
   { path: '/basic',            label: 'Basic / Quick Start',   description: 'Contact form with inline submit' },
+  { path: '/themes',           label: 'Theme Demo',            description: 'Preview and switch themes' },
   { path: '/groups',           label: 'Field Groups',           description: 'Organize fields into collapsible groups' },
   { path: '/parents',          label: 'Conditional Fields',     description: 'Show/hide fields based on other values' },
   { path: '/validation',       label: 'Form Validation',        description: 'Cross-field validation handler via plugin' },
@@ -57,6 +59,7 @@ export default function App() {
           <Route path="/component" element={<ComponentDemo />} />
           <Route path="/visibility" element={<Visibility />} />
           <Route path="/computed-values" element={<ComputedValues />} />
+          <Route path="/themes" element={<Themes />} />
         </Routes>
       </main>
     </div>

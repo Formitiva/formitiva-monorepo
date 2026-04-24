@@ -90,7 +90,6 @@ const definition = {
       <fv-formitiva
         [definitionData]="definition"
         [onSubmit]="handleSubmit"
-        theme="material"
         [displayInstanceName]="false"
         fieldValidationMode="onSubmission"
       ></fv-formitiva>

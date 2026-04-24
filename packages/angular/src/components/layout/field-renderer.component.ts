@@ -68,8 +68,8 @@ export class FieldRendererComponent implements OnChanges {
         field: this.field,
         value,
         disabled: this.isDisabled,
-        onChange: (v: FieldValueType) => this.handleChange(this.field.name, v),
-        onError: (err: ErrorType) => this.handleError?.(this.field.name, err),
+        onChangeFn: (v: FieldValueType) => this.handleChange(this.field.name, v),
+        onErrorFn: (err: ErrorType) => this.handleError?.(this.field.name, err),
         error,
       };
     }

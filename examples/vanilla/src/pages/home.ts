@@ -2,7 +2,6 @@
  * home.ts — Basic / Quick Start Example
  */
 import { Formitiva } from '@formitiva/vanilla';
-import '@formitiva/core/themes/material-dark.css';
 
 const definition = {
   name: 'contactForm',
@@ -24,7 +23,6 @@ export default async function render(container: HTMLElement) {
 
   const form = new Formitiva({
     definitionData: definition,
-    theme: 'material-dark',
     displayInstanceName: false,
     onSubmit: (_def, _instanceName, values, _t) => {
       resultBox.className = 'result-box success';

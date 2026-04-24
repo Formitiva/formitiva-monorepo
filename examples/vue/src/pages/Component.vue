@@ -100,7 +100,6 @@ onUnmounted(() => { pluginSubmitCallback = null; });
     <Formitiva
       :definition-data="definition"
       :instance="initialInstance"
-      theme="material"
     />
 
     <div v-if="lastSubmission" class="result-box success">{{ lastSubmission }}</div>

@@ -324,6 +324,11 @@
   cursor: var(--formitiva-button-disabled-cursor);
 }
 
+/* Specific class for submit button to allow fixed width */
+.formitiva-submit-button {
+  width: 120px;;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .formitiva-container {
