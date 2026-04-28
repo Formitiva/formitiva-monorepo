@@ -21,3 +21,7 @@
 ## 2.1.4 2026-04-23
 - Fix issues
 - Optimization for all packages
+
+## 2.1.5 2026-04-28
+- Enhance compute value functionality
+- Add formitiva-submit-button in formitiva.css

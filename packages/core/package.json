@@ -1,6 +1,6 @@
 {
   "name": "@formitiva/core",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "Formitiva shared core — types, validation, registries and utilities (framework-agnostic)",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "schema", "dynamic-form", "typescript", "framework-agnostic"],
   "repository": {

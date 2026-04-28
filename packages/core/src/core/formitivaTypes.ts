@@ -209,7 +209,7 @@ export type FormitivaProviderProps = {
   defaultStyle?: Record<string, unknown>;
 };
 
-// ─── Layout Types ────────────────────────────────────────────────────────
+// ─── Layout Types for future support ────────────────────
 
 export type LayoutSection = {
   label: string;

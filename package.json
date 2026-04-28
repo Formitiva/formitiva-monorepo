@@ -1,7 +1,7 @@
 {
   "name": "formitiva-monorepo",
   "private": true,
-  "version": "2.1.0",
+  "version": "2.1.5",
   "description": "Formitiva monorepo — shared core with React, Vue, Angular, and Vanilla adapters",
   "scripts": {
     "build": "turbo run build",
