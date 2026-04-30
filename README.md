@@ -439,10 +439,38 @@ pnpm publish --filter "@formitiva/*" -r
 ```
 ---
 
-## Contributing
+## 🤝 Looking for Contributors
 
-Contributions are welcome. Open an issue or submit a pull request at:
+Formitiva was originally built with a strong focus on the React renderer. Support for Vue, Angular, and Vanilla JS is available, but these adapters would benefit from deeper ecosystem expertise and ongoing maintenance.
 
-https://github.com/formitiva/formitiva-monorepo
+We are looking for contributors experienced with:
 
-For internal monorepo development setup, see [DEVELOPMENT.md](DEVELOPMENT.md).
+- Vue
+- Angular
+- Vanilla JavaScript
+
+### Where help is needed
+
+- Ensuring idiomatic patterns for each framework
+- Fixing framework-specific bugs and edge cases
+- Improving performance and reactivity handling
+- Keeping feature parity across all renderers
+- Enhancing documentation and examples
+
+### Getting involved
+
+- Pick up issues labeled by framework (vue, angular, vanilla)
+- Open discussions for design improvements
+- Submit pull requests for fixes or enhancements
+
+For development setup and architecture details, see DEVELOPMENT.md.
+
+
+## Learn More
+
+https://formitiva.com
+https://formitiva.com/docs
+
+## Development
+
+See DEVELOPMENT.md

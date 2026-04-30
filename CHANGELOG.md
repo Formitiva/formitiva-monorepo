@@ -25,3 +25,6 @@
 ## 2.1.5 2026-04-28
 - Enhance compute value functionality
 - Add formitiva-submit-button in formitiva.css
+
+## 2.1.6 2026-04-29
+- Fix publish workspace issue in 2.1.5
