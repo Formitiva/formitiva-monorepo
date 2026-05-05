@@ -10,8 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@formitiva/vue": "^2.1.3",
-    "@formitiva/core": "^2.1.3",
+    "@formitiva/vue": "workspace:^",
+    "@formitiva/core": "workspace:^",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },

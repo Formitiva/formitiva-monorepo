@@ -1,6 +1,6 @@
 {
   "name": "@formitiva/vue",
-  "version": "2.1.6",
+  "version": "2.1.7",
   "description": "Formitiva Vue 3 adapter — components, composables and registries",
   "keywords": ["formitiva", "form", "form-builder", "form-validation", "dynamic-form", "vue", "vue3", "composables", "typescript"],
   "repository": {

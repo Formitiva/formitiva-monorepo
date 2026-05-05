@@ -28,3 +28,7 @@
 
 ## 2.1.6 2026-04-29
 - Fix publish workspace issue in 2.1.5
+
+## 2.1.7 2026-05-05
+- Fix onBlur validation issue
+- Fix placeholder localize issue
