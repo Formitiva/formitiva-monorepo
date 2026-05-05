@@ -1,0 +1,21 @@
+{
+  "Purchase Order": "Bestellung",
+  "Vendor Name": "Lieferantenname",
+  "PO Number": "Bestellnummer",
+  "Item Description": "Artikelbeschreibung",
+  "Quantity": "Menge",
+  "Unit Price ($)": "Einzelpreis (€)",
+  "Discount (%)": "Rabatt (%)",
+  "Subtotal ($)": "Zwischensumme (€)",
+  "Total Amount ($)": "Gesamtbetrag (€)",
+  "Payment Terms": "Zahlungsbedingungen",
+  "Notes": "Hinweise",
+  "Net 30": "Netto 30",
+  "Net 60": "Netto 60",
+  "Cash on Delivery": "Nachnahme",
+  "Prepaid": "Vorauszahlung",
+  "Supplier Inc.": "Lieferant GmbH",
+  "PO-20260101-0001": "PO-20260101-0001",
+  "Describe the goods or services being ordered": "Bestellte Waren oder Dienstleistungen beschreiben",
+  "Special instructions or delivery requirements": "Besondere Anweisungen oder Lieferanforderungen"
+}

@@ -1,0 +1,20 @@
+{
+  "name": "formitiva-vanilla-business-portal",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc -b --noEmit",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@formitiva/vanilla": "workspace:^",
+    "@formitiva/core": "workspace:^"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.3",
+    "vite": "^6.0.5"
+  }
+}

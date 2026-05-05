@@ -1,0 +1,21 @@
+{
+  "Purchase Order": "Orden de Compra",
+  "Vendor Name": "Nombre del Proveedor",
+  "PO Number": "Número de Orden",
+  "Item Description": "Descripción del Artículo",
+  "Quantity": "Cantidad",
+  "Unit Price ($)": "Precio Unitario ($)",
+  "Discount (%)": "Descuento (%)",
+  "Subtotal ($)": "Subtotal ($)",
+  "Total Amount ($)": "Monto Total ($)",
+  "Payment Terms": "Términos de Pago",
+  "Notes": "Notas",
+  "Net 30": "Neto 30",
+  "Net 60": "Neto 60",
+  "Cash on Delivery": "Pago contra Entrega",
+  "Prepaid": "Prepagado",
+  "Supplier Inc.": "Proveedor S.A.",
+  "PO-20260101-0001": "PO-20260101-0001",
+  "Describe the goods or services being ordered": "Describa los bienes o servicios que se ordenan",
+  "Special instructions or delivery requirements": "Instrucciones especiales o requisitos de entrega"
+}

@@ -1,0 +1,21 @@
+{
+  "Purchase Order": "Bon de Commande",
+  "Vendor Name": "Nom du Fournisseur",
+  "PO Number": "Numéro de Commande",
+  "Item Description": "Description de l'Article",
+  "Quantity": "Quantité",
+  "Unit Price ($)": "Prix Unitaire (€)",
+  "Discount (%)": "Remise (%)",
+  "Subtotal ($)": "Sous-total (€)",
+  "Total Amount ($)": "Montant Total (€)",
+  "Payment Terms": "Conditions de Paiement",
+  "Notes": "Remarques",
+  "Net 30": "Net 30",
+  "Net 60": "Net 60",
+  "Cash on Delivery": "Contre Remboursement",
+  "Prepaid": "Prépayé",
+  "Supplier Inc.": "Fournisseur S.A.",
+  "PO-20260101-0001": "PO-20260101-0001",
+  "Describe the goods or services being ordered": "Décrivez les biens ou services commandés",
+  "Special instructions or delivery requirements": "Instructions spéciales ou exigences de livraison"
+}

@@ -183,7 +183,7 @@ const handleSubmit = async () => {
 
   let errorsForSubmit = errors.value;
 
-  if (renderContext.value.fieldValidationMode === "onSubmission") {
+  if (renderContext.value.fieldValidationMode === "onSubmission" || renderContext.value.fieldValidationMode === "onBlur") {
     const newErrors = computeSubmitErrors(
       updatedProperties.value,
       valuesMap.value,

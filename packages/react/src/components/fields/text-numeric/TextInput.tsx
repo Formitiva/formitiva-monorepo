@@ -5,6 +5,7 @@ import type { BaseInputProps } from '@formitiva/core';
 import { CSS_CLASSES, combineClasses } from '@formitiva/core';
 import { useUncontrolledValidatedInput } from "../../../hooks/useUncontrolledValidatedInput";
 import { useFieldValidator } from "../../../hooks/useFieldValidator";
+import useFormitivaContext from "../../../hooks/useFormitivaContext";
 
 // ------------------ Types ------------------
 
@@ -20,6 +21,7 @@ const TextInput: React.FC<TextInputProps> = ({
   error: externalError,
 }) => {
   const validate = useFieldValidator(field, externalError);
+  const { t } = useFormitivaContext();
 
   const { inputRef, error, handleChange } = useUncontrolledValidatedInput({
     value,
@@ -37,7 +39,7 @@ const TextInput: React.FC<TextInputProps> = ({
         ref={inputRef}
         onChange={handleChange}
         className={combineClasses(CSS_CLASSES.input, CSS_CLASSES.textInput)}
-        placeholder={field.placeholder}
+        placeholder={field.placeholder ? t(field.placeholder) : undefined}
         aria-invalid={!!error}
         aria-describedby={error ? `${field.name}-error` : undefined}
       />

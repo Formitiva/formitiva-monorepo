@@ -1,0 +1,60 @@
+/* ── Global reset ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: #1a1a1a;
+  background: #f0f2f5;
+}
+
+code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.85em;
+  background: #e8eaf0;
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: #5c6bc0;
+}
+
+/* ── Result box ───────────────────────────────────────────── */
+.result-box {
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: #1e1e2e;
+  color: #cdd6f4;
+  border-radius: 8px;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 320px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+.result-box.success { border-left: 4px solid #a6e3a1; }
+.result-box.error   { border-left: 4px solid #f38ba8; }
+
+/* ── Handler chip ─────────────────────────────────────────── */
+.handler-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(203, 166, 247, 0.12);
+  border: 1px solid rgba(203, 166, 247, 0.25);
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 0.72rem;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  color: #cba6f7;
+  margin: 2px 0;
+}
+
+.handler-chip .chip-label {
+  color: #6c7086;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}

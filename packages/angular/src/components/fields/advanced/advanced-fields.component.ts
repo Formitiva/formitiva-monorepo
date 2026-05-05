@@ -28,7 +28,7 @@ import { getUnitFactors, convertTemperature } from '@formitiva/core';
         [formControl]="control"
         (blur)="onBlur()"
         [class]="inputClass"
-        [placeholder]="field.placeholder || ''"
+        [placeholder]="field.placeholder ? ctx.t()(field.placeholder) : ''"
         [attr.aria-invalid]="!!errorSig() || null"
         [attr.aria-describedby]="errorSig() ? field.name + '-error' : null"
       />
@@ -38,10 +38,6 @@ import { getUnitFactors, convertTemperature } from '@formitiva/core';
 export class EmailInputComponent extends ReactiveStringFieldComponent {
   inputClass = combineClasses(CSS_CLASSES.input, CSS_CLASSES.textInput);
 }
-
-// ----------------------------
-// PhoneInput (type=phone)
-// ----------------------------
 @Component({
   selector: 'fv-phone-input',
   standalone: true,
@@ -55,7 +51,7 @@ export class EmailInputComponent extends ReactiveStringFieldComponent {
         [formControl]="control"
         (blur)="onBlur()"
         [class]="inputClass"
-        [placeholder]="field.placeholder || ''"
+        [placeholder]="field.placeholder ? ctx.t()(field.placeholder) : ''"
         [attr.aria-invalid]="!!errorSig() || null"
         [attr.aria-describedby]="errorSig() ? field.name + '-error' : null"
       />
@@ -65,10 +61,6 @@ export class EmailInputComponent extends ReactiveStringFieldComponent {
 export class PhoneInputComponent extends ReactiveStringFieldComponent {
   inputClass = combineClasses(CSS_CLASSES.input, CSS_CLASSES.textInput);
 }
-
-// ----------------------------
-// UrlInput (type=url)
-// ----------------------------
 @Component({
   selector: 'fv-url-input',
   standalone: true,
@@ -82,7 +74,7 @@ export class PhoneInputComponent extends ReactiveStringFieldComponent {
         [formControl]="control"
         (blur)="onBlur()"
         [class]="inputClass"
-        [placeholder]="field.placeholder || ''"
+        [placeholder]="field.placeholder ? ctx.t()(field.placeholder) : ''"
         [attr.aria-invalid]="!!errorSig() || null"
         [attr.aria-describedby]="errorSig() ? field.name + '-error' : null"
       />
@@ -92,10 +84,6 @@ export class PhoneInputComponent extends ReactiveStringFieldComponent {
 export class UrlInputComponent extends ReactiveStringFieldComponent {
   inputClass = combineClasses(CSS_CLASSES.input, CSS_CLASSES.textInput);
 }
-
-// ----------------------------
-// ColorInput (type=color)
-// ----------------------------
 const DEFAULT_COLOR = '#000000';
 const HEX_REGEX = /^#([0-9A-F]{3}){1,2}$/i;
 const COLOR_PRESETS = [

@@ -379,7 +379,7 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
 
     let errorsForSubmit = this.errors();
 
-    if (this.ctx.fieldValidationMode() === 'onSubmission') {
+    if (this.ctx.fieldValidationMode() === 'onSubmission' || this.ctx.fieldValidationMode() === 'onBlur') {
       const newErrors = computeSubmitErrors(
         this.updatedProperties,
         this.valuesMap(),

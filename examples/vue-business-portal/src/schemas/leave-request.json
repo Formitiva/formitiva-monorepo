@@ -1,0 +1,101 @@
+{
+  "name": "leave_request",
+  "displayName": "Leave Request",
+  "version": "1.0.0",
+  "localization": "leave_request",
+  "submitterRef": "biz:leaveRequest",
+  "validatorRef": "biz:leaveRequestValidator",
+  "properties": [
+    {
+      "name": "employeeName",
+      "displayName": "Employee Name",
+      "type": "text",
+      "defaultValue": "",
+      "required": true
+    },
+    {
+      "name": "employeeId",
+      "displayName": "Employee ID",
+      "type": "text",
+      "defaultValue": "",
+      "required": true,
+      "placeholder": "EMP-XXXX"
+    },
+    {
+      "name": "department",
+      "displayName": "Department",
+      "type": "dropdown",
+      "defaultValue": "engineering",
+      "required": true,
+      "options": [
+        { "value": "engineering", "label": "Engineering" },
+        { "value": "marketing",   "label": "Marketing" },
+        { "value": "sales",       "label": "Sales" },
+        { "value": "hr",          "label": "Human Resources" },
+        { "value": "finance",     "label": "Finance" },
+        { "value": "operations",  "label": "Operations" }
+      ]
+    },
+    {
+      "name": "leaveType",
+      "displayName": "Leave Type",
+      "type": "dropdown",
+      "defaultValue": "annual",
+      "required": true,
+      "options": [
+        { "value": "annual",    "label": "Annual Leave" },
+        { "value": "sick",      "label": "Sick Leave" },
+        { "value": "personal",  "label": "Personal Leave" },
+        { "value": "emergency", "label": "Emergency Leave" }
+      ]
+    },
+    {
+      "name": "startDate",
+      "displayName": "Start Date",
+      "type": "text",
+      "defaultValue": "",
+      "required": true,
+      "placeholder": "YYYY-MM-DD"
+    },
+    {
+      "name": "endDate",
+      "displayName": "End Date",
+      "type": "text",
+      "defaultValue": "",
+      "required": true,
+      "placeholder": "YYYY-MM-DD"
+    },
+    {
+      "name": "reason",
+      "displayName": "Reason",
+      "type": "multiline",
+      "defaultValue": "",
+      "required": true,
+      "placeholder": "Briefly explain the reason for your leave request",
+      "minHeight": "80px"
+    },
+    {
+      "name": "requiresMedicalCert",
+      "displayName": "Medical Certificate Provided",
+      "type": "checkbox",
+      "defaultValue": false,
+      "visibilityRef": "biz:isSickLeave"
+    },
+    {
+      "name": "emergencyContactName",
+      "displayName": "Emergency Contact — Full Name",
+      "type": "text",
+      "defaultValue": "",
+      "visibilityRef": "biz:isEmergencyLeave",
+      "placeholder": "Full name of your emergency contact"
+    },
+    {
+      "name": "emergencyContactPhone",
+      "displayName": "Emergency Contact — Phone",
+      "type": "text",
+      "defaultValue": "",
+      "visibilityRef": "biz:isEmergencyLeave",
+      "placeholder": "+1 (555) 000-0000"
+    }
+  ]
+}

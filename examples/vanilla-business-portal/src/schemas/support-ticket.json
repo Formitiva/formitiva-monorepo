@@ -1,0 +1,71 @@
+{
+  "name": "support_ticket",
+  "displayName": "Support Ticket",
+  "version": "1.0.0",
+  "localization": "support_ticket",
+  "submitterRef": "biz:supportTicket",
+  "validatorRef": "biz:supportTicketValidator",
+  "properties": [
+    {
+      "name": "title",
+      "displayName": "Ticket Title",
+      "type": "text",
+      "defaultValue": "",
+      "required": true,
+      "placeholder": "Brief description of the issue"
+    },
+    {
+      "name": "priority",
+      "displayName": "Priority",
+      "type": "dropdown",
+      "defaultValue": "medium",
+      "required": true,
+      "options": [
+        { "value": "low",      "label": "Low" },
+        { "value": "medium",   "label": "Medium" },
+        { "value": "high",     "label": "High" },
+        { "value": "critical", "label": "Critical — Service Down" }
+      ]
+    },
+    {
+      "name": "category",
+      "displayName": "Category",
+      "type": "dropdown",
+      "defaultValue": "question",
+      "required": true,
+      "options": [
+        { "value": "bug",     "label": "Bug Report" },
+        { "value": "feature", "label": "Feature Request" },
+        { "value": "question","label": "Question" },
+        { "value": "billing", "label": "Billing" }
+      ]
+    },
+    {
+      "name": "description",
+      "displayName": "Description",
+      "type": "multiline",
+      "defaultValue": "",
+      "required": true,
+      "placeholder": "Describe the issue in detail (minimum 20 characters)",
+      "minHeight": "100px"
+    },
+    {
+      "name": "stepsToReproduce",
+      "displayName": "Steps to Reproduce",
+      "type": "multiline",
+      "defaultValue": "",
+      "visibilityRef": "biz:isBugCategory",
+      "placeholder": "1. Go to…\n2. Click on…\n3. Observe…",
+      "minHeight": "80px"
+    },
+    {
+      "name": "expectedBehavior",
+      "displayName": "Expected Behavior",
+      "type": "multiline",
+      "defaultValue": "",
+      "visibilityRef": "biz:isBugOrFeature",
+      "placeholder": "What should happen instead?",
+      "minHeight": "80px"
+    }
+  ]
+}

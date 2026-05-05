@@ -351,7 +351,7 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
 
     let errorsForSubmit = { ...errorsMap };
 
-    if (ctx.fieldValidationMode === 'onSubmission') {
+    if (ctx.fieldValidationMode === 'onSubmission' || ctx.fieldValidationMode === 'onBlur') {
       const newErrors = computeSubmitErrors(updatedProperties, valuesMap, ctx.definitionName, t);
       // Sync errorsMap in-place
       Object.keys(errorsMap).forEach(k => { delete errorsMap[k]; });

@@ -25,7 +25,7 @@ import { CSS_CLASSES, combineClasses } from '@formitiva/core';
         [formControl]="control"
         (blur)="onBlur()"
         [class]="inputClass"
-        [placeholder]="field.placeholder || ''"
+        [placeholder]="field.placeholder ? ctx.t()(field.placeholder) : ''"
         [attr.aria-invalid]="!!errorSig() || null"
         [attr.aria-describedby]="errorSig() ? field.name + '-error' : null"
       />
@@ -105,6 +105,7 @@ export class FloatInputComponent extends ReactiveStringFieldComponent {
         [style.min-height]="field.minHeight || '80px'"
         style="resize:vertical;width:100%;box-sizing:border-box"
         [class]="inputClass"
+        [placeholder]="field.placeholder ? ctx.t()(field.placeholder) : ''"
         [attr.aria-invalid]="!!errorSig() || null"
         [attr.aria-describedby]="errorSig() ? field.name + '-error' : null"
       ></textarea>
@@ -247,7 +248,7 @@ export class NumericStepperInputComponent extends ReactiveStringFieldComponent {
           [formControl]="control"
           (blur)="onBlur()"
           [class]="inputClass"
-          [placeholder]="field.placeholder || ''"
+          [placeholder]="field.placeholder ? ctx.t()(field.placeholder) : ''"
           [attr.aria-invalid]="!!errorSig() || null"
           [attr.aria-describedby]="errorSig() ? field.name + '-error' : null"
           style="flex:1;min-width:0"

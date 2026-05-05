@@ -258,7 +258,7 @@ const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRen
 
     let errorsForSubmit = errors;
 
-    if (renderContext.fieldValidationMode === "onSubmission") {
+    if (renderContext.fieldValidationMode === "onSubmission" || renderContext.fieldValidationMode === "onBlur") {
       const newErrors = computeSubmitErrors(updatedProperties, valuesMap, renderContext.definitionName, t);
       setErrors(newErrors);
       errorsForSubmit = newErrors;

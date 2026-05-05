@@ -5,6 +5,7 @@ import type { BaseInputProps } from '@formitiva/core';
 import { CSS_CLASSES, combineClasses } from '@formitiva/core';
 import { useUncontrolledValidatedInput } from "../../../hooks/useUncontrolledValidatedInput";
 import { useFieldValidator } from "../../../hooks/useFieldValidator";
+import useFormitivaContext from "../../../hooks/useFormitivaContext";
 
 
 type MultilineTextInputProps = BaseInputProps<string, DefinitionPropertyField>;
@@ -17,6 +18,7 @@ const emit = defineEmits<{
 }>();
 
 const validate = useFieldValidator(props.field, props.error);
+const { t } = useFormitivaContext();
 
 // Use shared uncontrolled + validated input hook (textarea variant)
 const { inputRef, error, handleChange, handleBlur } = useUncontrolledValidatedInput<HTMLTextAreaElement>({
@@ -43,6 +45,7 @@ const { inputRef, error, handleChange, handleBlur } = useUncontrolledValidatedIn
         boxSizing: 'border-box',
       }"
       :class="combineClasses(CSS_CLASSES.input, CSS_CLASSES.textInput)"
+      :placeholder="field.placeholder ? t(field.placeholder) : undefined"
       :aria-invalid="!!error"
       :aria-describedby="error ? `${field.name}-error` : undefined"
     />

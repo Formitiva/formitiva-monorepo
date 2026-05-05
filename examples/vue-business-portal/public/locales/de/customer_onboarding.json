@@ -1,0 +1,22 @@
+{
+  "Customer Registration": "Kundenregistrierung",
+  "Account Type": "Kontotyp",
+  "Full Name": "Vollständiger Name",
+  "Email Address": "E-Mail-Adresse",
+  "Phone Number": "Telefonnummer",
+  "Company Name": "Firmenname",
+  "Tax ID / EIN": "Steuer-ID / EIN",
+  "Industry": "Branche",
+  "Individual": "Einzelperson",
+  "Business": "Unternehmen",
+  "Technology": "Technologie",
+  "Healthcare": "Gesundheitswesen",
+  "Finance": "Finanzen",
+  "Retail": "Einzelhandel",
+  "Manufacturing": "Fertigung",
+  "Other": "Sonstige",
+  "Enter your full name": "Vollständigen Namen eingeben",
+  "+1 (555) 000-0000": "+49 (555) 000-0000",
+  "ACME Corp.": "ACME GmbH",
+  "XX-XXXXXXX": "XX-XXXXXXX"
+}

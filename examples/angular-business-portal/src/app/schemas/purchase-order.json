@@ -1,0 +1,96 @@
+{
+  "name": "purchase_order",
+  "displayName": "Purchase Order",
+  "version": "1.0.0",
+  "localization": "purchase_order",
+  "submitterRef": "biz:purchaseOrder",
+  "validatorRef": "biz:purchaseOrderValidator",
+  "properties": [
+    {
+      "name": "vendorName",
+      "displayName": "Vendor Name",
+      "type": "text",
+      "defaultValue": "",
+      "required": true,
+      "placeholder": "Supplier Inc."
+    },
+    {
+      "name": "poNumber",
+      "displayName": "PO Number",
+      "type": "text",
+      "defaultValue": "",
+      "required": true,
+      "placeholder": "PO-20260101-0001"
+    },
+    {
+      "name": "itemDescription",
+      "displayName": "Item Description",
+      "type": "multiline",
+      "defaultValue": "",
+      "required": true,
+      "placeholder": "Describe the goods or services being ordered",
+      "minHeight": "80px"
+    },
+    {
+      "name": "quantity",
+      "displayName": "Quantity",
+      "type": "int",
+      "defaultValue": 1,
+      "required": true,
+      "min": 1
+    },
+    {
+      "name": "unitPrice",
+      "displayName": "Unit Price ($)",
+      "type": "float",
+      "defaultValue": 0,
+      "required": true,
+      "min": 0
+    },
+    {
+      "name": "discountPct",
+      "displayName": "Discount (%)",
+      "type": "float",
+      "defaultValue": 0,
+      "min": 0,
+      "max": 100
+    },
+    {
+      "name": "subtotal",
+      "displayName": "Subtotal ($)",
+      "type": "float",
+      "defaultValue": 0,
+      "disabled": true,
+      "computedRef": "biz:calcOrderTotals"
+    },
+    {
+      "name": "totalAmount",
+      "displayName": "Total Amount ($)",
+      "type": "float",
+      "defaultValue": 0,
+      "disabled": true,
+      "computedRef": "biz:calcOrderTotals"
+    },
+    {
+      "name": "paymentTerms",
+      "displayName": "Payment Terms",
+      "type": "dropdown",
+      "defaultValue": "net30",
+      "required": true,
+      "options": [
+        { "value": "net30",   "label": "Net 30" },
+        { "value": "net60",   "label": "Net 60" },
+        { "value": "cod",     "label": "Cash on Delivery" },
+        { "value": "prepaid", "label": "Prepaid" }
+      ]
+    },
+    {
+      "name": "notes",
+      "displayName": "Notes",
+      "type": "multiline",
+      "defaultValue": "",
+      "placeholder": "Special instructions or delivery requirements",
+      "minHeight": "60px"
+    }
+  ]
+}

@@ -53,7 +53,7 @@ export function createSimpleField(
   const strValue = strOf(initialValue);
   input.value = strValue;
   if (disabled) input.disabled = true;
-  if (field.placeholder) input.placeholder = field.placeholder;
+  if (field.placeholder) input.placeholder = ctx.t(field.placeholder);
   input.setAttribute('aria-invalid', initialError ? 'true' : 'false');
   if (initialError) input.setAttribute('aria-describedby', `${field.name}-error`);
 
@@ -119,6 +119,7 @@ export function createTextareaField(
   textarea.style.width = '100%';
   textarea.style.boxSizing = 'border-box';
   if (disabled) textarea.disabled = true;
+  if (field.placeholder) textarea.placeholder = ctx.t(field.placeholder);
 
   const uvi = new UncontrolledValidatedInput<HTMLTextAreaElement>({ validate, onChange, onError });
   uvi.setRef(textarea, 0);

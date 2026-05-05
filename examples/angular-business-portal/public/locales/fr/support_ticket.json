@@ -1,0 +1,21 @@
+{
+  "Support Ticket": "Ticket de Support",
+  "Ticket Title": "Titre du Ticket",
+  "Priority": "Priorité",
+  "Category": "Catégorie",
+  "Description": "Description",
+  "Steps to Reproduce": "Étapes pour Reproduire",
+  "Expected Behavior": "Comportement Attendu",
+  "Low": "Faible",
+  "Medium": "Moyen",
+  "High": "Élevé",
+  "Critical — Service Down": "Critique — Service Indisponible",
+  "Bug Report": "Rapport de Bogue",
+  "Feature Request": "Demande de Fonctionnalité",
+  "Question": "Question",
+  "Billing": "Facturation",
+  "Brief description of the issue": "Brève description du problème",
+  "Describe the issue in detail (minimum 20 characters)": "Décrivez le problème en détail (minimum 20 caractères)",
+  "1. Go to…\n2. Click on…\n3. Observe…": "1. Aller à…\n2. Cliquer sur…\n3. Observer…",
+  "What should happen instead?": "Que devrait-il se passer à la place ?"
+}

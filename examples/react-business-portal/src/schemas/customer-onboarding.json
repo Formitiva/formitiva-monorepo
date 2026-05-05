@@ -1,0 +1,74 @@
+{
+  "name": "customer_onboarding",
+  "displayName": "Customer Registration",
+  "version": "1.0.0",
+  "localization": "customer_onboarding",
+  "submitterRef": "biz:customerOnboarding",
+  "validatorRef": "biz:customerOnboardingValidator",
+  "properties": [
+    {
+      "name": "accountType",
+      "displayName": "Account Type",
+      "type": "dropdown",
+      "defaultValue": "individual",
+      "required": true,
+      "options": [
+        { "value": "individual", "label": "Individual" },
+        { "value": "business",   "label": "Business" }
+      ]
+    },
+    {
+      "name": "fullName",
+      "displayName": "Full Name",
+      "type": "text",
+      "defaultValue": "",
+      "required": true,
+      "placeholder": "Enter your full name"
+    },
+    {
+      "name": "email",
+      "displayName": "Email Address",
+      "type": "email",
+      "defaultValue": "",
+      "required": true
+    },
+    {
+      "name": "phone",
+      "displayName": "Phone Number",
+      "type": "text",
+      "defaultValue": "",
+      "placeholder": "+1 (555) 000-0000"
+    },
+    {
+      "name": "companyName",
+      "displayName": "Company Name",
+      "type": "text",
+      "defaultValue": "",
+      "visibilityRef": "biz:isBusinessAccount",
+      "placeholder": "ACME Corp."
+    },
+    {
+      "name": "taxId",
+      "displayName": "Tax ID / EIN",
+      "type": "text",
+      "defaultValue": "",
+      "visibilityRef": "biz:isBusinessAccount",
+      "placeholder": "XX-XXXXXXX"
+    },
+    {
+      "name": "industry",
+      "displayName": "Industry",
+      "type": "dropdown",
+      "defaultValue": "technology",
+      "visibilityRef": "biz:isBusinessAccount",
+      "options": [
+        { "value": "technology",    "label": "Technology" },
+        { "value": "healthcare",    "label": "Healthcare" },
+        { "value": "finance",       "label": "Finance" },
+        { "value": "retail",        "label": "Retail" },
+        { "value": "manufacturing", "label": "Manufacturing" },
+        { "value": "other",         "label": "Other" }
+      ]
+    }
+  ]
+}

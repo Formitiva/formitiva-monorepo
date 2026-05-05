@@ -1,0 +1,22 @@
+{
+  "Customer Registration": "Registro de Cliente",
+  "Account Type": "Tipo de Cuenta",
+  "Full Name": "Nombre Completo",
+  "Email Address": "Dirección de Correo Electrónico",
+  "Phone Number": "Número de Teléfono",
+  "Company Name": "Nombre de la Empresa",
+  "Tax ID / EIN": "RFC / NIF",
+  "Industry": "Industria",
+  "Individual": "Individual",
+  "Business": "Empresa",
+  "Technology": "Tecnología",
+  "Healthcare": "Salud",
+  "Finance": "Finanzas",
+  "Retail": "Comercio Minorista",
+  "Manufacturing": "Manufactura",
+  "Other": "Otro",
+  "Enter your full name": "Ingrese su nombre completo",
+  "+1 (555) 000-0000": "+52 (555) 000-0000",
+  "ACME Corp.": "ACME S.A.",
+  "XX-XXXXXXX": "XX-XXXXXXX"
+}
