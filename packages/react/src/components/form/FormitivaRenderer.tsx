@@ -7,12 +7,14 @@ import type {
   FormitivaInstance,
   FormSubmissionHandler,
   FormValidationHandler,
+  LayoutConfig,
 } from '@formitiva/core';
 import { getLayout } from '@formitiva/core';
 import useFormitivaContext, { FormitivaContext } from "../../hooks/useFormitivaContext";
 import { FieldRenderer } from "../layout/FieldRenderer";
 import { FieldGroup } from "../layout/FieldGroup";
 import { InstanceName } from "../layout/LayoutComponents";
+import { LayoutAdapter as BuiltinLayoutAdapter } from "../layout/LayoutAdapter";
 import { getLayoutAdapter } from '../../core/registries/layoutAdapterRegistry';
 import {
   initFormState,
@@ -38,6 +40,7 @@ export interface FormitivaRendererHandle {
 
 export interface FormitivaRendererProps {
   definition: FormitivaDefinition;
+  layout?: LayoutConfig | null;
   instance: FormitivaInstance;
   onSubmit?: FormSubmissionHandler;
   onValidation?: FormValidationHandler;
@@ -55,6 +58,7 @@ export interface FormitivaRendererProps {
  */
 const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRendererProps>(function FormitivaRenderer({
   definition,
+  layout = null,
   instance,
   onSubmit = undefined,
   onValidation = undefined,
@@ -73,8 +77,8 @@ const FormitivaRenderer = React.forwardRef<FormitivaRendererHandle, FormitivaRen
   const savedLanguageRef = React.useRef(language ?? "en");
 
   // Layout adapter registry
-  const activeLayout = getLayout(definition?.layoutRef ?? '');
-  const LayoutAdapter = getLayoutAdapter();
+  const activeLayout = layout ?? getLayout(definition?.layoutRef ?? '');
+  const LayoutAdapter = getLayoutAdapter() ?? BuiltinLayoutAdapter;
 
   // Core state
   const [updatedProperties, setUpdatedProperties] = React.useState<

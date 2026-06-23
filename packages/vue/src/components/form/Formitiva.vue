@@ -113,6 +113,7 @@ onUnmounted(() => {
   >
     <FormitivaRenderer
       :definition="definition"
+      :layout="props.layout"
       :instance="resolvedInstance"
       :on-submit="onSubmit"
       :on-validation="onValidation"

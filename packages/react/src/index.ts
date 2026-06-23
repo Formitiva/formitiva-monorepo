@@ -58,6 +58,13 @@ export { default as FormitivaRenderer } from './components/form/FormitivaRendere
 export type { FormitivaRendererProps, FormitivaRendererHandle } from './components/form/FormitivaRenderer';
 export { FormitivaProvider } from './components/form/FormitivaProvider';
 export { StandardFieldLayout } from './components/layout/LayoutComponents';
+export { LayoutAdapter, default as DefaultLayoutAdapter } from './components/layout/LayoutAdapter';
+export { NavLayout } from './components/layout/NavLayout';
+export type { NavLayoutProps } from './components/layout/NavLayout';
+export { TabLayout } from './components/layout/TabLayout';
+export type { TabLayoutProps } from './components/layout/TabLayout';
+export { WizardLayout } from './components/layout/WizardLayout';
+export type { WizardLayoutProps } from './components/layout/WizardLayout';
 
 // Layout adapter registry
 export {

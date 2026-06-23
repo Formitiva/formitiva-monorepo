@@ -19,6 +19,7 @@ import type {
   FieldValidationMode,
   FormSubmissionHandler,
   FormValidationHandler,
+  LayoutConfig,
 } from '@formitiva/core';
 
 let _formitivaInitialized = false;
@@ -46,6 +47,7 @@ function ensureFormitivaInitialized(): void {
       <fv-formitiva-renderer
         *ngIf="definition && resolvedInstance"
         [definition]="definition"
+        [layout]="layout"
         [instance]="resolvedInstance"
         [onSubmit]="onSubmit"
         [onValidation]="onValidation"
@@ -55,6 +57,7 @@ function ensureFormitivaInitialized(): void {
 })
 export class FormitivaComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   @Input() definitionData?: string | Record<string, unknown> | FormitivaDefinition;
+  @Input() layout?: LayoutConfig | null;
   @Input() instance?: FormitivaInstance;
   @Input() language?: string;
   @Input() className = 'formitiva-container';

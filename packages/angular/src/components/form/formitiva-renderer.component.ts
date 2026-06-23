@@ -17,6 +17,7 @@ import { FieldGroupComponent } from '../layout/field-group.component';
 import { InstanceNameComponent } from '../layout/layout-components.component';
 import { SubmissionMessageComponent } from './submission-message.component';
 import { getLayoutAdapter } from '../../core/registries/layout-adapter-registry';
+import { LayoutAdapterComponent } from '../layout/layout-adapter.component';
 import { LayoutRenderContextService } from '../../services/layout-render-context.service';
 import {
   initFormState,
@@ -122,6 +123,7 @@ import type {
 })
 export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy {
   @Input({ required: true }) definition!: FormitivaDefinition;
+  @Input() layout?: LayoutConfig | null;
   @Input({ required: true }) instance!: FormitivaInstance;
   @Input() onSubmit?: FormSubmissionHandler;
   @Input() onValidation?: FormValidationHandler;
@@ -164,7 +166,7 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   // Pro: layout registry
   activeLayout: LayoutConfig | null = null;
   readonly activeSection = signal<string>('');
-  readonly layoutAdapter = getLayoutAdapter();
+  readonly layoutAdapter = getLayoutAdapter() ?? LayoutAdapterComponent;
 
   readonly isWizardLastStep = computed(() => {
     if (!this.activeLayout || this.activeLayout.type !== 'wizard') return false;
@@ -193,15 +195,15 @@ export class FormitivaRendererComponent implements OnInit, OnChanges, OnDestroy 
   };
 
   ngOnInit(): void {
-    this.activeLayout = getLayout(this.definition?.layoutRef ?? '');
+    this.activeLayout = this.layout ?? getLayout(this.definition?.layoutRef ?? '');
     this.activeSection.set(this.activeLayout?.defaultValue ?? '');
     this.init();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['definition'] || changes['instance']) {
-      if (changes['definition']) {
-        this.activeLayout = getLayout(this.definition?.layoutRef ?? '');
+    if (changes['definition'] || changes['instance'] || changes['layout']) {
+      if (changes['definition'] || changes['layout']) {
+        this.activeLayout = this.layout ?? getLayout(this.definition?.layoutRef ?? '');
         this.activeSection.set(this.activeLayout?.defaultValue ?? '');
       }
       this.initDone = false;

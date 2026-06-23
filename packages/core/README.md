@@ -118,6 +118,27 @@ import {
 import { groupConsecutiveFields, renameDuplicatedGroups } from "@formitiva/core";
 ```
 
+### Page Layout Types
+
+`LayoutConfig` describes how an application wants to group schema fields into nav sections, tabs, or wizard steps. It is separate from `FormitivaDefinition`, so schemas can remain data-only and reusable across different screens.
+
+```ts
+import type { LayoutConfig } from "@formitiva/core";
+
+const wizardLayout: LayoutConfig = {
+  name: "onboardingWizard",
+  type: "wizard",
+  displayName: "Onboarding",
+  defaultValue: "account",
+  sections: [
+    { label: "Account", name: "account", props: ["email", "password"] },
+    { label: "Profile", name: "profile", props: ["firstName", "lastName"] },
+  ],
+};
+```
+
+Pass the layout to the framework adapter, for example `<Formitiva layout={wizardLayout} />` in React or `[layout]="wizardLayout"` in Angular. `definition.layoutRef` and `registerLayout()` are retained for compatibility, but explicit layout props are recommended for new work.
+
 ### Styles & CSS Classes
 
 ```ts

@@ -66,4 +66,25 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/themes/themes.component').then((m) => m.ThemesComponent),
   },
+  {
+    path: 'layout-nav',
+    loadComponent: () =>
+      import('./pages/layout-nav/layout-nav.component').then(
+        (m) => m.LayoutNavComponent
+      ),
+  },
+  {
+    path: 'layout-tab',
+    loadComponent: () =>
+      import('./pages/layout-tab/layout-tab.component').then(
+        (m) => m.LayoutTabComponent
+      ),
+  },
+  {
+    path: 'layout-wizard',
+    loadComponent: () =>
+      import('./pages/layout-wizard/layout-wizard.component').then(
+        (m) => m.LayoutWizardComponent
+      ),
+  },
 ];

@@ -125,5 +125,8 @@ export class AppComponent {
     { path: 'visibility',     label: 'Visibility Handler',     description: 'Show/hide/disable fields via registered handlers' },
     { path: 'computed-values', label: 'Computed Values',        description: 'Derive field values from other fields (e.g. total = qty × price)' },
     { path: 'themes',          label: 'Theme Demo',             description: 'Preview and switch themes' },
+    { path: 'layout-nav',      label: 'Layout - Nav',           description: 'Left-side navigation panel splits form into sections' },
+    { path: 'layout-tab',      label: 'Layout - Tab',           description: 'Tab buttons above the form split fields into sections' },
+    { path: 'layout-wizard',   label: 'Layout - Wizard',        description: 'Multi-step wizard with Previous / Next navigation' },
   ];
 }

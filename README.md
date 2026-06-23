@@ -98,6 +98,106 @@ Reads the schema, resolves components through the registry, and produces the fin
 
 ---
 
+## Page Layouts: Nav, Tab, and Wizard
+
+Formitiva supports advanced page layouts without putting layout decisions inside the JSON schema. The schema should describe the form data and fields. The application decides how those fields are grouped and navigated by passing a `layout` config to the framework adapter.
+
+This keeps one schema reusable across different screens:
+
+- Render the same schema as a single long form on mobile.
+- Render it as tabs in a settings page.
+- Render it as a wizard during onboarding.
+- Change layout per application without changing backend schema data.
+
+### Implementation Logic
+
+Layouts are a thin rendering layer around the normal field renderer:
+
+1. The renderer loads and validates the schema as usual.
+2. If a `layout` config is passed, the built-in layout adapter becomes active.
+3. The adapter tracks the active section.
+4. Each section lists field names in `props`.
+5. Only fields belonging to the active section are rendered.
+6. The same validation, visibility, computed values, translation, theme, and submit logic still apply.
+
+`definition.layoutRef` and `registerLayout()` remain available as a compatibility fallback, but new code should prefer the explicit `layout` prop/input/option.
+
+### Layout Config
+
+```ts
+type LayoutConfig = {
+  name: string;
+  type: "nav" | "tab" | "wizard";
+  displayName: string;
+  defaultValue: string;
+  sections: Array<{
+    label: string;
+    name: string;
+    props: string[];
+  }>;
+};
+```
+
+Example:
+
+```ts
+const definition = {
+  name: "profile",
+  version: "1.0.0",
+  displayName: "Profile",
+  properties: [
+    { name: "firstName", type: "text", displayName: "First Name", required: true },
+    { name: "lastName", type: "text", displayName: "Last Name", required: true },
+    { name: "email", type: "email", displayName: "Email", required: true },
+    { name: "newsletter", type: "switch", displayName: "Newsletter" }
+  ]
+};
+
+const tabLayout = {
+  name: "profileTabs",
+  type: "tab" as const,
+  displayName: "Profile Tabs",
+  defaultValue: "personal",
+  sections: [
+    { label: "Personal", name: "personal", props: ["firstName", "lastName"] },
+    { label: "Contact", name: "contact", props: ["email", "newsletter"] }
+  ]
+};
+```
+
+### How To Use
+
+React:
+
+```tsx
+<Formitiva definitionData={definition} layout={tabLayout} />
+```
+
+Vue:
+
+```vue
+<Formitiva :definition-data="definition" :layout="tabLayout" />
+```
+
+Angular:
+
+```html
+<fv-formitiva [definitionData]="definition" [layout]="tabLayout"></fv-formitiva>
+```
+
+Vanilla:
+
+```ts
+const form = new Formitiva({
+  definitionData: definition,
+  layout: tabLayout
+});
+```
+
+Use `type: "nav"` for a left-side section menu, `type: "tab"` for tab buttons above the form, and `type: "wizard"` for step-by-step navigation. Wizard layouts disable the Next button while the current step has validation errors.
+
+---
+
 ## Packages
 
 | Package | Framework | npm |

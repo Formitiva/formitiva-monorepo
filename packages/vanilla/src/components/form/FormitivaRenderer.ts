@@ -10,10 +10,12 @@ import type {
   FormitivaInstance,
   FormSubmissionHandler,
   FormValidationHandler,
+  LayoutConfig,
 } from '@formitiva/core';
 import type { FormContext } from '../../context/formitivaContext';
 import { createFieldRenderer, type FieldRendererResult } from '../layout/FieldRenderer';
 import { createFieldGroup, type FieldGroupResult } from '../layout/FieldGroup';
+import { vanillaLayoutAdapter as builtinLayoutAdapter } from '../layout/LayoutAdapter';
 import { getLayoutAdapter, type VanillaLayoutAdapterResult } from '../../core/registries/layoutAdapterRegistry';
 import {
   initFormState,
@@ -30,6 +32,7 @@ import { CSS_CLASSES } from '@formitiva/core';
 
 export interface FormitivaRendererOptions {
   definition: FormitivaDefinition;
+  layout?: LayoutConfig | null;
   instance: FormitivaInstance;
   ctx: FormContext;
   onSubmit?: FormSubmissionHandler;
@@ -124,8 +127,8 @@ export function createFormitivaRenderer(opts: FormitivaRendererOptions): Formiti
   submitBtn.textContent = t('Submit');
 
   // Layout adapter
-  const activeLayout = getLayout(definition?.layoutRef ?? '');
-  const layoutAdapter = getLayoutAdapter();
+  const activeLayout = opts.layout ?? getLayout(definition?.layoutRef ?? '');
+  const layoutAdapter = getLayoutAdapter() ?? builtinLayoutAdapter;
   let activeSection: string = activeLayout?.defaultValue ?? '';
   let layoutAdapterResult: VanillaLayoutAdapterResult | null = null;
 

@@ -64,6 +64,13 @@ export {
   createInstanceNameWidget,
   createErrorDiv,
 } from './components/layout/LayoutComponents';
+export { vanillaLayoutAdapter } from './components/layout/LayoutAdapter';
+export { createNavLayout } from './components/layout/NavLayout';
+export type { NavLayoutResult } from './components/layout/NavLayout';
+export { createTabLayout } from './components/layout/TabLayout';
+export type { TabLayoutResult } from './components/layout/TabLayout';
+export { createWizardLayout } from './components/layout/WizardLayout';
+export type { WizardLayoutResult } from './components/layout/WizardLayout';
 
 // layout adapter registry
 export {

@@ -9,6 +9,9 @@ import Translation from './pages/Translation';
 import ComponentDemo from './pages/Component';
 import Visibility from './pages/Visibility';
 import ComputedValues from './pages/ComputedValues';
+import LayoutNav from './pages/LayoutNav';
+import LayoutTab from './pages/LayoutTab';
+import LayoutWizard from './pages/LayoutWizard';
 
 const navItems = [
   { path: '/basic',            label: 'Basic / Quick Start',   description: 'Contact form with inline submit' },
@@ -21,6 +24,9 @@ const navItems = [
   { path: '/component',        label: 'Component',              description: 'Custom Point2D field component via plugin' },
   { path: '/visibility',     label: 'Visibility Handler',     description: 'Show/hide/disable fields via registered handlers' },
   { path: '/computed-values', label: 'Computed Values',        description: 'Derive field values from other fields (e.g. total = qty × price)' },
+  { path: '/layout-nav',      label: 'Layout - Nav',           description: 'Left-side navigation panel splits form into sections' },
+  { path: '/layout-tab',      label: 'Layout - Tab',           description: 'Tab buttons above the form split fields into sections' },
+  { path: '/layout-wizard',   label: 'Layout - Wizard',        description: 'Multi-step wizard with Previous / Next navigation' },
 ];
 
 export default function App() {
@@ -60,6 +66,9 @@ export default function App() {
           <Route path="/visibility" element={<Visibility />} />
           <Route path="/computed-values" element={<ComputedValues />} />
           <Route path="/themes" element={<Themes />} />
+          <Route path="/layout-nav" element={<LayoutNav />} />
+          <Route path="/layout-tab" element={<LayoutTab />} />
+          <Route path="/layout-wizard" element={<LayoutWizard />} />
         </Routes>
       </main>
     </div>

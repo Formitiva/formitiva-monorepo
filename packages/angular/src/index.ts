@@ -60,6 +60,10 @@ export {
 } from './components/layout/layout-components.component';
 export { FieldRendererComponent } from './components/layout/field-renderer.component';
 export { FieldGroupComponent } from './components/layout/field-group.component';
+export { LayoutAdapterComponent, LayoutAdapterComponent as DefaultLayoutAdapterComponent } from './components/layout/layout-adapter.component';
+export { NavLayoutComponent } from './components/layout/nav-layout.component';
+export { TabLayoutComponent } from './components/layout/tab-layout.component';
+export { WizardLayoutComponent } from './components/layout/wizard-layout.component';
 
 // Services
 export { FormitivaContextService } from './services/formitiva-context.service';

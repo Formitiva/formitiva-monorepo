@@ -16,6 +16,9 @@ const pages: Record<string, () => Promise<{ default: PageRenderer }>> = {
   'component':        () => import('./pages/component'),
   'visibility':       () => import('./pages/visibility'),
   'computed-values':  () => import('./pages/computedValues'),
+  'layout-nav':       () => import('./pages/layoutNav'),
+  'layout-tab':       () => import('./pages/layoutTab'),
+  'layout-wizard':    () => import('./pages/layoutWizard'),
 };
 
 class Router {

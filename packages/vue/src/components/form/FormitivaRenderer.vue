@@ -8,12 +8,14 @@ import type {
   FormitivaInstance,
   FormSubmissionHandler,
   FormValidationHandler,
+  LayoutConfig,
 } from '@formitiva/core';
 import { getLayout } from '@formitiva/core';
 import useFormitivaContext, { provideFormitivaContext } from '../../hooks/useFormitivaContext';
 import FieldRenderer from '../layout/FieldRenderer.vue';
 import FieldGroup from '../layout/FieldGroup.vue';
 import { InstanceName } from '../layout/LayoutComponents';
+import LayoutAdapter from '../layout/LayoutAdapter.vue';
 import { getLayoutAdapter } from '../../core/registries/layoutAdapterRegistry';
 import {
   initFormState,
@@ -29,6 +31,7 @@ import SubmissionButton from './SubmissionButton.vue';
 
 export interface FormitivaRendererProps {
   definition: FormitivaDefinition;
+  layout?: LayoutConfig | null;
   instance: FormitivaInstance;
   onSubmit?: FormSubmissionHandler;
   onValidation?: FormValidationHandler;
@@ -43,13 +46,13 @@ const { displayName } = props.definition;
 const parentContext = useFormitivaContext();
 
 // Layout adapter
-const activeLayout = getLayout(props.definition?.layoutRef ?? '');
-const layoutAdapter = getLayoutAdapter();
-const activeSection = ref<string>(activeLayout?.defaultValue ?? '');
+const activeLayout = computed(() => props.layout ?? getLayout(props.definition?.layoutRef ?? ''));
+const layoutAdapter = getLayoutAdapter() ?? LayoutAdapter;
+const activeSection = ref<string>(activeLayout.value?.defaultValue ?? '');
 
 // Reset section when layout changes
-watch(() => activeLayout?.defaultValue, (val) => {
-  activeSection.value = val ?? '';
+watch(() => activeLayout.value, (nextLayout) => {
+  activeSection.value = nextLayout?.defaultValue ?? nextLayout?.sections[0]?.name ?? '';
 }, { immediate: true });
 
 const renderContext = computed(() => ({
@@ -254,8 +257,8 @@ const isApplyDisabled = computed(() =>
 
 // Compute which field names belong to the active layout section
 const activeSectionProps = computed<string[] | null>(() => {
-  if (!activeLayout) return null;
-  return activeLayout.sections.find((n) => n.name === activeSection.value)?.props ?? null;
+  if (!activeLayout.value) return null;
+  return activeLayout.value.sections.find((n) => n.name === activeSection.value)?.props ?? null;
 });
 
 const isNextDisabled = computed(() => hasErrorsInFields(activeSectionProps.value));
@@ -272,7 +275,7 @@ const groups = computed(() =>
     sectionProperties.value,
     visibility.value,
     visibilityRefStatus.value,
-    layoutAdapter && activeLayout ? undefined : loadedCount.value,
+    layoutAdapter && activeLayout.value ? undefined : loadedCount.value,
   )
 );
 

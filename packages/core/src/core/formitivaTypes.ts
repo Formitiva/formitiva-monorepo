@@ -123,6 +123,7 @@ export interface FormitivaInstance {
 
 export interface FormitivaProps {
   definitionData: string | Record<string, unknown> | FormitivaDefinition;
+  layout?: LayoutConfig | null;
   language?: string;
   instance?: FormitivaInstance;
   className?: string;

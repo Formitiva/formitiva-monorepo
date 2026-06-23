@@ -37,6 +37,7 @@ function useNearestFormitivaTheme(ref: React.RefObject<HTMLElement | null>) {
  */
 const Formitiva: React.FC<FormitivaProps> = ({
   definitionData,
+  layout = null,
   instance,
   language,
   className,
@@ -111,6 +112,7 @@ const Formitiva: React.FC<FormitivaProps> = ({
         >
           <FormitivaRenderer
             definition={definition}
+            layout={layout}
             instance={resolvedInstance}
             onSubmit={onSubmit}
             onValidation={onValidation}

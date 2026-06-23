@@ -74,6 +74,51 @@ await form.mount(document.getElementById("form-container")!);
 | `className` | `string` | — | Additional CSS class for the container |
 | `style` | `object` | — | Inline styles for the container |
 
+## Advanced Layouts
+
+Pass `layout` to let the Vanilla app choose nav, tab, or wizard presentation while the JSON schema remains focused on field data. The same `definitionData` can be rendered as a default form, a left-nav form, tabs, or wizard steps.
+
+```ts
+import { Formitiva } from "@formitiva/vanilla";
+
+const definition = {
+  name: "profile",
+  version: "1.0.0",
+  properties: [
+    { name: "firstName", type: "text", displayName: "First Name", required: true },
+    { name: "lastName", type: "text", displayName: "Last Name", required: true },
+    { name: "email", type: "email", displayName: "Email", required: true },
+    { name: "newsletter", type: "switch", displayName: "Newsletter" },
+  ],
+};
+
+const tabLayout = {
+  name: "profileTabs",
+  type: "tab" as const,
+  displayName: "Profile Tabs",
+  defaultValue: "personal",
+  sections: [
+    { label: "Personal", name: "personal", props: ["firstName", "lastName"] },
+    { label: "Contact", name: "contact", props: ["email", "newsletter"] },
+  ],
+};
+
+const form = new Formitiva({
+  definitionData: definition,
+  layout: tabLayout,
+});
+```
+
+Layout types:
+
+| Type | Behavior |
+|---|---|
+| `"nav"` | Left-side navigation; each item renders its section fields |
+| `"tab"` | Tab buttons above the form; switching tabs changes the active section |
+| `"wizard"` | Step-by-step flow; Next is disabled while the current step has errors |
+
+Each `sections[].props` entry must match field `name` values from the schema. `definition.layoutRef` and `registerLayout()` still work as a compatibility fallback, but new Vanilla code should pass `layout` directly.
+
 ## API
 
 ### Formitiva class

@@ -65,6 +65,10 @@ export {
   RowFieldLayout,
   InstanceName,
 } from './components/layout/LayoutComponents';
+export { default as LayoutAdapter, default as DefaultLayoutAdapter } from './components/layout/LayoutAdapter.vue';
+export { default as NavLayout } from './components/layout/NavLayout.vue';
+export { default as TabLayout } from './components/layout/TabLayout.vue';
+export { default as WizardLayout } from './components/layout/WizardLayout.vue';
 
 // Layout adapter registry
 export {

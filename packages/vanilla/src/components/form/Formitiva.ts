@@ -118,6 +118,7 @@ export class Formitiva {
 
     this.renderer = createFormitivaRenderer({
       definition: this.definition,
+      layout: this.props.layout,
       instance: this.instance,
       ctx,
       onSubmit: this.props.onSubmit,

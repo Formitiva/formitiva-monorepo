@@ -93,6 +93,51 @@ export class AppModule {}
 | `onSubmit` | `FormSubmissionHandler` | — | Callback on form submission |
 | `onValidation` | `FormValidationHandler` | — | Cross-field validation callback |
 
+## Advanced Layouts
+
+Pass `layout` to let the Angular app choose nav, tab, or wizard presentation while the JSON schema remains focused on field data. The same `definitionData` can be rendered as a default form, a left-nav form, tabs, or wizard steps.
+
+```typescript
+const definition = {
+  name: "profile",
+  version: "1.0.0",
+  properties: [
+    { name: "firstName", type: "text", displayName: "First Name", required: true },
+    { name: "lastName", type: "text", displayName: "Last Name", required: true },
+    { name: "email", type: "email", displayName: "Email", required: true },
+    { name: "newsletter", type: "switch", displayName: "Newsletter" },
+  ],
+};
+
+const tabLayout = {
+  name: "profileTabs",
+  type: "tab" as const,
+  displayName: "Profile Tabs",
+  defaultValue: "personal",
+  sections: [
+    { label: "Personal", name: "personal", props: ["firstName", "lastName"] },
+    { label: "Contact", name: "contact", props: ["email", "newsletter"] },
+  ],
+};
+```
+
+```html
+<fv-formitiva
+  [definitionData]="definition"
+  [layout]="tabLayout"
+></fv-formitiva>
+```
+
+Layout types:
+
+| Type | Behavior |
+|---|---|
+| `"nav"` | Left-side navigation; each item renders its section fields |
+| `"tab"` | Tab buttons above the form; switching tabs changes the active section |
+| `"wizard"` | Step-by-step flow; Next is disabled while the current step has errors |
+
+Each `sections[].props` entry must match field `name` values from the schema. `definition.layoutRef` and `registerLayout()` still work as a compatibility fallback, but new Angular code should pass `layout` directly.
+
 ## Services
 
 | Service | Description |

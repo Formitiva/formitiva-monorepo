@@ -17,6 +17,9 @@ const router = createRouter({
     { path: '/visibility',     component: () => import('./pages/Visibility.vue') },
     { path: '/computed-values', component: () => import('./pages/ComputedValues.vue') },
     { path: '/themes', component: () => import('./pages/Themes.vue') },
+    { path: '/layout-nav', component: () => import('./pages/LayoutNav.vue') },
+    { path: '/layout-tab', component: () => import('./pages/LayoutTab.vue') },
+    { path: '/layout-wizard', component: () => import('./pages/LayoutWizard.vue') },
   ],
 });
 
