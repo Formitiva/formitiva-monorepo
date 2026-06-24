@@ -3,7 +3,11 @@ import * as React from "react";
 import FormitivaRenderer from "./FormitivaRenderer";
 import { FormitivaProvider } from "./FormitivaProvider";
 import { createInstanceFromDefinition } from '@formitiva/core';
-import type { FormitivaDefinition, FormitivaProps } from '@formitiva/core';
+import type { FormitivaDefinition, FormitivaProps, LayoutConfig } from '@formitiva/core';
+
+type FormitivaComponentProps = FormitivaProps & {
+  layout?: LayoutConfig | null;
+};
 
 function useNearestFormitivaTheme(ref: React.RefObject<HTMLElement | null>) {
   const [theme, setTheme] = React.useState<string | null>(null);
@@ -35,7 +39,7 @@ function useNearestFormitivaTheme(ref: React.RefObject<HTMLElement | null>) {
  * @param {FieldValidationMode} [props.fieldValidationMode] - Field Validation mode ('onEdit', 'onBlur', 'onSubmission', 'realTime' [deprecated])
  * @param {boolean} [props.displayInstanceName] - Whether to display the instance name
  */
-const Formitiva: React.FC<FormitivaProps> = ({
+const Formitiva: React.FC<FormitivaComponentProps> = ({
   definitionData,
   layout = null,
   instance,

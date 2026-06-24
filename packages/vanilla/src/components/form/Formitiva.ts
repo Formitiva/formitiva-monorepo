@@ -4,7 +4,13 @@
  */
 import '@formitiva/core/styles/formitiva.css';
 import FormitivaCss from '@formitiva/core/styles/formitiva.css?raw';
-import type { FormitivaDefinition, FormitivaProps, FormitivaInstance, FieldValueType } from '@formitiva/core';
+import type {
+  FormitivaDefinition,
+  FormitivaProps,
+  FormitivaInstance,
+  FieldValueType,
+  LayoutConfig,
+} from '@formitiva/core';
 import type { FormContext } from '../../context/formitivaContext';
 import {
   loadTranslationMaps,
@@ -16,6 +22,10 @@ import { registerBaseComponents } from '../../core/registries/componentRegistry'
 import { ensureBuiltinFieldTypeValidatorsRegistered } from '@formitiva/core';
 import { createFormitivaRenderer, type FormitivaRendererResult } from './FormitivaRenderer';
 import { createInstanceFromDefinition } from '@formitiva/core';
+
+type FormitivaComponentProps = FormitivaProps & {
+  layout?: LayoutConfig | null;
+};
 
 // Inject formitiva styles once
 function injectStyles() {
@@ -46,13 +56,13 @@ function detectTheme(container: HTMLElement): string {
 }
 
 export class Formitiva {
-  private props: FormitivaProps;
+  private props: FormitivaComponentProps;
   private definition: FormitivaDefinition | null = null;
   private instance: FormitivaInstance | null = null;
   private renderer: FormitivaRendererResult | null = null;
   private wrapper: HTMLElement | null = null;
 
-  constructor(props: FormitivaProps) {
+  constructor(props: FormitivaComponentProps) {
     this.props = props;
     injectStyles();
     ensurePopupRoot();

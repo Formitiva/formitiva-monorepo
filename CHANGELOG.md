@@ -32,3 +32,7 @@
 ## 2.1.7 2026-05-05
 - Fix onBlur validation issue
 - Fix placeholder localize issue
+
+## 2.2.0 2026-06-24
+- Added Navigation, Tab, and Wizard layouts across four frameworks.
+- No changes were made to the Core module; version remains at 2.1.7.

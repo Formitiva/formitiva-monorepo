@@ -3,9 +3,13 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import FormitivaRenderer from './FormitivaRenderer.vue';
 import FormitivaProvider from './FormitivaProvider.vue';
 import { createInstanceFromDefinition } from '@formitiva/core';
-import type { FormitivaDefinition, FormitivaProps } from '@formitiva/core';
+import type { FormitivaDefinition, FormitivaProps, LayoutConfig } from '@formitiva/core';
 
-const props = withDefaults(defineProps<FormitivaProps>(), {
+type FormitivaComponentProps = FormitivaProps & {
+  layout?: LayoutConfig | null;
+};
+
+const props = withDefaults(defineProps<FormitivaComponentProps>(), {
   language: 'en',
   theme: undefined,
   className: '',
